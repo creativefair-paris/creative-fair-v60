@@ -9,13 +9,13 @@ Ce skill décrit comment l'isolation multi-tenant est garantie côté DB et côt
 L'isolation passe par :
 1. Une colonne `tenant_id` sur **toutes les tables sauf `tenants` elle-même**
 2. RLS PostgreSQL activée partout, **sans exception**
-3. Une fonction helper `auth.user_tenant_id()` qui résout le tenant courant à partir du JWT
-4. Des policies SELECT/INSERT/UPDATE/DELETE qui filtrent toutes sur `tenant_id = auth.user_tenant_id()`
+3. Une fonction helper `public.user_tenant_id()` qui résout le tenant courant à partir du JWT
+4. Des policies SELECT/INSERT/UPDATE/DELETE qui filtrent toutes sur `tenant_id = public.user_tenant_id()`
 
-## La fonction `auth.user_tenant_id()`
+## La fonction `public.user_tenant_id()`
 
 ```sql
-create or replace function auth.user_tenant_id()
+create or replace function public.user_tenant_id()
 returns uuid as $$
   select tenant_id from profiles where id = auth.uid()
 $$ language sql stable security definer;
@@ -29,16 +29,16 @@ Pour chaque table, 4 policies minimum :
 
 ```sql
 create policy "<table> select" on <table> for select
-  using (tenant_id = auth.user_tenant_id());
+  using (tenant_id = public.user_tenant_id());
 
 create policy "<table> insert" on <table> for insert
-  with check (tenant_id = auth.user_tenant_id());
+  with check (tenant_id = public.user_tenant_id());
 
 create policy "<table> update" on <table> for update
-  using (tenant_id = auth.user_tenant_id());
+  using (tenant_id = public.user_tenant_id());
 
 create policy "<table> delete" on <table> for delete
-  using (tenant_id = auth.user_tenant_id());
+  using (tenant_id = public.user_tenant_id());
 ```
 
 **Exception** : `analytics_events` et `credits_usage` n'ont pas de policy DELETE/UPDATE pour les users — seul le `service_role` peut écrire (les fonctions edge AI tracking).
@@ -116,7 +116,7 @@ Le script `scripts/test-multi-tenant.ts` crée 2 tenants A et B avec 1 user et 1
 
 | Table | tenant_id | Notes |
 |---|---|---|
-| `tenants` | (id) | La table racine, lue via `id = auth.user_tenant_id()`. |
+| `tenants` | (id) | La table racine, lue via `id = public.user_tenant_id()`. |
 | `profiles` | ✓ | Lien `auth.users` ↔ tenant. Update limité à `id = auth.uid()`. |
 | `brands` | ✓ | Contient `brand_book` jsonb et `business_calendar` jsonb. |
 | `onboarding_answers` | ✓ | Réponses brand book. |
