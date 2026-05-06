@@ -1,17 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getBrandIdForCurrentUser } from '@/lib/supabase/brands'
+import { CoachingCard, type DailyCoaching } from '@/components/aujourdhui/CoachingCard'
+import { NextAction } from '@/components/aujourdhui/NextAction'
 
-// Explicit types until `supabase gen types` replaces the stub in types/database.ts
-type ProfileRow = {
-  full_name: string | null
-  email: string
-  role: string
-  tenant_id: string
+type TenantRow = { name: string }
+type PostRow = { id: string }
+
+function formatFrenchDate(d: Date): string {
+  const formatted = new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(d)
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1)
 }
 
-type TenantRow = {
-  name: string
-  slug: string
+function todayIsoDate(): string {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 export default async function AujourdhuiPage() {
@@ -20,94 +30,79 @@ export default async function AujourdhuiPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
   if (!user) redirect('/login')
 
-  const { data: rawProfile } = await supabase
-    .from('profiles')
-    .select('full_name, email, role, tenant_id')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  const profile = rawProfile as ProfileRow | null
+  const ids = await getBrandIdForCurrentUser(supabase)
 
   let tenant: TenantRow | null = null
-  if (profile?.tenant_id) {
+  let coaching: DailyCoaching | null = null
+  let todayPost: PostRow | null = null
+
+  if (ids) {
     const { data: rawTenant } = await supabase
       .from('tenants')
-      .select('name, slug')
-      .eq('id', profile.tenant_id)
+      .select('name')
+      .eq('id', ids.tenantId)
       .maybeSingle()
     tenant = rawTenant as TenantRow | null
+
+    const today = todayIsoDate()
+
+    const { data: rawCoaching } = await supabase
+      .from('daily_coaching')
+      .select('id, date, content, business_context, read_at')
+      .eq('brand_id', ids.brandId)
+      .eq('date', today)
+      .maybeSingle()
+    coaching = rawCoaching as DailyCoaching | null
+
+    const startOfDay = new Date()
+    startOfDay.setHours(0, 0, 0, 0)
+    const endOfDay = new Date()
+    endOfDay.setHours(23, 59, 59, 999)
+
+    const { data: rawPost } = await supabase
+      .from('posts')
+      .select('id')
+      .eq('brand_id', ids.brandId)
+      .gte('scheduled_for', startOfDay.toISOString())
+      .lte('scheduled_for', endOfDay.toISOString())
+      .order('scheduled_for', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    todayPost = rawPost as PostRow | null
   }
 
-  const displayName = profile?.full_name ?? profile?.email ?? user.email ?? 'vous'
-  const atIndex = displayName.indexOf('@')
-  const spaceIndex = displayName.indexOf(' ')
-  const firstName =
-    atIndex !== -1
-      ? displayName.slice(0, atIndex)
-      : spaceIndex !== -1
-        ? displayName.slice(0, spaceIndex)
-        : displayName
+  const dateLabel = formatFrenchDate(new Date())
+  const tenantLabel = tenant?.name ?? 'Creative Fair'
 
   return (
     <main
-      className="min-h-screen flex flex-col px-6 py-12"
+      className="min-h-screen px-6 py-12"
       style={{ backgroundColor: 'var(--color-background)' }}
     >
-      <div className="max-w-xl mx-auto w-full flex-1 space-y-8">
+      <div className="max-w-2xl mx-auto w-full space-y-12">
         <header className="space-y-1">
           <p
             className="text-xs tracking-widest uppercase"
             style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-body)' }}
           >
-            {tenant?.name ?? 'Creative Fair'}
+            {tenantLabel}
           </p>
           <h1
             className="text-3xl font-semibold tracking-tight"
             style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}
           >
-            Bonjour {firstName}
+            {dateLabel}
           </h1>
         </header>
 
-        <div
-          className="rounded-xl px-5 py-4 space-y-1"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius)',
-          }}
-        >
-          <p
-            className="text-sm"
-            style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
-          >
-            Connecté en tant que
-          </p>
-          <p
-            className="text-sm font-medium"
-            style={{ color: 'var(--color-text)', fontFamily: 'var(--font-body)' }}
-          >
-            {profile?.email ?? user.email}
-          </p>
-          {tenant && (
-            <p
-              className="text-xs"
-              style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
-            >
-              {tenant.name} · {profile?.role}
-            </p>
-          )}
-        </div>
+        <CoachingCard coaching={coaching} />
 
-        <p
-          className="text-sm"
-          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
-        >
-          {"L'application est en cours de construction. Sprint 4 livré."}
-        </p>
+        <NextAction
+          hasPostToday={Boolean(todayPost)}
+          todayPostId={todayPost?.id ?? null}
+        />
       </div>
     </main>
   )
