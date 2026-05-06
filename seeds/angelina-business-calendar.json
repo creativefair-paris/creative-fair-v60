@@ -1,0 +1,107 @@
+{
+  "recurringEvents": [
+    {
+      "id": "tea-time",
+      "name": "Tea time quotidien",
+      "frequency": "weekly",
+      "description": "Service du thé et goûter chaque après-midi 15h-18h dans tous les salons."
+    },
+    {
+      "id": "rituel-chocolat",
+      "name": "Le rituel du chocolat chaud",
+      "frequency": "weekly",
+      "description": "Rappel saisonnier hebdomadaire du chocolat chaud signature, plus fort en automne et hiver."
+    },
+    {
+      "id": "petit-dejeuner",
+      "name": "Petit-déjeuner Belle Époque",
+      "frequency": "monthly",
+      "description": "Mise en avant du petit-déjeuner servi rue de Rivoli dès 7h30."
+    }
+  ],
+  "upcomingLaunches": [
+    {
+      "id": "fete-meres-2026",
+      "name": "Création Fête des mères",
+      "date": "2026-05-25",
+      "type": "collection",
+      "description": "Pâtisserie limitée en collaboration avec une artiste française pour la Fête des mères. Édition de 800 pièces, vente du 25 mai au 7 juin 2026."
+    },
+    {
+      "id": "ete-glaces",
+      "name": "Carte glacée d'été",
+      "date": "2026-06-15",
+      "type": "collection",
+      "description": "Lancement de 5 nouvelles glaces signature pour l'été 2026, dont sorbet marron-vanille bourbon."
+    },
+    {
+      "id": "rentree-galette",
+      "name": "Galette des rois 2027",
+      "date": "2026-12-26",
+      "type": "product",
+      "description": "Précommande de la galette des rois pour Épiphanie 2027 dès fin décembre 2026."
+    }
+  ],
+  "seasonality": [
+    {
+      "season": "spring",
+      "activityLevel": "high",
+      "keyTopics": [
+        "Pâques",
+        "Fête des mères",
+        "Terrasses",
+        "Fraises et fruits rouges"
+      ]
+    },
+    {
+      "season": "summer",
+      "activityLevel": "medium",
+      "keyTopics": [
+        "Glaces et sorbets",
+        "Tourisme international",
+        "Petit-déjeuner",
+        "Carte rafraîchissante"
+      ]
+    },
+    {
+      "season": "fall",
+      "activityLevel": "high",
+      "keyTopics": [
+        "Retour du chocolat chaud",
+        "Marrons glacés",
+        "Mont-Blanc",
+        "Rentrée parisienne"
+      ]
+    },
+    {
+      "season": "winter",
+      "activityLevel": "high",
+      "keyTopics": [
+        "Bûche de Noël",
+        "Coffrets cadeaux",
+        "Galette des rois",
+        "Saint-Valentin"
+      ]
+    }
+  ],
+  "industryEvents": [
+    {
+      "id": "fashion-week-mars",
+      "name": "Paris Fashion Week",
+      "date": "2026-09-29",
+      "relevance": "core"
+    },
+    {
+      "id": "salon-chocolat",
+      "name": "Salon du Chocolat Paris",
+      "date": "2026-10-28",
+      "relevance": "core"
+    },
+    {
+      "id": "journees-patrimoine",
+      "name": "Journées européennes du patrimoine",
+      "date": "2026-09-19",
+      "relevance": "adjacent"
+    }
+  ]
+}

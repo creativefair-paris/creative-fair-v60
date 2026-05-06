@@ -1,0 +1,111 @@
+{
+  "identity": {
+    "name": "Angelina Paris",
+    "domain": "Salon de thé et pâtisserie de luxe",
+    "tagline": "Le chocolat chaud le plus mythique de Paris",
+    "description": "Maison fondée en 1903 rue de Rivoli, devenue l'adresse incontournable du chocolat chaud à Paris. Le Mont-Blanc, signature pâtissière, et le décor Belle Époque font de chaque visite un voyage hors du temps. Aujourd'hui présente à Paris, Versailles, Tokyo, Londres et Doha.",
+    "history": "Fondée en 1903 par le confiseur autrichien Antoine Rumpelmayer, qui baptisa le salon du prénom de sa belle-fille. Coco Chanel, Marcel Proust et Audrey Hepburn comptaient parmi les habitués. Repris en 2005 par le groupe Bertrand, qui a modernisé la marque tout en préservant son patrimoine."
+  },
+  "voice": {
+    "tone": ["élégant", "chaleureux", "patrimonial", "contemporain"],
+    "register": "formal",
+    "forbiddenWords": [
+      "addictif",
+      "deal",
+      "boost",
+      "viral",
+      "incontournable",
+      "must-have",
+      "iconique"
+    ],
+    "encouragedWords": [
+      "savoir-faire",
+      "patrimoine",
+      "raffinement",
+      "maison",
+      "héritage",
+      "douceur",
+      "instant",
+      "geste"
+    ],
+    "sentenceStyle": "Phrases élégantes, rythmées, sans superlatifs. Privilégier l'évocation au discours commercial. Ponctuation respirée. Le « je » de la maison parle à la première personne du pluriel discret, jamais au « vous » direct des marques de masse."
+  },
+  "audience": {
+    "personas": [
+      {
+        "name": "L'amoureuse de Paris",
+        "description": "Femme 35-55 ans, parisienne ou voyageuse, sensible au patrimoine et aux gestes artisanaux. Cherche des moments d'évasion dans son quotidien.",
+        "aspirations": "Vivre des instants de raffinement sans ostentation. Transmettre une certaine idée de la France."
+      },
+      {
+        "name": "Le voyageur exigeant",
+        "description": "International, 40-65 ans, vient à Paris pour ses adresses légendaires. Connait Le Meurice, le Ritz, la Tour d'Argent.",
+        "aspirations": "Cocher la liste des expériences parisiennes authentiques. Repartir avec une boîte de marrons glacés."
+      }
+    ],
+    "aspirational": "Notre audience cherche l'excellence discrète. Elle ne veut pas être impressionnée, elle veut être touchée."
+  },
+  "territories": [
+    {
+      "id": "savoir-faire",
+      "name": "Savoir-faire pâtissier",
+      "description": "Mettre en lumière le geste, la précision, les matières premières. Le Mont-Blanc, le chocolat chaud, les marrons glacés sont les héros.",
+      "examples": [
+        "Plan rapproché sur la pose des vermicelles de marrons sur un Mont-Blanc",
+        "Le chocolat chaud versé en filet, fumée qui s'élève",
+        "Le geste du chef en cuisine, avant ouverture"
+      ]
+    },
+    {
+      "id": "patrimoine",
+      "name": "Patrimoine et lieu",
+      "description": "Le décor Belle Époque, la rue de Rivoli, les visages connus. Raconter le lieu sans muséifier.",
+      "examples": [
+        "Détails des fresques peintes par Lorenzo Malato",
+        "La banquette préférée de Coco Chanel",
+        "Photo d'archive avec une légende contemporaine"
+      ]
+    },
+    {
+      "id": "rituels",
+      "name": "Rituels du quotidien",
+      "description": "Les moments de pause, le goûter, le thé de l'après-midi. L'invitation à ralentir.",
+      "examples": [
+        "Le rituel du thé à 16h",
+        "Petit-déjeuner avant Paris en éveil",
+        "Pause goûter mère-fille"
+      ]
+    },
+    {
+      "id": "saisons",
+      "name": "Saisons et créations",
+      "description": "Les pâtisseries éphémères, les éditions limitées, les fêtes de fin d'année.",
+      "examples": [
+        "La galette des rois en janvier",
+        "Les œufs en chocolat de Pâques",
+        "Le bûche signature de Noël"
+      ]
+    }
+  ],
+  "visual": {
+    "colors": ["#A8324E", "#FFF8F3", "#2A1A12", "#D4AF7A"],
+    "fonts": ["Playfair Display", "Inter"],
+    "references": [
+      "Wes Anderson — palette automnale, symétrie",
+      "Photographies de Sarah Moon",
+      "Nature morte du XVIIIᵉ — Chardin"
+    ]
+  },
+  "taboos": [
+    "Jamais de filtres ostentatoires",
+    "Jamais de hashtags dans les légendes",
+    "Aucune mise en scène influenceuse",
+    "Pas de comparaison avec d'autres maisons",
+    "Pas de promotion en pourcentage",
+    "Pas de contenu généré par IA visible"
+  ],
+  "goals": {
+    "primary": "Faire vivre le patrimoine Angelina aux audiences contemporaines sans le banaliser. Convertir l'aura en visites en boutique.",
+    "instagram": "Transformer le compte en magazine visuel quotidien. Cible : doubler le taux d'engagement organique sur 6 mois sans céder à la viralité."
+  }
+}
