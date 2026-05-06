@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getBrandIdForCurrentUser } from '@/lib/supabase/brands'
 import { CoachingCard, type DailyCoaching } from '@/components/aujourdhui/CoachingCard'
+import { CoachingGenerator } from '@/components/aujourdhui/CoachingGenerator'
 import { NextAction } from '@/components/aujourdhui/NextAction'
 
 type TenantRow = { name: string }
@@ -97,7 +98,11 @@ export default async function AujourdhuiPage() {
           </h1>
         </header>
 
-        <CoachingCard coaching={coaching} />
+        {coaching ? (
+          <CoachingCard coaching={coaching} />
+        ) : (
+          <CoachingGenerator autoGenerate />
+        )}
 
         <NextAction
           hasPostToday={Boolean(todayPost)}
