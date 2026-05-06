@@ -131,9 +131,11 @@ function applyResultToDraft(
       const idx = lines.length - 1 - hashtagLineIdx
       const hashtagsLine = lines[idx]
       const tags = hashtagsLine
-        .split(/\s+/)
-        .filter((t) => t.startsWith('#'))
-        .map((t) => t.replace(/^#/, '').toLowerCase())
+        ? hashtagsLine
+            .split(/\s+/)
+            .filter((t) => t.startsWith('#'))
+            .map((t) => t.replace(/^#/, '').toLowerCase())
+        : []
       const captionLines = lines.slice(0, idx).join('\n').trim()
       next.caption = captionLines
       next.hashtags = tags
