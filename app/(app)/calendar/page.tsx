@@ -1,3 +1,10 @@
 export default function CalendarPage() {
-  return <div>Page Calendar (placeholder)</div>
+  return (
+    <div
+      className="flex items-center justify-center h-full min-h-[60vh]"
+      style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
+    >
+      <p className="text-sm">Calendrier — à venir</p>
+    </div>
+  )
 }

@@ -106,19 +106,9 @@ export default async function AujourdhuiPage() {
           className="text-sm"
           style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
         >
-          {"L'application est en cours de construction. Sprint 2 livré."}
+          {"L'application est en cours de construction. Sprint 4 livré."}
         </p>
       </div>
-
-      <footer className="max-w-xl mx-auto w-full pt-8">
-        <a
-          href="/logout"
-          className="text-xs"
-          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
-        >
-          Se déconnecter
-        </a>
-      </footer>
     </main>
   )
 }
