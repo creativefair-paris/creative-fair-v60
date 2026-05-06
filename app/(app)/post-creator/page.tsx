@@ -1,3 +1,5 @@
-export default function PostCreatorPage() {
-  return <div>Page Post Creator (placeholder)</div>
+import { redirect } from 'next/navigation'
+
+export default function PostCreatorIndexPage() {
+  redirect('/calendrier')
 }
