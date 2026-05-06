@@ -1,9 +1,8 @@
-import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic } from '@/lib/ai/client'
 import { VOICE_SHEET_RULES } from '@/lib/ai/prompts/system'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
