@@ -45,7 +45,7 @@ export default async function LoginPage({ searchParams }: Props) {
             {error && (
               <p
                 className="text-sm"
-                style={{ color: '#c0392b', fontFamily: 'var(--font-body)' }}
+                style={{ color: 'var(--color-error)', fontFamily: 'var(--font-body)' }}
               >
                 {error === 'no_access'
                   ? "Votre compte n'est pas encore activé. Contactez votre administrateur."
