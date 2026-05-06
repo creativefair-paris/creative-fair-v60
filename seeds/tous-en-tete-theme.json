@@ -1,0 +1,16 @@
+{
+  "colors": {
+    "background": "#F5F9FB",
+    "surface": "#FFFFFF",
+    "text": "#1A2A3A",
+    "textMuted": "#5A6B7A",
+    "border": "#D8E2EA",
+    "accent": "#3B7A99",
+    "accentForeground": "#FFFFFF"
+  },
+  "fonts": {
+    "display": "\"Inter\", -apple-system, sans-serif",
+    "body": "\"Inter\", -apple-system, sans-serif",
+    "mono": "ui-monospace, monospace"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "recurringEvents": [
+    {
+      "id": "atelier-mensuel",
+      "name": "Atelier mensuel grand public",
+      "frequency": "monthly",
+      "description": "Un atelier ouvert chaque dernier samedi du mois sur un thème de santé mentale."
+    },
+    {
+      "id": "ligne-ecoute-rappel",
+      "name": "Rappel ligne d'écoute",
+      "frequency": "weekly",
+      "description": "Communication hebdomadaire des numéros et horaires de la ligne d'écoute associative."
+    }
+  ],
+  "upcomingLaunches": [
+    {
+      "id": "campagne-rentree",
+      "name": "Campagne « Rentrée et anxiété »",
+      "date": "2026-09-01",
+      "type": "event",
+      "description": "Série de contenus sur l'anxiété de rentrée chez les ados et étudiants, lancée le 1er septembre 2026."
+    },
+    {
+      "id": "rapport-annuel",
+      "name": "Rapport d'activité 2025",
+      "date": "2026-06-30",
+      "type": "other",
+      "description": "Publication du rapport annuel de l'association, communication transparente sur les actions et finances."
+    }
+  ],
+  "seasonality": [
+    {
+      "season": "spring",
+      "activityLevel": "medium",
+      "keyTopics": [
+        "Santé mentale au travail",
+        "Examens et stress scolaire",
+        "Renouveau et rechute"
+      ]
+    },
+    {
+      "season": "summer",
+      "activityLevel": "low",
+      "keyTopics": [
+        "Solitude estivale",
+        "Aidants en vacances",
+        "Pause et culpabilité"
+      ]
+    },
+    {
+      "season": "fall",
+      "activityLevel": "high",
+      "keyTopics": [
+        "Rentrée et anxiété",
+        "Retour au bureau",
+        "Dépression saisonnière"
+      ]
+    },
+    {
+      "season": "winter",
+      "activityLevel": "high",
+      "keyTopics": [
+        "Fêtes et solitude",
+        "Bilan de fin d'année",
+        "Janvier et idées suicidaires"
+      ]
+    }
+  ],
+  "industryEvents": [
+    {
+      "id": "journee-mondiale",
+      "name": "Journée mondiale de la santé mentale",
+      "date": "2026-10-10",
+      "relevance": "core"
+    },
+    {
+      "id": "semaine-info-sm",
+      "name": "Semaines d'information sur la santé mentale",
+      "date": "2026-10-05",
+      "relevance": "core"
+    },
+    {
+      "id": "journee-prevention-suicide",
+      "name": "Journée mondiale de prévention du suicide",
+      "date": "2026-09-10",
+      "relevance": "core"
+    },
+    {
+      "id": "movember",
+      "name": "Movember (santé mentale masculine)",
+      "date": "2026-11-01",
+      "relevance": "adjacent"
+    }
+  ]
+}

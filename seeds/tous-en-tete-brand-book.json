@@ -1,0 +1,121 @@
+{
+  "identity": {
+    "name": "Tous en Tête",
+    "domain": "Association de prévention en santé mentale",
+    "tagline": "Parler de santé mentale, ça commence par soi",
+    "description": "Association loi 1901 fondée pour rendre la santé mentale accessible : ressources, lignes d'écoute, ateliers en entreprise et auprès des jeunes. Notre mission est de transformer la honte en parole et le silence en accompagnement.",
+    "history": "Née en 2018 d'un collectif de proches aidants et de professionnels de santé. Reconnue d'intérêt général. Présente dans 12 villes en France."
+  },
+  "voice": {
+    "tone": ["bienveillant", "informé", "non-jugeant", "direct"],
+    "register": "casual",
+    "forbiddenWords": [
+      "fou",
+      "folle",
+      "schizo",
+      "déprimé(e) (en blague)",
+      "tabou",
+      "boost mental",
+      "guéri",
+      "résolu",
+      "miracle",
+      "thérapie express"
+    ],
+    "encouragedWords": [
+      "soin",
+      "écoute",
+      "accompagnement",
+      "parler",
+      "chemin",
+      "ressources",
+      "professionnel",
+      "proche",
+      "entendre",
+      "respect"
+    ],
+    "sentenceStyle": "Phrases courtes, concrètes, sans pathos. Le « tu » et le « je » sont préférés au « vous » distant. Toujours nommer le problème avec ses mots cliniques sans en faire un drame. Jamais d'injonction (« il faut »), toujours une invitation (« on peut »)."
+  },
+  "audience": {
+    "personas": [
+      {
+        "name": "Le proche en alerte",
+        "description": "25-50 ans, voit qu'un membre de sa famille ou un collègue ne va pas bien. Cherche comment aider sans blesser.",
+        "aspirations": "Trouver les bons mots, savoir vers qui orienter, ne pas se sentir démuni."
+      },
+      {
+        "name": "Le jeune en questionnement",
+        "description": "16-28 ans, traverse une période difficile (anxiété, mal-être, deuil, transition). Hésite à demander de l'aide.",
+        "aspirations": "Comprendre ce qui se passe en soi sans étiquette, trouver une première ressource discrète et fiable."
+      },
+      {
+        "name": "Le RH ou manager engagé",
+        "description": "30-55 ans, veut mettre en place un cadre santé mentale au travail. Cherche des intervenants sérieux.",
+        "aspirations": "Outiller son équipe, prévenir les situations critiques, sensibiliser sans stigmatiser."
+      }
+    ],
+    "aspirational": "Notre audience veut comprendre, agir, accompagner. Elle ne veut pas être infantilisée ni alarmée."
+  },
+  "territories": [
+    {
+      "id": "premiers-mots",
+      "name": "Trouver les premiers mots",
+      "description": "Aider à nommer ce que l'on traverse ou ce que l'on perçoit chez l'autre. Le langage comme premier soin.",
+      "examples": [
+        "Mini-glossaire : anxiété, burn-out, dépression — ce que c'est vraiment",
+        "5 phrases à dire à un proche qui va mal",
+        "Témoignage anonymisé : « la première fois que j'ai dit que j'allais pas bien »"
+      ]
+    },
+    {
+      "id": "ressources",
+      "name": "Ressources concrètes",
+      "description": "Diffuser les numéros, structures, professionnels accessibles. Toujours vérifié, toujours à jour.",
+      "examples": [
+        "Numéros nationaux d'écoute en France",
+        "Comment trouver un psy remboursé",
+        "Plateformes en ligne sérieuses : qui consulter et quand"
+      ]
+    },
+    {
+      "id": "deconstruction",
+      "name": "Déconstruction des idées reçues",
+      "description": "Démonter les clichés sans humilier ceux qui les portent. Pédagogie patiente.",
+      "examples": [
+        "« Les antidépresseurs, c'est pour les faibles » — vraiment ?",
+        "Parler santé mentale au travail, ça aide ou ça pénalise ?",
+        "Les hommes et la dépression : statistiques honnêtes"
+      ]
+    },
+    {
+      "id": "actions",
+      "name": "Actions de l'association",
+      "description": "Donner à voir le terrain : ateliers, formations, lignes d'écoute. Sans héroïser les bénévoles.",
+      "examples": [
+        "Récap d'un atelier en lycée",
+        "Coulisses de la ligne d'écoute, avec accord des écoutants",
+        "Bilan trimestriel transparent"
+      ]
+    }
+  ],
+  "visual": {
+    "colors": ["#3B7A99", "#F5F9FB", "#1A2A3A"],
+    "fonts": ["Inter"],
+    "references": [
+      "Reporters Sans Frontières — graphisme sobre, charté",
+      "The School of Life — illustrations sereines",
+      "Photographies documentaires douces"
+    ]
+  },
+  "taboos": [
+    "Aucune représentation explicite de tentative de suicide ou d'automutilation",
+    "Aucun témoignage non anonymisé sans accord écrit",
+    "Aucun diagnostic à distance",
+    "Aucune injonction au bonheur ou au lâcher-prise",
+    "Aucune comparaison entre pathologies",
+    "Pas d'humour sur les troubles mentaux"
+  ],
+  "goals": {
+    "primary": "Augmenter le nombre de personnes qui composent un numéro d'écoute ou consultent un professionnel après avoir vu nos contenus.",
+    "instagram": "Devenir le compte de référence francophone en prévention santé mentale grand public. Cible : 30k abonnés engagés sur 12 mois, avec un taux de partage supérieur à la moyenne du secteur."
+  }
+}
