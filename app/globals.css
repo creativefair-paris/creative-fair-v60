@@ -1,33 +1,42 @@
 @import "tailwindcss";
 
+/* Default CFS theme — vert forêt.
+   Overridden at runtime by AppLayout via inline style vars per tenant. */
 :root {
-  --color-primary: #1F4937;
-  --color-primary-fg: #ffffff;
-  --color-background: #fbfbfd;
-  --color-surface: #ffffff;
-  --color-text: #1d1d1f;
-  --color-text-muted: #515154;
-  --color-border: #d2d2d7;
+  --color-background: #FBFAF7;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1F1B;
+  --color-text-muted: #5A6260;
+  --color-border: #E8E5DD;
   --color-accent: #1F4937;
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  --color-accent-fg: #FFFFFF;
+  --color-primary: #1F4937;
+  --color-primary-fg: #FFFFFF;
+  --color-error: #B91C1C;
+  --font-display: -apple-system, "SF Pro Display", system-ui, sans-serif;
+  --font-body: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", monospace;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
   --radius: 12px;
 }
 
 @theme inline {
-  --color-primary: var(--color-primary);
   --color-background: var(--color-background);
   --color-surface: var(--color-surface);
   --color-text: var(--color-text);
   --color-text-muted: var(--color-text-muted);
   --color-border: var(--color-border);
   --color-accent: var(--color-accent);
+  --color-primary: var(--color-primary);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
 body {
-  background: var(--color-background);
+  background-color: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-body);
 }
