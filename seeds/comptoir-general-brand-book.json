@@ -1,0 +1,120 @@
+{
+  "identity": {
+    "name": "Le Comptoir Général",
+    "domain": "Lieu culturel et bar associatif parisien",
+    "tagline": "Un musée de la débrouille au bord du canal",
+    "description": "Espace culturel atypique installé dans un ancien hangar du 10ᵉ arrondissement de Paris, au bord du canal Saint-Martin. Mélange singulier de bar, friperie, galerie, espace d'expositions, scène musicale, brunch africain et programmation engagée autour des cultures du Sud, de l'écologie populaire et des contre-cultures.",
+    "history": "Fondé en 2009 par Aurélien Laffon. Devenu en 15 ans un repère parisien décalé, surnommé « le Ghetto Museum » par ses fondateurs. A accueilli des milliers d'artistes, expositions et événements, du quotidien le plus humble (ateliers fanzine) au plus festif (concerts, soirées, mariages)."
+  },
+  "voice": {
+    "tone": ["décalé", "engagé", "chaleureux", "curieux", "anti-institutionnel"],
+    "register": "casual",
+    "forbiddenWords": [
+      "exclusif",
+      "premium",
+      "luxe",
+      "VIP",
+      "select",
+      "lifestyle",
+      "concept-store",
+      "expérience client"
+    ],
+    "encouragedWords": [
+      "lieu",
+      "passage",
+      "rencontre",
+      "bricole",
+      "histoire",
+      "panaché",
+      "scène",
+      "famille",
+      "voisin",
+      "habitué",
+      "détour"
+    ],
+    "sentenceStyle": "Ton parlé, parfois familier, sans vulgarité. Comme un patron de bar qui raconte son lieu un soir tranquille. Phrases qui n'ont pas peur d'une virgule de trop ni d'un mot rare. Toujours du concret, jamais du jargon culturel. Le « nous » du collectif plutôt que le « je » du fondateur."
+  },
+  "audience": {
+    "personas": [
+      {
+        "name": "Le curieux du quartier",
+        "description": "25-45 ans, habite ou travaille dans le 10ᵉ-11ᵉ-19ᵉ. Connaît le lieu de loin, n'est pas encore venu ou y vient occasionnellement.",
+        "aspirations": "Trouver des sorties hors des circuits balisés. Aimer une programmation qui surprend."
+      },
+      {
+        "name": "L'habitué.e fidèle",
+        "description": "30-55 ans, vient régulièrement. Connaît la maison, lit les programmations à fond.",
+        "aspirations": "Soutenir un lieu unique. Faire découvrir à ses proches."
+      },
+      {
+        "name": "Le passant culturel parisien",
+        "description": "20-40 ans, suit la scène culturelle alternative parisienne (Point Éphémère, La REcyclerie, La Station, Ground Control).",
+        "aspirations": "Repérer les programmations qui se distinguent. Documenter sa vie culturelle."
+      }
+    ],
+    "aspirational": "Notre audience cherche du vivant, du métissé, de l'imparfait. Pas du contenu lissé."
+  },
+  "territories": [
+    {
+      "id": "lieu",
+      "name": "Le lieu et son atmosphère",
+      "description": "Donner à voir l'âme physique du Comptoir : le hangar, la lumière, les recoins, les saisons. La photographie naturelle, jamais la pub.",
+      "examples": [
+        "Lumière d'hiver sur la grande salle",
+        "Le bar à 17h, avant l'arrivée du monde",
+        "Détail d'un objet de la friperie"
+      ]
+    },
+    {
+      "id": "programmation",
+      "name": "Programmation culturelle",
+      "description": "Annoncer expositions, concerts, ateliers, projections. Toujours avec un point de vue, jamais un simple plan de comm.",
+      "examples": [
+        "Exposition photo africaine — comment elle est arrivée chez nous",
+        "Atelier sérigraphie samedi : trois choses à savoir avant de venir",
+        "Le concert de mardi : pourquoi on l'a programmé"
+      ]
+    },
+    {
+      "id": "engagement",
+      "name": "Engagement et combats",
+      "description": "Écologie populaire, accès à la culture, soutien aux scènes des Suds. Sans posture militante, par le concret.",
+      "examples": [
+        "Comment notre programmation a changé sur 15 ans",
+        "Pourquoi nous restons un bar à prix libre certaines soirées",
+        "Le travail invisible des bénévoles"
+      ]
+    },
+    {
+      "id": "histoires",
+      "name": "Histoires et personnages",
+      "description": "Le Comptoir, ce sont des humains. Personnel, habitués, artistes en passage. Toujours avec leur consentement.",
+      "examples": [
+        "Portrait du barman qui est là depuis l'ouverture",
+        "Le couple qui s'est marié ici",
+        "L'artiste exposée et son histoire"
+      ]
+    }
+  ],
+  "visual": {
+    "colors": ["#C26841", "#FAF4ED", "#2A1F18", "#7A4A2A"],
+    "fonts": ["DM Serif Display", "Inter"],
+    "references": [
+      "Photographie de Malick Sidibé — joie collective",
+      "Esthétique Hôtel Amour — chaleureux non-lifestyle",
+      "Reportages culturels Société — texte long, image documentaire"
+    ]
+  },
+  "taboos": [
+    "Aucun visuel posé/influenceur",
+    "Aucun hashtag dans les légendes (parti pris éditorial)",
+    "Pas de discours de marque corporate (« nous sommes fiers de »)",
+    "Pas de pub déguisée en éditorial",
+    "Aucune dramatisation de la programmation (« événement à ne pas manquer »)",
+    "Pas de greenwashing : si un combat est porté, il est tenu dans les faits"
+  ],
+  "goals": {
+    "primary": "Faire vivre l'identité culturelle du lieu en ligne au-delà des passants physiques. Drainer un public de curieux qualifiés sur les expositions et programmations.",
+    "instagram": "Devenir un compte de référence parisien pour la scène alternative, avec un ton reconnaissable. Cible : maintenir un taux d'engagement supérieur à la moyenne du secteur culturel parisien."
+  }
+}

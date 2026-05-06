@@ -1,0 +1,113 @@
+{
+  "recurringEvents": [
+    {
+      "id": "brunch-dimanche",
+      "name": "Brunch africain dominical",
+      "frequency": "weekly",
+      "description": "Tous les dimanches midi, brunch signature autour des cuisines des Suds."
+    },
+    {
+      "id": "expo-trimestrielle",
+      "name": "Nouvelle exposition",
+      "frequency": "quarterly",
+      "description": "Une exposition principale tous les trois mois, vernissage gratuit ouvert au public."
+    },
+    {
+      "id": "soiree-mensuelle",
+      "name": "Soirée signature",
+      "frequency": "monthly",
+      "description": "Soirée musicale mensuelle (DJ set, concert) avec entrée à prix libre."
+    }
+  ],
+  "upcomingLaunches": [
+    {
+      "id": "expo-printemps",
+      "name": "Exposition photo « Lagos en transit »",
+      "date": "2026-05-22",
+      "type": "event",
+      "description": "Vernissage le 22 mai 2026, exposition jusqu'au 31 août. Photographie nigériane contemporaine."
+    },
+    {
+      "id": "festival-canal",
+      "name": "Festival Canal Nights",
+      "date": "2026-06-21",
+      "type": "event",
+      "description": "Festival de 4 jours autour du solstice d'été : musique, projections en plein air, ateliers."
+    },
+    {
+      "id": "rentree-prog",
+      "name": "Programmation rentrée 2026",
+      "date": "2026-09-05",
+      "type": "other",
+      "description": "Annonce de la programmation de septembre à décembre 2026 le 5 septembre."
+    }
+  ],
+  "seasonality": [
+    {
+      "season": "spring",
+      "activityLevel": "high",
+      "keyTopics": [
+        "Terrasse au canal",
+        "Vernissages de printemps",
+        "Premières soirées en plein air",
+        "Brunchs allongés"
+      ]
+    },
+    {
+      "season": "summer",
+      "activityLevel": "high",
+      "keyTopics": [
+        "Festivals d'été",
+        "Soirées au bord du canal",
+        "Expositions estivales",
+        "Touristes et habitués mélangés"
+      ]
+    },
+    {
+      "season": "fall",
+      "activityLevel": "high",
+      "keyTopics": [
+        "Rentrée culturelle",
+        "Saison des grandes expositions",
+        "Concerts en intérieur",
+        "Programmation engagée de rentrée"
+      ]
+    },
+    {
+      "season": "winter",
+      "activityLevel": "medium",
+      "keyTopics": [
+        "Programmation chaleureuse",
+        "Soirées plus intimes",
+        "Cinéma et discussions",
+        "Préparation Festival Canal Nights"
+      ]
+    }
+  ],
+  "industryEvents": [
+    {
+      "id": "nuit-musees",
+      "name": "Nuit européenne des musées",
+      "date": "2026-05-16",
+      "relevance": "core"
+    },
+    {
+      "id": "fete-musique",
+      "name": "Fête de la musique",
+      "date": "2026-06-21",
+      "relevance": "core"
+    },
+    {
+      "id": "journees-patrimoine",
+      "name": "Journées européennes du patrimoine",
+      "date": "2026-09-19",
+      "relevance": "adjacent"
+    },
+    {
+      "id": "nuit-blanche",
+      "name": "Nuit Blanche Paris",
+      "date": "2026-10-03",
+      "relevance": "core"
+    }
+  ]
+}
