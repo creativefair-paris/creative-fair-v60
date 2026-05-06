@@ -224,7 +224,7 @@ export function Programmer({ postId, draft, initialScheduledFor }: Props) {
           {error && (
             <p
               className="text-sm"
-              style={{ color: '#9B2828', fontFamily: 'var(--font-body)' }}
+              style={{ color: 'var(--color-error)', fontFamily: 'var(--font-body)' }}
             >
               {error}
             </p>

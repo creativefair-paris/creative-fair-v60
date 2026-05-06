@@ -204,3 +204,4 @@ create trigger update_posts_updated_at
 create trigger update_conversations_updated_at
   before update on conversations
   for each row execute function update_updated_at();
+

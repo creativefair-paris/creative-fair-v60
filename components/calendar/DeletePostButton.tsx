@@ -50,7 +50,7 @@ export function DeletePostButton({ postId }: Props) {
         disabled={isPending}
         className="px-3 py-1 text-xs font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
         style={{
-          backgroundColor: '#9B2828',
+          backgroundColor: 'var(--color-error)',
           color: '#FFFFFF',
           borderRadius: 'var(--radius)',
           fontFamily: 'var(--font-body)',

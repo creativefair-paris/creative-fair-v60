@@ -13,7 +13,7 @@ const QUESTIONS = [
   {
     id: 'audience',
     label: "À qui s'adresse-t-elle ?",
-    placeholder: 'Décris ton audience en 2 ou 3 phrases.',
+    placeholder: 'Décris ton public en 2 ou 3 phrases.',
   },
   {
     id: 'voice',

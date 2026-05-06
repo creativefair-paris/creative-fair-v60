@@ -91,8 +91,8 @@ export default async function BrandBookPage() {
             )}
           </Section>
 
-          <Section title="Audience">
-            <Prose label="Aspirational" value={book.audience.aspirational} />
+          <Section title="Public">
+            <Prose label="Aspiration" value={book.audience.aspirational} />
             {book.audience.personas.map((persona, i) => (
               <div key={i} className="space-y-1">
                 <p
