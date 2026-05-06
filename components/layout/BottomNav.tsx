@@ -16,11 +16,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 inset-x-0 h-16 flex items-center justify-around px-2 z-40"
-      style={{
-        backgroundColor: 'var(--color-surface)',
-        borderTop: '1px solid var(--color-border)',
-      }}
+      className="glass-bar md:hidden fixed bottom-0 inset-x-0 h-16 flex items-center justify-around px-2 z-40"
     >
       {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
         const active = pathname === href || pathname.startsWith(href + '/')

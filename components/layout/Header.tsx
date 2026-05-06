@@ -46,11 +46,7 @@ export function Header({
 
   return (
     <header
-      className="h-14 flex items-center justify-between px-4 shrink-0"
-      style={{
-        backgroundColor: 'var(--color-surface)',
-        borderBottom: '1px solid var(--color-border)',
-      }}
+      className="glass-bar h-14 flex items-center justify-between px-4 shrink-0 sticky top-0 z-30"
     >
       <span
         className="text-sm font-semibold tracking-tight"
@@ -90,12 +86,7 @@ export function Header({
 
           {open && (
             <div
-              className="absolute right-0 top-10 w-52 rounded-xl shadow-lg py-1 z-50"
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius)',
-              }}
+              className="glass-z3 glass-pop-in absolute right-0 top-10 w-52 py-1 z-50"
             >
               <div
                 className="px-4 py-2 border-b"

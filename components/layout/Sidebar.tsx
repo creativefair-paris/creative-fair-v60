@@ -16,10 +16,9 @@ export function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-[220px] shrink-0 py-4 px-3 gap-1"
+      className="glass-bar hidden md:flex flex-col w-[220px] shrink-0 py-4 px-3 gap-1"
       style={{
-        backgroundColor: 'var(--color-surface)',
-        borderRight: '1px solid var(--color-border)',
+        borderRight: '1px solid var(--glass-z2-border)',
       }}
     >
       {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
