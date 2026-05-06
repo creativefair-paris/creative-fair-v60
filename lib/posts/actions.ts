@@ -106,6 +106,39 @@ export async function updatePostSchedule(
   revalidatePath('/calendrier')
 }
 
+export async function schedulePost(
+  postId: string,
+  scheduledFor: string,
+): Promise<void> {
+  const supabase = await createClient()
+
+  const updatable = supabase as unknown as {
+    from: (t: string) => {
+      update: (vals: unknown) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => Promise<{ error: { message: string } | null }>
+      }
+    }
+  }
+
+  const { error } = await updatable
+    .from('posts')
+    .update({
+      scheduled_for: scheduledFor,
+      status: 'scheduled',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', postId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/calendrier')
+  revalidatePath(`/calendrier/${postId}`)
+  revalidatePath(`/post-creator/${postId}`)
+}
+
 export async function updatePostStatus(
   postId: string,
   status: 'draft' | 'in_progress' | 'ready' | 'scheduled' | 'published',

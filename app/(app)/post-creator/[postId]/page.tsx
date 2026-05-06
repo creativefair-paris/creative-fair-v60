@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
-import type { PostDraft, PostType } from '@/types/post-draft'
+import type { PostDraft, PostStatus, PostType } from '@/types/post-draft'
 import { PostCreatorLayout } from '@/components/post-creator/PostCreatorLayout'
 
 type PostRow = {
@@ -9,6 +9,8 @@ type PostRow = {
   tenant_id: string
   brand_id: string
   type: PostType | null
+  status: PostStatus
+  scheduled_for: string | null
   content: PostDraft | null
 }
 
@@ -29,7 +31,7 @@ export default async function PostCreatorPage({
 
   const { data: rawPost } = await supabase
     .from('posts')
-    .select('id, tenant_id, brand_id, type, content')
+    .select('id, tenant_id, brand_id, type, status, scheduled_for, content')
     .eq('id', postId)
     .maybeSingle()
 
@@ -43,6 +45,8 @@ export default async function PostCreatorPage({
       postId={post.id}
       initialType={post.type}
       initialDraft={post.content ?? {}}
+      initialStatus={post.status}
+      initialScheduledFor={post.scheduled_for}
       brandName={brand?.name ?? undefined}
     />
   )
