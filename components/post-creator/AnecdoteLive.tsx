@@ -73,15 +73,19 @@ export function AnecdoteLive({ postId, draft, onDraftChange }: Props) {
         draft: PostDraft
       }
       onDraftChange(data.draft)
-      setState((s) => ({
-        ...s,
-        results: { ...s.results, [stepId]: data.result },
-        status: 'done',
-        current:
-          stepId < 6
-            ? ((stepId + 1) as State['current'])
-            : (6 as State['current']),
-      }))
+      setState((s) => {
+        const isAutoAdvance =
+          data.result.kind === 'choices' || stepId === 6
+        return {
+          ...s,
+          results: { ...s.results, [stepId]: data.result },
+          status: isAutoAdvance ? 'done' : 'pending',
+          current:
+            stepId < 6
+              ? ((stepId + 1) as State['current'])
+              : (6 as State['current']),
+        }
+      })
       if (stepId === 6) router.refresh()
     } catch (err) {
       setState((s) => ({
