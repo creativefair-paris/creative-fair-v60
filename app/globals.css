@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #C77D3A;
+  --color-primary: #1F4937;
   --color-primary-fg: #ffffff;
   --color-background: #fbfbfd;
   --color-surface: #ffffff;
   --color-text: #1d1d1f;
   --color-text-muted: #515154;
   --color-border: #d2d2d7;
-  --color-accent: #C77D3A;
+  --color-accent: #1F4937;
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   --radius: 12px;
