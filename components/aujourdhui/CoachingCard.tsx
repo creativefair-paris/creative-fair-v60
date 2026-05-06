@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { AdaptedBadge } from '@/components/ui/AdaptedBadge'
 
 export type DailyCoaching = {
   id: string
@@ -79,12 +80,9 @@ export function CoachingCard({ coaching, generateAction }: Props) {
       )}
 
       {business_context && (
-        <p
-          className="text-xs pt-1"
-          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
-        >
-          Adapté à ton calendrier · {business_context}
-        </p>
+        <div className="pt-1">
+          <AdaptedBadge context={business_context} type="coaching" />
+        </div>
       )}
     </section>
   )

@@ -3,13 +3,32 @@
 import { useState, useRef, useEffect } from 'react'
 import { MessageCircle } from 'lucide-react'
 import Link from 'next/link'
+import {
+  CreditsIndicator,
+  type CreditsByFeature,
+} from '@/components/layout/CreditsIndicator'
 
 type Props = {
   firstName: string
   email: string
+  creditsTotal?: number
+  creditsByFeature?: CreditsByFeature
 }
 
-export function Header({ firstName, email }: Props) {
+const EMPTY_CREDITS: CreditsByFeature = {
+  coaching: 0,
+  generation: 0,
+  brief: 0,
+  brand_book: 0,
+  conseiller: 0,
+}
+
+export function Header({
+  firstName,
+  email,
+  creditsTotal = 0,
+  creditsByFeature = EMPTY_CREDITS,
+}: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -40,7 +59,12 @@ export function Header({ firstName, email }: Props) {
         Creative Fair
       </span>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
+        <CreditsIndicator
+          totalThisMonth={creditsTotal}
+          byFeature={creditsByFeature}
+        />
+
         <Link
           href="/conseiller"
           className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:opacity-80"
