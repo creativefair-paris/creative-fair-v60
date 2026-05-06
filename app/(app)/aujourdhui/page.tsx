@@ -4,9 +4,11 @@ import { getBrandIdForCurrentUser } from '@/lib/supabase/brands'
 import { CoachingCard, type DailyCoaching } from '@/components/aujourdhui/CoachingCard'
 import { CoachingGenerator } from '@/components/aujourdhui/CoachingGenerator'
 import { NextAction } from '@/components/aujourdhui/NextAction'
+import { ContextualSuggestion } from '@/components/ui/ContextualSuggestion'
 
 type TenantRow = { name: string }
 type PostRow = { id: string }
+type BrandStatusRow = { brand_book_status: 'incomplete' | 'complete' }
 
 function formatFrenchDate(d: Date): string {
   const formatted = new Intl.DateTimeFormat('fr-FR', {
@@ -38,6 +40,8 @@ export default async function AujourdhuiPage() {
   let tenant: TenantRow | null = null
   let coaching: DailyCoaching | null = null
   let todayPost: PostRow | null = null
+  let brandStatus: BrandStatusRow | null = null
+  let upcomingPostsCount = 0
 
   if (ids) {
     const { data: rawTenant } = await supabase
@@ -72,6 +76,23 @@ export default async function AujourdhuiPage() {
       .limit(1)
       .maybeSingle()
     todayPost = rawPost as PostRow | null
+
+    const { data: rawBrandStatus } = await supabase
+      .from('brands')
+      .select('brand_book_status')
+      .eq('id', ids.brandId)
+      .maybeSingle()
+    brandStatus = rawBrandStatus as BrandStatusRow | null
+
+    const sevenDays = new Date()
+    sevenDays.setDate(sevenDays.getDate() + 7)
+    const { count } = await supabase
+      .from('posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('brand_id', ids.brandId)
+      .gte('scheduled_for', new Date().toISOString())
+      .lte('scheduled_for', sevenDays.toISOString())
+    upcomingPostsCount = count ?? 0
   }
 
   const dateLabel = formatFrenchDate(new Date())
@@ -108,6 +129,27 @@ export default async function AujourdhuiPage() {
           hasPostToday={Boolean(todayPost)}
           todayPostId={todayPost?.id ?? null}
         />
+
+        {brandStatus?.brand_book_status === 'incomplete' && (
+          <ContextualSuggestion
+            title="Ton brand book n'est pas complet"
+            body="Tant qu'il est partiel, le coaching et les suggestions restent génériques. Cinq minutes pour le compléter."
+            ctaLabel="Compléter mon brand book"
+            ctaHref="/ma-marque/brand-book"
+            storageKey="suggestion:brand-book-incomplete"
+          />
+        )}
+
+        {brandStatus?.brand_book_status === 'complete' &&
+          upcomingPostsCount === 0 && (
+            <ContextualSuggestion
+              title="Aucune publication prévue cette semaine"
+              body="Tu peux générer des idées à partir de ton calendrier business depuis le calendrier."
+              ctaLabel="Voir mes suggestions"
+              ctaHref="/calendrier"
+              storageKey="suggestion:no-upcoming-7d"
+            />
+          )}
       </div>
     </main>
   )
