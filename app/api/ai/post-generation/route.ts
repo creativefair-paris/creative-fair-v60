@@ -197,8 +197,12 @@ export async function POST(req: NextRequest) {
   const draftIn = body.draft ?? post.content ?? {}
 
   // Avant l'appel IA, propage le userInput dans le draft pour les étapes où
-  // il représente une décision utilisateur (choix d'option à l'étape précédente).
-  let workingDraft: PostDraft = { ...draftIn }
+  // il représente une décision utilisateur (choix d'option à l'étape précédente,
+  // ou texte initial pour anecdote_custom).
+  const workingDraft: PostDraft = { ...draftIn }
+  if (step === 1 && body.type === 'anecdote_custom' && body.userInput) {
+    workingDraft.actualite = body.userInput
+  }
   if (step === 2 && body.userInput) workingDraft.actualite = body.userInput
   if (step === 3 && body.userInput) workingDraft.angle = body.userInput
 
