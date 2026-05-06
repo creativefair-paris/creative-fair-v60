@@ -6,6 +6,7 @@ import {
   CalendarPostCard,
   type CalendarPost,
 } from '@/components/calendar/CalendarPostCard'
+import { NewPostModal } from '@/components/calendar/NewPostModal'
 import {
   addDays,
   dayLabelShort,
@@ -33,7 +34,6 @@ type Props = {
   posts: CalendarPost[]
   events: BusinessEventOnDay[]
   initialDate?: string
-  onCreatePost?: (isoDate: string) => void
 }
 
 function postsOn(posts: CalendarPost[], day: Date): CalendarPost[] {
@@ -49,16 +49,12 @@ function eventsOn(events: BusinessEventOnDay[], day: Date): BusinessEventOnDay[]
   return events.filter((e) => e.date === iso)
 }
 
-export function CalendarView({
-  posts,
-  events,
-  initialDate,
-  onCreatePost,
-}: Props) {
+export function CalendarView({ posts, events, initialDate }: Props) {
   const [view, setView] = useState<View>('week')
   const [cursor, setCursor] = useState<Date>(
     initialDate ? new Date(initialDate) : new Date(),
   )
+  const [modalIso, setModalIso] = useState<string | null>(null)
   const today = useMemo(() => startOfDay(new Date()), [])
 
   const days = useMemo(() => {
@@ -289,27 +285,31 @@ export function CalendarView({
                 <CalendarPostCard key={p.id} post={p} />
               ))}
 
-              {onCreatePost && (
-                <button
-                  type="button"
-                  onClick={() => onCreatePost(isoDate(d))}
-                  className="mt-auto inline-flex items-center justify-center gap-1 text-[11px] py-1 transition-opacity hover:opacity-80"
-                  style={{
-                    color: 'var(--color-text-muted)',
-                    border: '1px dashed var(--color-border)',
-                    borderRadius: 'var(--radius-sm, 6px)',
-                    fontFamily: 'var(--font-body)',
-                  }}
-                  aria-label={`Créer une publication le ${isoDate(d)}`}
-                >
-                  <Plus size={10} />
-                  Publication
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setModalIso(isoDate(d))}
+                className="mt-auto inline-flex items-center justify-center gap-1 text-[11px] py-1 transition-opacity hover:opacity-80"
+                style={{
+                  color: 'var(--color-text-muted)',
+                  border: '1px dashed var(--color-border)',
+                  borderRadius: 'var(--radius-sm, 6px)',
+                  fontFamily: 'var(--font-body)',
+                }}
+                aria-label={`Créer une publication le ${isoDate(d)}`}
+              >
+                <Plus size={10} />
+                Publication
+              </button>
             </div>
           )
         })}
       </div>
+
+      <NewPostModal
+        open={modalIso !== null}
+        onClose={() => setModalIso(null)}
+        scheduledIso={modalIso}
+      />
     </div>
   )
 }
