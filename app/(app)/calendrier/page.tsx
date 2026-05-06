@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getBrandIdForCurrentUser, getBrandByTenantId } from '@/lib/supabase/brands'
 import { CalendarView, type BusinessEventOnDay } from '@/components/calendar/CalendarView'
+import { SuggestionsPanel } from '@/components/calendar/SuggestionsPanel'
 import type { CalendarPost, PostStatus } from '@/components/calendar/CalendarPostCard'
 import type { BusinessCalendar } from '@/types/business-calendar'
 
@@ -132,6 +133,8 @@ export default async function CalendarPage() {
         </header>
 
         <CalendarView posts={posts} events={events} />
+
+        <SuggestionsPanel />
 
         {noUpcomingPost && (
           <section
