@@ -7,9 +7,11 @@ const PROTECTED_PATHS = [
   '/conseiller',
   '/ma-marque',
   '/calendar',
+  '/calendrier',
   '/post-creator',
   '/mon-compte',
   '/mon-programme',
+  '/admin',
 ]
 
 export async function proxy(request: NextRequest) {
@@ -41,9 +43,22 @@ export async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p))
+  const isAdminRoute = pathname.startsWith('/admin')
 
   if (isProtected && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Admin routes require both auth + email allowlist.
+  if (isAdminRoute) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    const email = user.email?.toLowerCase() ?? null
+    const ADMIN_EMAILS = ['creativefair@1922.studio']
+    if (!email || !ADMIN_EMAILS.includes(email)) {
+      return NextResponse.redirect(new URL('/aujourdhui', request.url))
+    }
   }
 
   // Redirect authenticated users away from /login.
