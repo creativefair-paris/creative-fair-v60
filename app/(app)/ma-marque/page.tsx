@@ -15,11 +15,6 @@ const SECTIONS = [
     label: 'Calendrier business',
     description: "Événements récurrents, lancements, saisonnalité.",
   },
-  {
-    href: '/ma-marque/parametres',
-    label: 'Paramètres',
-    description: 'Configuration de la marque.',
-  },
 ]
 
 export default async function MaMarquePage() {

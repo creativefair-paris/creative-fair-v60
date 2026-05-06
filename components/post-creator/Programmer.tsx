@@ -2,23 +2,15 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calendar, Download, Share2 } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import { schedulePost } from '@/lib/posts/actions'
 import type { PostDraft } from '@/types/post-draft'
-
-type Tab = 'recap' | 'download' | 'multichannel'
 
 type Props = {
   postId: string
   draft: PostDraft
   initialScheduledFor: string | null
 }
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'recap', label: 'Récap' },
-  { id: 'download', label: 'Télécharger' },
-  { id: 'multichannel', label: 'Multi-canal' },
-]
 
 function defaultDateTimeLocal(initial: string | null): string {
   const base = initial ? new Date(initial) : nextMorning()
@@ -39,7 +31,6 @@ function nextMorning(): Date {
 
 export function Programmer({ postId, draft, initialScheduledFor }: Props) {
   const router = useRouter()
-  const [tab, setTab] = useState<Tab>('recap')
   const [datetime, setDatetime] = useState<string>(
     defaultDateTimeLocal(initialScheduledFor),
   )
@@ -84,42 +75,11 @@ export function Programmer({ postId, draft, initialScheduledFor }: Props) {
             fontFamily: 'var(--font-body)',
           }}
         >
-          Choisis quand cette publication doit partir, prépare-la pour téléchargement, ou prévois un format multi-canal.
+          Choisis quand cette publication doit partir.
         </p>
       </div>
 
-      <nav
-        className="flex items-center gap-1 p-1"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-        }}
-      >
-        {TABS.map((t) => {
-          const active = tab === t.id
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              className="flex-1 px-3 py-2 text-sm font-medium transition-opacity hover:opacity-90"
-              style={{
-                backgroundColor: active ? 'var(--color-background)' : 'transparent',
-                color: active ? 'var(--color-text)' : 'var(--color-text-muted)',
-                border: active ? '1px solid var(--color-border)' : '1px solid transparent',
-                borderRadius: 'var(--radius)',
-                fontFamily: 'var(--font-body)',
-              }}
-            >
-              {t.label}
-            </button>
-          )
-        })}
-      </nav>
-
-      {tab === 'recap' && (
-        <div className="space-y-4">
+      <div className="space-y-4">
           <div
             className="rounded-xl px-4 py-4 space-y-3"
             style={{
@@ -253,62 +213,7 @@ export function Programmer({ postId, draft, initialScheduledFor }: Props) {
               {isPending ? 'Je programme…' : 'Programmer cette publication'}
             </button>
           )}
-        </div>
-      )}
-
-      {tab === 'download' && (
-        <div
-          className="rounded-xl px-4 py-6 space-y-2"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius)',
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Download size={16} style={{ color: 'var(--color-text-muted)' }} />
-            <p
-              className="text-sm font-medium"
-              style={{ color: 'var(--color-text)', fontFamily: 'var(--font-body)' }}
-            >
-              Téléchargement des assets
-            </p>
-          </div>
-          <p
-            className="text-sm"
-            style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
-          >
-            Disponible bientôt.
-          </p>
-        </div>
-      )}
-
-      {tab === 'multichannel' && (
-        <div
-          className="rounded-xl px-4 py-6 space-y-2"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius)',
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Share2 size={16} style={{ color: 'var(--color-text-muted)' }} />
-            <p
-              className="text-sm font-medium"
-              style={{ color: 'var(--color-text)', fontFamily: 'var(--font-body)' }}
-            >
-              Diffusion multi-canal
-            </p>
-          </div>
-          <p
-            className="text-sm"
-            style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
-          >
-            Disponible bientôt.
-          </p>
-        </div>
-      )}
+      </div>
     </section>
   )
 }

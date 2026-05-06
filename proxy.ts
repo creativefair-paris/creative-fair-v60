@@ -10,7 +10,6 @@ const PROTECTED_PATHS = [
   '/calendrier',
   '/post-creator',
   '/mon-compte',
-  '/mon-programme',
   '/admin',
 ]
 

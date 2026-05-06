@@ -86,7 +86,7 @@ export function CoachingGenerator({ autoGenerate = true }: Props) {
           style={{ backgroundColor: 'var(--color-border)' }}
         />
         <p
-          className="text-sm pt-4 transition-opacity duration-700"
+          className="text-sm pt-4 transition-opacity duration-[420ms]"
           style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
         >
           {PHRASES[phraseIndex]}
