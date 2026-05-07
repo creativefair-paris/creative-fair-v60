@@ -133,12 +133,7 @@ export function ConseillerChat({
     <div className="flex flex-col h-[70vh] min-h-[480px]">
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-        }}
+        className="glass-z2 flex-1 overflow-y-auto px-4 py-4 space-y-4"
       >
         {messages.length === 0 && !streaming && (
           <p
@@ -182,7 +177,7 @@ export function ConseillerChat({
       {error && (
         <p
           className="text-sm mt-2"
-          style={{ color: '#9B2828', fontFamily: 'var(--font-body)' }}
+          style={{ color: 'var(--color-error)', fontFamily: 'var(--font-body)' }}
         >
           {error}
         </p>

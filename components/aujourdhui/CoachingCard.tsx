@@ -18,12 +18,7 @@ export function CoachingCard({ coaching, generateAction }: Props) {
   if (!coaching) {
     return (
       <section
-        className="rounded-2xl px-8 py-10 space-y-4"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-        }}
+        className="glass-z2 px-8 py-10 space-y-4"
       >
         <h2
           className="text-lg font-semibold tracking-tight"
@@ -46,12 +41,7 @@ export function CoachingCard({ coaching, generateAction }: Props) {
 
   return (
     <section
-      className="rounded-2xl px-8 py-8 space-y-5"
-      style={{
-        backgroundColor: 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius)',
-      }}
+      className="glass-z2 px-8 py-8 space-y-5"
     >
       <p
         className="leading-relaxed whitespace-pre-line"

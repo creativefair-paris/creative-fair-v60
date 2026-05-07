@@ -67,12 +67,7 @@ export function CoachingGenerator({ autoGenerate = true }: Props) {
   if (status === 'loading') {
     return (
       <section
-        className="rounded-2xl px-8 py-10 space-y-4 animate-pulse"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-        }}
+        className="glass-z2 px-8 py-10 space-y-4 animate-pulse"
         aria-live="polite"
         aria-busy="true"
       >
@@ -105,12 +100,7 @@ export function CoachingGenerator({ autoGenerate = true }: Props) {
   if (status === 'no_brand') {
     return (
       <section
-        className="rounded-2xl px-8 py-10 space-y-4"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-        }}
+        className="glass-z2 px-8 py-10 space-y-4"
       >
         <h2
           className="text-lg font-semibold tracking-tight"
@@ -143,12 +133,7 @@ export function CoachingGenerator({ autoGenerate = true }: Props) {
   if (status === 'error') {
     return (
       <section
-        className="rounded-2xl px-8 py-10 space-y-4"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-        }}
+        className="glass-z2 px-8 py-10 space-y-4"
       >
         <h2
           className="text-lg font-semibold tracking-tight"
