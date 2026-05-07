@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import type { Message } from '@anthropic-ai/sdk/resources'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic } from '@/lib/ai/client'
 import { buildSystemPrompt } from '@/lib/ai/caching'
@@ -231,6 +232,7 @@ export async function POST(req: NextRequest) {
     const createParams: AnthropicCreateInput = {
       model: 'claude-opus-4-7',
       max_tokens: 1500,
+      stream: false,
       system: buildSystemPrompt(systemParts),
       messages: [
         {
@@ -249,7 +251,7 @@ export async function POST(req: NextRequest) {
       createParams.tools = [toolWebSearch]
     }
 
-    const response = await anthropic.messages.create(createParams)
+    const response = (await anthropic.messages.create(createParams)) as Message
 
     const text = response.content
       .filter((b) => b.type === 'text')
