@@ -7,10 +7,10 @@ type Props = {
 
 export function NextAction({ hasPostToday, todayPostId }: Props) {
   const message = hasPostToday
-    ? 'Tu as une publication prévue aujourd\u2019hui. Prête à la finaliser ?'
-    : 'Tu n\u2019as rien planifié aujourd\u2019hui. Envie de préparer demain ?'
+    ? 'Tu as une publication prévue aujourd\u2019hui.'
+    : 'Rien de pr\u00e9vu aujourd\u2019hui \u2014 l\u2019occasion de préparer la semaine.'
 
-  const ctaLabel = hasPostToday ? 'Voir la publication' : 'Ouvrir mon calendrier'
+  const ctaLabel = hasPostToday ? 'Voir la publication' : 'Planifier une publication'
   const ctaHref =
     hasPostToday && todayPostId
       ? `/calendrier/${todayPostId}`
@@ -38,12 +38,6 @@ export function NextAction({ hasPostToday, todayPostId }: Props) {
         {ctaLabel}
       </Link>
 
-      <p
-        className="text-xs pt-2"
-        style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}
-      >
-        En toute tranquillité — tu avances à ton rythme.
-      </p>
     </section>
   )
 }
