@@ -1,4 +1,6 @@
 import type { ReactNode, CSSProperties } from 'react'
+import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { buildThemeVars, mergeTheme } from '@/lib/theme/apply-theme'
 import { defaultTheme } from '@/lib/theme/default-theme'
@@ -8,8 +10,12 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { getCreditsThisMonth } from '@/lib/supabase/credits'
 import type { CreditsByFeature } from '@/components/layout/CreditsIndicator'
+import { getBrandByTenantId } from '@/lib/supabase/brands'
 
 type ProfileRow = { full_name: string | null; email: string; tenant_id: string }
+
+// Routes under (app) that don't require a brand to exist yet.
+const NO_BRAND_ALLOWED = ['/ma-marque', '/mon-compte']
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient()
@@ -17,6 +23,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') ?? '/'
 
   let theme = defaultTheme
   let firstName = 'vous'
@@ -61,6 +70,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       const tenantTheme = (rawTenant as { theme?: Partial<TenantTheme> } | null)?.theme
       if (tenantTheme) {
         theme = mergeTheme(defaultTheme, tenantTheme)
+      }
+
+      // Guard : if no brand row exists and the current path is not the brand
+      // creation flow, redirect silently to onboarding.
+      const needsBrandGuard = !NO_BRAND_ALLOWED.some((p) => pathname.startsWith(p))
+      if (needsBrandGuard) {
+        const brand = await getBrandByTenantId(supabase, profile.tenant_id)
+        if (!brand) {
+          redirect('/ma-marque/onboarding')
+        }
       }
     }
 

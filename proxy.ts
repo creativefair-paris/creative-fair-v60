@@ -14,7 +14,13 @@ const PROTECTED_PATHS = [
 ]
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request })
+  const pathname = request.nextUrl.pathname
+
+  // Forward pathname to Server Components so (app)/layout can guard by path.
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', pathname)
+
+  let response = NextResponse.next({ request: { headers: requestHeaders } })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,7 +32,8 @@ export async function proxy(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request })
+          // Preserve x-pathname header when refreshing session cookies.
+          response = NextResponse.next({ request: { headers: requestHeaders } })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           )
