@@ -13,6 +13,7 @@ type Props = {
   email: string
   creditsTotal?: number
   creditsByFeature?: CreditsByFeature
+  brandComplete?: boolean
 }
 
 const EMPTY_CREDITS: CreditsByFeature = {
@@ -28,6 +29,7 @@ export function Header({
   email,
   creditsTotal = 0,
   creditsByFeature = EMPTY_CREDITS,
+  brandComplete = false,
 }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -56,10 +58,12 @@ export function Header({
       </span>
 
       <div className="flex items-center gap-4">
-        <CreditsIndicator
-          totalThisMonth={creditsTotal}
-          byFeature={creditsByFeature}
-        />
+        {brandComplete && creditsTotal > 0 && (
+          <CreditsIndicator
+            totalThisMonth={creditsTotal}
+            byFeature={creditsByFeature}
+          />
+        )}
 
         <Link
           href="/conseiller"

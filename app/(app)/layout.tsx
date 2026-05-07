@@ -38,6 +38,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     brand_book: 0,
     conseiller: 0,
   }
+  let brandComplete = false
 
   if (user) {
     const { data: rawProfile } = await supabase
@@ -72,14 +73,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         theme = mergeTheme(defaultTheme, tenantTheme)
       }
 
-      // Guard : if no brand row exists and the current path is not the brand
-      // creation flow, redirect silently to onboarding.
+      const brand = await getBrandByTenantId(supabase, profile.tenant_id)
+      brandComplete = brand?.brand_book_status === 'complete'
+
       const needsBrandGuard = !NO_BRAND_ALLOWED.some((p) => pathname.startsWith(p))
-      if (needsBrandGuard) {
-        const brand = await getBrandByTenantId(supabase, profile.tenant_id)
-        if (!brand) {
-          redirect('/ma-marque/onboarding')
-        }
+      if (needsBrandGuard && !brand) {
+        redirect('/ma-marque/onboarding')
       }
     }
 
@@ -97,6 +96,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         email={email}
         creditsTotal={creditsTotal}
         creditsByFeature={creditsByFeature}
+        brandComplete={brandComplete}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
