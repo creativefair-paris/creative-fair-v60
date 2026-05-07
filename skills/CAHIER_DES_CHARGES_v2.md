@@ -691,3 +691,246 @@ Conditions cumulatives. Aucune dérogation.
 Document validé pour exécution. Toute déviation pendant les sprints doit être validée par retour à ce cahier — pas par décision en cours de sprint.
 
 Si un point manque pendant un sprint, stopper le sprint, ouvrir un addendum daté, valider l'addendum, reprendre.
+
+---
+
+## 15. Architecture frontend + nouveaux backends outils
+
+### 15.1 Périmètre de la refonte
+
+Inclus : structure des dossiers `app/`, organisation des routes Next.js, découpage des composants, hooks, state management côté client. Ajout des nouveaux backends pour Moodboard, Variations, Reviews, Programme.
+
+Non touché : schema Supabase existant (`tenants`, `profiles`, `brands`, `posts`, `conversations`, etc.), routes API IA existantes (`/api/ai/coaching`, `/api/ai/chat`, `/api/ai/brand-book`, `/api/ai/post-generation`, `/api/ai/brief`), middlewares auth, RLS, helpers Supabase.
+
+### 15.2 Route groups Next.js par mode produit
+
+L'organisation des routes reflète l'architecture produit en 2 modes. Les route groups isolent les layouts (toggle persistant en Mode 1 et Mode 2, pas de toggle en onboarding et accueil).
+
+```
+app/
+├── (auth)/
+│   └── login/                       # existant, conservé
+├── (onboarding)/                    # NOUVEAU
+│   ├── layout.tsx                   # layout immersif sans nav
+│   └── analyse-marque/
+│       └── page.tsx                 # 10 questions en 3 blocs
+├── (accueil)/                       # NOUVEAU
+│   ├── layout.tsx                   # layout cérémoniel sans toggle
+│   └── page.tsx                     # bifurcation Mode 1 / Mode 2
+├── (programme)/                     # NOUVEAU — Mode 1
+│   ├── layout.tsx                   # toggle persistant Programme/Outils
+│   ├── page.tsx                     # Mon Programme
+│   └── post/
+│       └── [postId]/
+│           └── page.tsx             # workflow Publier depuis carte
+├── (outils)/                        # NOUVEAU — Mode 2
+│   ├── layout.tsx                   # toggle persistant Programme/Outils
+│   ├── page.tsx                     # catalogue Mes Outils
+│   ├── post-creator/
+│   │   └── page.tsx
+│   ├── moodboard/
+│   │   └── page.tsx
+│   ├── variations/
+│   │   └── page.tsx
+│   ├── reviews/
+│   │   └── page.tsx
+│   └── conseiller/
+│       └── page.tsx
+├── (compte)/                        # NOUVEAU
+│   ├── layout.tsx                   # layout sheet-style
+│   ├── ma-marque/
+│   │   ├── page.tsx
+│   │   ├── brand-book/
+│   │   └── business-calendar/
+│   ├── mon-compte/
+│   │   └── page.tsx
+│   └── parametres/
+│       └── page.tsx
+└── api/
+    ├── ai/                          # existant, conservé
+    │   ├── coaching/
+    │   ├── chat/
+    │   ├── brand-book/
+    │   ├── post-generation/
+    │   └── brief/
+    ├── programme/                   # NOUVEAU
+    │   ├── generer/
+    │   │   └── route.ts             # génération programme initial 1 mois
+    │   └── etendre/
+    │       └── route.ts             # extension semaine/mois/trimestre
+    └── outils/                      # NOUVEAU
+        ├── moodboard/
+        │   └── route.ts             # Replicate Flux + ControlNet style
+        ├── variations/
+        │   └── route.ts             # Replicate Flux + ControlNet pose/depth
+        └── reviews/
+            └── route.ts             # Claude Opus + web search + suggestions
+```
+
+### 15.3 Migration progressive des routes existantes
+
+Les routes existantes en `app/(app)/aujourdhui`, `app/(app)/calendrier`, `app/(app)/ma-marque`, `app/(app)/conseiller`, `app/(app)/post-creator`, `app/(app)/mon-compte` sont progressivement remplacées :
+
+- `(app)/aujourdhui` → supprimé (remplacé par `(accueil)/page.tsx` + `(programme)/page.tsx`)
+- `(app)/calendrier` → supprimé (intégré dans `(programme)/page.tsx` comme section)
+- `(app)/ma-marque/*` → migré vers `(compte)/ma-marque/*`
+- `(app)/conseiller` → migré vers `(outils)/conseiller`
+- `(app)/post-creator/[postId]` → migré vers `(programme)/post/[postId]`
+- `(app)/mon-compte` → migré vers `(compte)/mon-compte`
+
+Le route group `(app)` est entièrement vidé puis supprimé en fin de Sprint 32.5.
+
+### 15.4 Composants par feature
+
+Réorganisation des composants par fonctionnalité plutôt que par type. Plus lisible quand le produit grossit.
+
+```
+components/
+├── layout/                          # composants traversaux
+│   ├── Toggle.tsx                   # NOUVEAU — toggle Programme/Outils
+│   ├── NavigationBar.tsx            # iOS-style nav avec large title
+│   ├── Sheet.tsx                    # iOS-style sheet glass-thick
+│   └── PlugToPost.tsx               # NOUVEAU — sheet plug universel
+├── ui/                              # primitives Apple-strict
+│   ├── Button.tsx                   # variants: primary | secondary
+│   ├── Card.tsx                     # variants: elevated | grouped
+│   ├── ListCell.tsx                 # iOS Settings style
+│   ├── DatePicker.tsx               # iOS wheel picker
+│   ├── TimePicker.tsx               # iOS wheel picker
+│   └── SegmentedControl.tsx         # iOS segmented
+├── programme/                       # Mode 1 spécifique
+│   ├── HeroSemaine.tsx              # carrousel cartes semaine
+│   ├── CalendarGrid.tsx             # grid 4 semaines
+│   ├── ArcNarratif.tsx              # vue arc narratif 4 semaines
+│   ├── PostCard.tsx                 # carte de post (statut + jour + extrait)
+│   ├── ExtendreSheet.tsx            # sheet "Étendre mon programme"
+│   └── ConseillerIntegre.tsx        # présence contextuelle Conseiller
+├── outils/                          # Mode 2 spécifique
+│   ├── catalogue/
+│   │   ├── ToolCard.tsx             # card outil dans catalogue
+│   │   └── ToolGrid.tsx             # grid 5 outils
+│   ├── post-creator/                # composants Post Creator
+│   ├── moodboard/                   # composants Moodboard
+│   │   ├── ImageUploader.tsx
+│   │   ├── ResultGrid.tsx
+│   │   └── LoadingShimmer.tsx
+│   ├── variations/                  # composants Variations
+│   ├── reviews/                     # composants Reviews
+│   │   ├── PostSelector.tsx
+│   │   ├── InlineReview.tsx         # texte avec annotations
+│   │   └── SuggestionBubble.tsx
+│   └── conseiller/                  # composants Conseiller chat
+│       ├── ChatBubble.tsx
+│       ├── ExpertAvatar.tsx
+│       └── ExpertChips.tsx
+├── workflow/                        # Workflow Publier
+│   ├── EtapeAngle.tsx
+│   ├── EtapeComposition.tsx
+│   └── EtapeProgrammation.tsx
+├── onboarding/                      # Onboarding 10 questions
+│   ├── BlocIdentite.tsx
+│   ├── BlocCalendrier.tsx
+│   ├── BlocObjectifs.tsx
+│   └── ProgressIndicator.tsx
+├── moments/                         # Moments Wow
+│   ├── GenerationProgramme.tsx
+│   ├── ProgrammationPost.tsx
+│   └── ExtensionProgramme.tsx
+└── accueil/                         # Bifurcation
+    └── ModeBifurcation.tsx
+```
+
+### 15.5 Lib/ étendu
+
+```
+lib/
+├── ai/                              # existant
+│   ├── client.ts
+│   ├── caching.ts
+│   ├── credits.ts
+│   ├── brand-context.ts
+│   └── prompts/
+├── supabase/                        # existant
+├── theme/                           # existant (mais palette refondue Apple)
+├── replicate/                       # NOUVEAU
+│   ├── client.ts                    # client Replicate
+│   ├── flux.ts                      # wrapper Flux Dev
+│   └── controlnet.ts                # wrapper ControlNet style/pose/depth
+├── posts/                           # existant
+│   └── actions.ts
+├── programme/                       # NOUVEAU
+│   ├── generation.ts                # logique arc narratif
+│   ├── extension.ts                 # logique extension semaine/mois/trimestre
+│   └── prompts.ts                   # prompts génération programme
+└── modes/                           # NOUVEAU
+    └── store.ts                     # zustand ou context — state Mode 1/2
+```
+
+### 15.6 Types/
+
+```
+types/
+├── tenant.ts                        # existant
+├── post.ts                          # NOUVEAU — types Post étendus
+├── programme.ts                     # NOUVEAU — types Programme + Arc narratif
+├── outils.ts                        # NOUVEAU — types par outil (Moodboard, Variations, Reviews)
+├── conseiller.ts                    # NOUVEAU — types chat + experts
+└── modes.ts                         # NOUVEAU — types Mode 1/2 + toggle
+```
+
+### 15.7 Variables d'environnement à ajouter
+
+```
+REPLICATE_API_TOKEN=
+REPLICATE_FLUX_MODEL_VERSION=
+REPLICATE_CONTROLNET_MODEL_VERSION=
+```
+
+### 15.8 Schema Supabase — additions minimales
+
+Aucune table existante n'est modifiée. Ajout d'une table pour stocker les programmes générés :
+
+```sql
+create table programmes (
+  id uuid primary key default gen_random_uuid(),
+  brand_id uuid not null references brands(id) on delete cascade,
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  periode text not null check (periode in ('semaine', 'mois', 'trimestre')),
+  arc_narratif jsonb not null,                    -- {semaines: [{theme, posts: [...]}]}
+  context_generation jsonb not null,              -- réponses aux questions de génération
+  status text not null default 'active' check (status in ('active', 'archived')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table programmes enable row level security;
+
+create policy "tenant isolation programmes select"
+  on programmes for select
+  using (tenant_id = public.user_tenant_id());
+
+create policy "tenant isolation programmes insert"
+  on programmes for insert
+  with check (tenant_id = public.user_tenant_id());
+
+create policy "tenant isolation programmes update"
+  on programmes for update
+  using (tenant_id = public.user_tenant_id());
+
+create policy "tenant isolation programmes delete"
+  on programmes for delete
+  using (tenant_id = public.user_tenant_id());
+```
+
+### 15.9 Critères d'acceptation Sprint 32.5
+
+- Toute route existante en `(app)/*` est migrée et `(app)` est supprimé
+- Tous les composants existants sont déplacés selon §15.4 ou supprimés s'ils ne servent plus
+- Les routes API existantes ne sont pas touchées
+- `npm run dev` lance l'app sans erreur sur la nouvelle structure
+- `npx tsc --noEmit` passe à zéro erreur
+- `npm run lint` passe à zéro erreur
+- Les pages atterrissent sur des stubs vides (titres + "page en construction") — l'UI est livrée en Sprints 33-36
+- La table `programmes` est créée en migration 005
+- Les variables d'environnement Replicate sont ajoutées en `.env.example`
+- Tag : `v1.1.5`
