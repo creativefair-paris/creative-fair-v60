@@ -79,13 +79,7 @@ export function NewPostModal({ open, onClose, scheduledIso }: Props) {
       aria-modal="true"
     >
       <div
-        className="w-full md:max-w-md md:mx-4 px-6 py-6 space-y-4"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          borderTopLeftRadius: 'var(--radius)',
-          borderTopRightRadius: 'var(--radius)',
-          borderRadius: 'var(--radius)',
-        }}
+        className="glass-z3 glass-pop-in w-full md:max-w-md md:mx-4 px-6 py-6 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">

@@ -30,12 +30,6 @@ export function ConseillerChat({
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    setConversationId(initialConversationId)
-    setMessages(initialMessages)
-    setError(null)
-  }, [initialConversationId, initialMessages])
-
-  useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, streaming])
 
@@ -157,7 +151,7 @@ export function ConseillerChat({
               style={{
                 backgroundColor:
                   m.role === 'user'
-                    ? 'rgba(168, 50, 78, 0.10)'
+                    ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)'
                     : 'var(--color-background)',
                 border:
                   m.role === 'user'

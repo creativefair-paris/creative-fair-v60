@@ -51,12 +51,7 @@ export default async function MaMarquePage() {
 
       {incomplete && (
         <div
-          className="mb-8 rounded-xl px-5 py-4"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius)',
-          }}
+          className="glass-z1 mb-8 px-5 py-4"
         >
           <p
             className="text-sm leading-relaxed"

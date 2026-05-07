@@ -270,7 +270,7 @@ export function CalendarView({ posts, events, initialDate }: Props) {
                   key={`${e.date}-${idx}`}
                   className="inline-block px-1.5 py-0.5 text-[10px] font-medium truncate"
                   style={{
-                    backgroundColor: 'rgba(168, 50, 78, 0.12)',
+                    backgroundColor: 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
                     color: 'var(--color-accent)',
                     borderRadius: 'var(--radius-sm, 6px)',
                     fontFamily: 'var(--font-body)',

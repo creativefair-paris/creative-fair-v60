@@ -81,12 +81,7 @@ export function Programmer({ postId, draft, initialScheduledFor }: Props) {
 
       <div className="space-y-4">
           <div
-            className="rounded-xl px-4 py-4 space-y-3"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius)',
-            }}
+            className="glass-z1 px-4 py-4 space-y-3"
           >
             {draft.hook && (
               <div>

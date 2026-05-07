@@ -133,12 +133,7 @@ export function SuggestionsPanel() {
 
       {status === 'loading' && (
         <div
-          className="rounded-2xl px-6 py-8 space-y-3 animate-pulse"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius)',
-          }}
+          className="glass-z1 px-6 py-8 space-y-3 animate-pulse"
           aria-busy="true"
           aria-live="polite"
         >
@@ -179,12 +174,7 @@ export function SuggestionsPanel() {
           {suggestions.map((s, idx) => (
             <li
               key={`${s.eventName}-${idx}`}
-              className="rounded-2xl px-5 py-4 space-y-3"
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius)',
-              }}
+              className="glass-z1 px-5 py-4 space-y-3"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1 min-w-0">

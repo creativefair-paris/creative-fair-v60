@@ -113,7 +113,7 @@ export function BriefExterne({ postId, draft, onDraftChange }: Props) {
                 className="text-left px-3 py-2 transition-opacity hover:opacity-90"
                 style={{
                   backgroundColor: active
-                    ? 'rgba(168, 50, 78, 0.10)'
+                    ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)'
                     : 'var(--color-surface)',
                   border: active
                     ? '1px solid var(--color-accent)'
@@ -220,11 +220,8 @@ export function BriefExterne({ postId, draft, onDraftChange }: Props) {
             </button>
           </div>
           <pre
-            className="text-sm leading-relaxed whitespace-pre-wrap"
+            className="glass-z1 text-sm leading-relaxed whitespace-pre-wrap"
             style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius)',
               padding: '12px 14px',
               color: 'var(--color-text)',
               fontFamily: 'var(--font-body)',

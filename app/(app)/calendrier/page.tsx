@@ -138,12 +138,7 @@ export default async function CalendarPage() {
 
         {noUpcomingPost && (
           <section
-            className="px-5 py-4 rounded-xl space-y-3"
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius)',
-            }}
+            className="glass-z1 px-5 py-4 space-y-3"
           >
             <p
               className="text-sm leading-relaxed"

@@ -88,7 +88,7 @@ export function ConversationsList({ conversations, activeId, onSelect }: Props) 
                   className="w-full text-left px-3 py-2 transition-opacity hover:opacity-90"
                   style={{
                     backgroundColor: active
-                      ? 'rgba(168, 50, 78, 0.10)'
+                      ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)'
                       : 'transparent',
                     border: active
                       ? '1px solid var(--color-accent)'

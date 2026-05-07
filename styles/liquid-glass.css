@@ -43,12 +43,11 @@
   --duration-slow: 420ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --glass-tint-rgb: 30, 32, 35;
-    --glass-shadow-rgb: 0, 0, 0;
-  }
-}
+/*
+ * V1 = mode clair uniquement (background #FBFAF7).
+ * Le tint glass reste blanc translucide quel que soit le mode OS.
+ * Prévu V2 : dark mode complet avec palette sombre cohérente.
+ */
 
 /* Niveau 1 — surface très légère (chips, sous-cartes) */
 .glass-z1 {

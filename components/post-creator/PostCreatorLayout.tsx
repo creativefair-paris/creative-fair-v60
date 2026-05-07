@@ -59,12 +59,7 @@ export function PostCreatorLayout({
 
           {canProgrammer && (
             <div
-              className="flex items-center gap-1 p-1"
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius)',
-              }}
+              className="glass-z1 flex items-center gap-1 p-1"
             >
               <button
                 type="button"

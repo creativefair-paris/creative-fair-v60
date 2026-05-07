@@ -35,12 +35,7 @@ export function ContextColumn({ postId, initialType, draft, onDraftChange }: Pro
   return (
     <div className="space-y-6">
       <nav
-        className="flex items-center gap-1 p-1"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-        }}
+        className="glass-z1 flex items-center gap-1 p-1"
       >
         {TABS.map((t) => {
           const active = tab === t.id

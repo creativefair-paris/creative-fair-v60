@@ -163,13 +163,8 @@ export function AnecdoteCustom({ postId, draft, onDraftChange }: Props) {
           return (
             <li
               key={step.id}
-              className="rounded-xl px-4 py-3 space-y-3"
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius)',
-                opacity: !isCurrent && !isPast ? 0.45 : 1,
-              }}
+              className="glass-z1 px-4 py-3 space-y-3"
+              style={{ opacity: !isCurrent && !isPast ? 0.45 : 1 }}
             >
               <div className="flex items-center justify-between">
                 <p
@@ -268,7 +263,7 @@ export function AnecdoteCustom({ postId, draft, onDraftChange }: Props) {
                         style={{
                           backgroundColor:
                             result.selected === opt
-                              ? 'rgba(168, 50, 78, 0.10)'
+                              ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)'
                               : 'var(--color-background)',
                           border:
                             result.selected === opt

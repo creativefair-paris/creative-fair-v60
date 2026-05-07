@@ -139,7 +139,7 @@ export function CoachingGenerator({ autoGenerate = true }: Props) {
           className="text-lg font-semibold tracking-tight"
           style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}
         >
-          Le coaching n'a pas pu être généré
+          Le coaching n&rsquo;a pas pu être généré
         </h2>
         <p
           className="text-sm leading-relaxed"

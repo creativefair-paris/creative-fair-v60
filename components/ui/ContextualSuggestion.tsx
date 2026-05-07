@@ -37,7 +37,7 @@ export function ContextualSuggestion({
     <aside
       className="px-4 py-3 flex items-start gap-4"
       style={{
-        backgroundColor: 'rgba(168, 50, 78, 0.06)',
+        backgroundColor: 'color-mix(in srgb, var(--color-accent) 6%, transparent)',
         border: '1px solid var(--color-accent)',
         borderRadius: 'var(--radius)',
       }}
