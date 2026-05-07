@@ -40,13 +40,7 @@ export default async function MaMarquePage() {
 
   return (
     <div className="px-6 md:px-10 py-10 max-w-2xl mx-auto w-full">
-      <header className="mb-10 space-y-1">
-        <p
-          className="text-xs tracking-widest uppercase"
-          style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-body)' }}
-        >
-          Ma marque
-        </p>
+      <header className="mb-10">
         <h1
           className="text-3xl font-semibold tracking-tight"
           style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}

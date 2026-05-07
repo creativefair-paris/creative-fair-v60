@@ -6,7 +6,6 @@ import { CoachingGenerator } from '@/components/aujourdhui/CoachingGenerator'
 import { NextAction } from '@/components/aujourdhui/NextAction'
 import { ContextualSuggestion } from '@/components/ui/ContextualSuggestion'
 
-type TenantRow = { name: string }
 type PostRow = { id: string }
 type BrandStatusRow = { brand_book_status: 'incomplete' | 'complete' }
 
@@ -37,20 +36,12 @@ export default async function AujourdhuiPage() {
 
   const ids = await getBrandIdForCurrentUser(supabase)
 
-  let tenant: TenantRow | null = null
   let coaching: DailyCoaching | null = null
   let todayPost: PostRow | null = null
   let brandStatus: BrandStatusRow | null = null
   let upcomingPostsCount = 0
 
   if (ids) {
-    const { data: rawTenant } = await supabase
-      .from('tenants')
-      .select('name')
-      .eq('id', ids.tenantId)
-      .maybeSingle()
-    tenant = rawTenant as TenantRow | null
-
     const today = todayIsoDate()
 
     const { data: rawCoaching } = await supabase
@@ -96,7 +87,6 @@ export default async function AujourdhuiPage() {
   }
 
   const dateLabel = formatFrenchDate(new Date())
-  const tenantLabel = tenant?.name ?? 'Creative Fair'
 
   return (
     <main
@@ -104,13 +94,7 @@ export default async function AujourdhuiPage() {
       style={{ backgroundColor: 'var(--color-background)' }}
     >
       <div className="max-w-2xl mx-auto w-full space-y-12">
-        <header className="space-y-1">
-          <p
-            className="text-xs tracking-widest uppercase"
-            style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-body)' }}
-          >
-            {tenantLabel}
-          </p>
+        <header>
           <h1
             className="text-3xl font-semibold tracking-tight"
             style={{ color: 'var(--color-text)', fontFamily: 'var(--font-display)' }}
