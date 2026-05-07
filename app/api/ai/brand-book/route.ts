@@ -4,7 +4,8 @@ import { anthropic } from '@/lib/ai/client'
 import { buildSystemPrompt } from '@/lib/ai/caching'
 import { VOICE_SHEET_RULES } from '@/lib/ai/prompts/system'
 import { BRAND_BOOK_GENERATION_RULES } from '@/lib/ai/prompts/brand-book'
-import { getBrandIdForCurrentUser, updateBrandBook } from '@/lib/supabase/brands'
+import { getBrandByTenantId, updateBrandBook } from '@/lib/supabase/brands'
+import type { Brand } from '@/types/brand-book'
 import type { BrandBook } from '@/types/brand-book'
 
 type OnboardingAnswers = {
@@ -55,18 +56,70 @@ async function persistAnswers(
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
 
-  const ctx = await getBrandIdForCurrentUser(supabase)
-  if (!ctx) {
-    return Response.json(
-      { error: 'No brand for current user' },
-      { status: 401 },
-    )
+  // Auth check — cookies transmis automatiquement par le navigateur (same-origin)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return Response.json({ error: 'Non authentifié' }, { status: 401 })
   }
 
+  // Tenant check
+  const { data: rawProfile } = await supabase
+    .from('profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const tenantId = (rawProfile as { tenant_id?: string } | null)?.tenant_id
+  if (!tenantId) {
+    return Response.json({ error: 'Aucun tenant associé' }, { status: 401 })
+  }
+
+  // Parse body avant la création du brand (un seul read du stream)
   const body = (await req.json()) as unknown
   if (!isAnswers(body)) {
     return Response.json({ error: 'Invalid answers payload' }, { status: 400 })
   }
+
+  // Get or create brand — pendant l'onboarding le brand n'existe pas encore
+  let brand = await getBrandByTenantId(supabase, tenantId)
+
+  if (!brand) {
+    const { data: rawTenant } = await supabase
+      .from('tenants')
+      .select('name')
+      .eq('id', tenantId)
+      .maybeSingle()
+
+    const brandName = (rawTenant as { name?: string } | null)?.name ?? 'Ma marque'
+
+    type BrandInsert = {
+      from: (t: 'brands') => {
+        insert: (row: { tenant_id: string; name: string }) => {
+          select: (cols: string) => {
+            single: () => Promise<{ data: Brand | null; error: { message: string } | null }>
+          }
+        }
+      }
+    }
+    const db = supabase as unknown as BrandInsert
+    const { data: created, error: createErr } = await db
+      .from('brands')
+      .insert({ tenant_id: tenantId, name: brandName })
+      .select(
+        'id, tenant_id, name, brand_book, business_calendar, brand_book_status, questions_answered, created_at, updated_at',
+      )
+      .single()
+
+    if (createErr ?? !created) {
+      return Response.json({ error: 'Impossible de créer la marque' }, { status: 500 })
+    }
+
+    brand = created
+  }
+
+  const ctx = { brandId: brand.id, tenantId }
 
   await persistAnswers(supabase, ctx.brandId, ctx.tenantId, body)
 
