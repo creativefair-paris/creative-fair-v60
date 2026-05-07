@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { ConversationsList, type ConversationSummary } from './ConversationsList'
 import { ConseillerChat } from './ConseillerChat'
+import { EmptyStateBrand } from '@/components/ui/EmptyStateBrand'
 
 type Message = {
   role: 'user' | 'assistant'
@@ -15,9 +16,10 @@ type ConversationFull = ConversationSummary & {
 
 type Props = {
   initial: ConversationFull[]
+  brandBookComplete?: boolean
 }
 
-export function ConseillerLayout({ initial }: Props) {
+export function ConseillerLayout({ initial, brandBookComplete = false }: Props) {
   const [conversations, setConversations] = useState<ConversationFull[]>(initial)
   const [activeId, setActiveId] = useState<string | null>(initial[0]?.id ?? null)
 
@@ -53,30 +55,37 @@ export function ConseillerLayout({ initial }: Props) {
           </p>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside>
-            <ConversationsList
-              conversations={conversations}
-              activeId={activeId}
-              onSelect={setActiveId}
-            />
-          </aside>
+        {!brandBookComplete ? (
+          <EmptyStateBrand
+            title="Configure ta marque pour activer le Conseiller"
+            body="Le Conseiller connaît ta voix, tes valeurs et ton calendrier business. Définis ta marque pour en profiter pleinement."
+          />
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+            <aside>
+              <ConversationsList
+                conversations={conversations}
+                activeId={activeId}
+                onSelect={setActiveId}
+              />
+            </aside>
 
-          <section className="min-w-0">
-            <ConseillerChat
-              key={activeId ?? 'new'}
-              initialConversationId={activeId}
-              initialMessages={active?.messages ?? []}
-              onConversationCreated={(summary) => {
-                setConversations((prev) => [
-                  { ...summary, messages: [] },
-                  ...prev,
-                ])
-                setActiveId(summary.id)
-              }}
-            />
-          </section>
-        </div>
+            <section className="min-w-0">
+              <ConseillerChat
+                key={activeId ?? 'new'}
+                initialConversationId={activeId}
+                initialMessages={active?.messages ?? []}
+                onConversationCreated={(summary) => {
+                  setConversations((prev) => [
+                    { ...summary, messages: [] },
+                    ...prev,
+                  ])
+                  setActiveId(summary.id)
+                }}
+              />
+            </section>
+          </div>
+        )}
       </div>
     </main>
   )

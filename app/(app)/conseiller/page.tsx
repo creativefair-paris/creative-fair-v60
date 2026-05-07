@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ConseillerLayout } from '@/components/conseiller/ConseillerLayout'
+import { getBrandIdForCurrentUser, getBrandByTenantId } from '@/lib/supabase/brands'
 
 type Message = {
   role: 'user' | 'assistant'
@@ -30,6 +31,13 @@ export default async function ConseillerPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const ids = await getBrandIdForCurrentUser(supabase)
+  let brandBookComplete = false
+  if (ids) {
+    const brand = await getBrandByTenantId(supabase, ids.tenantId)
+    brandBookComplete = brand?.brand_book_status === 'complete'
+  }
+
   const { data: rows } = await supabase
     .from('conversations')
     .select('id, messages, updated_at, context_page')
@@ -49,5 +57,5 @@ export default async function ConseillerPage() {
     }
   })
 
-  return <ConseillerLayout initial={initial} />
+  return <ConseillerLayout initial={initial} brandBookComplete={brandBookComplete} />
 }
