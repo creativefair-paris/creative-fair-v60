@@ -1,22 +1,17 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Routes that require an authenticated session.
 const PROTECTED_PATHS = [
-  '/aujourdhui',
-  '/conseiller',
-  '/ma-marque',
-  '/calendar',
-  '/calendrier',
-  '/post-creator',
-  '/mon-compte',
+  '/onboarding',
+  '/programme',
+  '/outils',
+  '/compte',
   '/admin',
 ]
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Forward pathname to Server Components so (app)/layout can guard by path.
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', pathname)
 
@@ -32,7 +27,6 @@ export async function proxy(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          // Preserve x-pathname header when refreshing session cookies.
           response = NextResponse.next({ request: { headers: requestHeaders } })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
@@ -42,7 +36,6 @@ export async function proxy(request: NextRequest) {
     },
   )
 
-  // Refresh session — required for Server Components to read fresh auth state.
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -54,7 +47,6 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Admin routes require both auth + email allowlist.
   if (isAdminRoute) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
@@ -62,13 +54,12 @@ export async function proxy(request: NextRequest) {
     const email = user.email?.toLowerCase() ?? null
     const ADMIN_EMAILS = ['creativefair@1922.studio']
     if (!email || !ADMIN_EMAILS.includes(email)) {
-      return NextResponse.redirect(new URL('/aujourdhui', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
-  // Redirect authenticated users away from /login.
   if (pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/aujourdhui', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return response
@@ -76,7 +67,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Run on all paths except Next.js internals and static files.
     '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
