@@ -1,15 +1,20 @@
-// Stub Sprint 32.5 — implémentation Sprint 36 (§2.5 + §8.8)
+// Sprint 33 §8.8 — Plug-to-post sheet (glass-thick)
+'use client'
+
+import { Sheet } from './Sheet'
 
 type PlugToPostProps = {
   open: boolean
+  onDismiss?: () => void
   artefact?: { kind: 'image' | 'text'; preview: string }
 }
 
-export function PlugToPost({ open }: PlugToPostProps) {
-  if (!open) return null
+export function PlugToPost({ open, onDismiss }: PlugToPostProps) {
   return (
-    <div role="dialog" aria-modal="true" aria-label="Utiliser dans">
-      <h2>Utiliser dans :</h2>
-    </div>
+    <Sheet open={open} title="Utiliser dans :" onDismiss={onDismiss}>
+      <div role="list">
+        {/* Stub Sprint 33 — items rendus par les Sprints 35-36 (programme + outils livrés). */}
+      </div>
+    </Sheet>
   )
 }

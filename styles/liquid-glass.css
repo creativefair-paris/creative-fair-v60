@@ -1,176 +1,59 @@
 /*
- * Liquid Glass — Creative Fair V1
+ * Sprint 33 — Liquid Glass iOS 26 strict (§7.6).
  *
- * Système de surfaces translucides inspiré d'iOS 26.
- * Trois niveaux de profondeur (z1, z2, z3), animations souples,
- * fallback @supports pour les navigateurs sans backdrop-filter.
+ * Doctrine : le Liquid Glass est utilisé seulement pour les éléments qui se
+ * superposent au contenu. Pas de glass partout. Surfaces de contenu = solides.
  *
- * Usage : <div class="glass-z1">…</div>
- *         <button class="glass-control">…</button>
- *
- * Les couleurs glass-*-rgb sont calculées à partir de var(--color-surface)
- * du tenant. Override possible par tenant en surchargeant ces variables.
+ * Aucun halo coloré, aucun mesh gradient, aucun blob animé.
+ * Le Liquid Glass fonctionne par contraste avec contenu riche dessous.
  */
 
 :root {
-  /* RGB extrait pour transparences. Override par tenant si besoin. */
-  --glass-tint-rgb: 255, 255, 255;
-  --glass-shadow-rgb: 26, 31, 27;
-
-  /* Trois niveaux de profondeur. */
-  --glass-z1-bg: rgba(var(--glass-tint-rgb), 0.55);
-  --glass-z1-border: rgba(var(--glass-tint-rgb), 0.18);
-  --glass-z1-shadow: 0 1px 2px rgba(var(--glass-shadow-rgb), 0.04);
-
-  --glass-z2-bg: rgba(var(--glass-tint-rgb), 0.7);
-  --glass-z2-border: rgba(var(--glass-tint-rgb), 0.24);
-  --glass-z2-shadow: 0 8px 24px -12px rgba(var(--glass-shadow-rgb), 0.12);
-
-  --glass-z3-bg: rgba(var(--glass-tint-rgb), 0.82);
-  --glass-z3-border: rgba(var(--glass-tint-rgb), 0.32);
-  --glass-z3-shadow: 0 24px 60px -24px rgba(var(--glass-shadow-rgb), 0.24);
-
-  /* Blur tiers. */
-  --glass-blur-soft: 14px;
-  --glass-blur-medium: 22px;
-  --glass-blur-strong: 32px;
-
-  /* Animation curves. */
-  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --ease-in-out-soft: cubic-bezier(0.45, 0, 0.2, 1);
-  --duration-fast: 160ms;
-  --duration-medium: 280ms;
-  --duration-slow: 420ms;
+  /* §7.6 Liquid Glass — 3 niveaux Apple iOS 26 */
+  --glass-thin-bg: rgba(255, 255, 255, 0.72);
+  --glass-thin-blur: 20px;
+  --glass-regular-bg: rgba(255, 255, 255, 0.82);
+  --glass-regular-blur: 30px;
+  --glass-thick-bg: rgba(255, 255, 255, 0.92);
+  --glass-thick-blur: 50px;
 }
 
-/*
- * V1 = mode clair uniquement (background #FBFAF7).
- * Le tint glass reste blanc translucide quel que soit le mode OS.
- * Prévu V2 : dark mode complet avec palette sombre cohérente.
- */
-
-/* Niveau 1 — surface très légère (chips, sous-cartes) */
-.glass-z1 {
-  background-color: var(--glass-z1-bg);
-  border: 1px solid var(--glass-z1-border);
-  box-shadow: var(--glass-z1-shadow);
-  backdrop-filter: blur(var(--glass-blur-soft)) saturate(140%);
-  -webkit-backdrop-filter: blur(var(--glass-blur-soft)) saturate(140%);
-  border-radius: var(--radius-md);
+/* Niveau thin — navigation bars, tab bars, toggle segmented */
+.glass-thin {
+  background-color: var(--glass-thin-bg);
+  backdrop-filter: blur(var(--glass-thin-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-thin-blur)) saturate(180%);
 }
 
-/* Niveau 2 — cartes principales, sidebars */
-.glass-z2 {
-  background-color: var(--glass-z2-bg);
-  border: 1px solid var(--glass-z2-border);
-  box-shadow: var(--glass-z2-shadow);
-  backdrop-filter: blur(var(--glass-blur-medium)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--glass-blur-medium)) saturate(160%);
-  border-radius: var(--radius-md);
+/* Niveau regular — sheets en standby, popovers */
+.glass-regular {
+  background-color: var(--glass-regular-bg);
+  backdrop-filter: blur(var(--glass-regular-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-regular-blur)) saturate(180%);
 }
 
-/* Niveau 3 — modals, popovers, sheets flottantes */
-.glass-z3 {
-  background-color: var(--glass-z3-bg);
-  border: 1px solid var(--glass-z3-border);
-  box-shadow: var(--glass-z3-shadow);
-  backdrop-filter: blur(var(--glass-blur-strong)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--glass-blur-strong)) saturate(180%);
-  border-radius: var(--radius-lg);
+/* Niveau thick — modals, sheets ouverts, plug-to-post */
+.glass-thick {
+  background-color: var(--glass-thick-bg);
+  backdrop-filter: blur(var(--glass-thick-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-thick-blur)) saturate(180%);
 }
 
-/* Header / barre flottante */
-.glass-bar {
-  background-color: var(--glass-z2-bg);
-  border-bottom: 1px solid var(--glass-z2-border);
-  backdrop-filter: blur(var(--glass-blur-medium)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--glass-blur-medium)) saturate(160%);
-}
-
-/* Bouton ou contrôle translucide */
-.glass-control {
-  background-color: var(--glass-z1-bg);
-  border: 1px solid var(--glass-z1-border);
-  backdrop-filter: blur(var(--glass-blur-soft)) saturate(140%);
-  -webkit-backdrop-filter: blur(var(--glass-blur-soft)) saturate(140%);
-  border-radius: var(--radius-md);
-  transition:
-    background-color var(--duration-fast) var(--ease-out-soft),
-    border-color var(--duration-fast) var(--ease-out-soft),
-    transform var(--duration-fast) var(--ease-out-soft);
-}
-
-.glass-control:hover {
-  background-color: var(--glass-z2-bg);
-  border-color: var(--glass-z2-border);
-}
-
-.glass-control:active {
-  transform: scale(0.98);
-}
-
-/* Animation d'entrée douce */
-.glass-fade-in {
-  animation: glass-fade-in var(--duration-medium) var(--ease-out-soft) both;
-}
-
-@keyframes glass-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.glass-pop-in {
-  animation: glass-pop-in var(--duration-medium) var(--ease-out-soft) both;
-}
-
-@keyframes glass-pop-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Fallback pour navigateurs sans backdrop-filter */
+/* Fallback pour navigateurs sans backdrop-filter — surface solide */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass-z1,
-  .glass-z2,
-  .glass-z3,
-  .glass-bar,
-  .glass-control {
-    background-color: var(--color-surface);
-  }
-  .glass-z3 {
-    box-shadow: 0 24px 60px -24px rgba(var(--glass-shadow-rgb), 0.32);
+  .glass-thin,
+  .glass-regular,
+  .glass-thick {
+    background-color: var(--color-surface-elevated);
   }
 }
 
-/* Respect des préférences utilisateur */
-@media (prefers-reduced-motion: reduce) {
-  .glass-fade-in,
-  .glass-pop-in,
-  .glass-control {
-    animation: none;
-    transition: none;
-  }
-}
-
+/* Respect prefers-reduced-transparency (WCAG, §6.8) */
 @media (prefers-reduced-transparency: reduce) {
-  .glass-z1,
-  .glass-z2,
-  .glass-z3,
-  .glass-bar,
-  .glass-control {
-    background-color: var(--color-surface);
+  .glass-thin,
+  .glass-regular,
+  .glass-thick {
+    background-color: var(--color-surface-elevated);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }

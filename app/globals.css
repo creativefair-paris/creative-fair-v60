@@ -1,26 +1,118 @@
 @import "tailwindcss";
 @import "../styles/liquid-glass.css";
 
-/* Default CFS theme — vert forêt.
-   Overridden at runtime by AppLayout via inline style vars per tenant. */
+/*
+ * Sprint 33 — Foundations Apple-strict.
+ * Référence : iOS 26 / iPadOS 26 (Notes, Reminders, Music, Photos, Wallet, Mail, Calendar).
+ * Sources cahier : §7.2 palette, §7.3 typo, §7.4 8pt grid, §7.5 radius, §7.7 ombres, §7.8 animations.
+ * Aucun vert forêt, aucun halo coloré, aucun mesh gradient, aucun serif.
+ */
+
 :root {
-  --color-background: #FBFAF7;
-  --color-surface: #FFFFFF;
-  --color-text: #1A1F1B;
-  --color-text-muted: #5A6260;
-  --color-border: #E8E5DD;
-  --color-accent: #1F4937;
+  /* §7.2 Palette Apple iOS (mode clair) */
+  --color-background: #F2F2F7;
+  --color-surface-elevated: #FFFFFF;
+  --color-surface-grouped: #FFFFFF;
+  --color-label: #000000;
+  --color-secondary-label: rgba(60, 60, 67, 0.6);
+  --color-tertiary-label: rgba(60, 60, 67, 0.3);
+  --color-separator: rgba(60, 60, 67, 0.29);
+  --color-system-blue: #007AFF;
+  --color-system-blue-pressed: #0051D5;
+  --color-system-red: #FF3B30;
+  --color-system-green: #34C759;
+  --color-system-orange: #FF9500;
+
+  /* Alias compatibilité theming par tenant. Pointent vers les tokens iOS. */
+  --color-surface: var(--color-surface-elevated);
+  --color-text: var(--color-label);
+  --color-text-muted: var(--color-secondary-label);
+  --color-border: var(--color-separator);
+  --color-accent: var(--color-system-blue);
+  --color-primary: var(--color-system-blue);
   --color-accent-fg: #FFFFFF;
-  --color-primary: #1F4937;
   --color-primary-fg: #FFFFFF;
-  --color-error: #B91C1C;
-  --font-display: -apple-system, "SF Pro Display", system-ui, sans-serif;
-  --font-body: -apple-system, "SF Pro Text", system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", monospace;
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius: 12px;
+  --color-error: var(--color-system-red);
+
+  /* §7.3 Typographie SF Pro — 11 tailles iOS HIG strictes */
+  --font-system: -apple-system, system-ui, sans-serif;
+  --font-display: var(--font-system);
+  --font-body: var(--font-system);
+  --font-mono: ui-monospace, SFMono-Regular, monospace;
+
+  --text-caption-2-size: 11px;
+  --text-caption-2-weight: 400;
+  --text-caption-2-tracking: 0.066em;
+  --text-caption-1-size: 12px;
+  --text-caption-1-weight: 400;
+  --text-caption-1-tracking: 0;
+  --text-footnote-size: 13px;
+  --text-footnote-weight: 400;
+  --text-footnote-tracking: -0.08px;
+  --text-subheadline-size: 15px;
+  --text-subheadline-weight: 400;
+  --text-subheadline-tracking: -0.24px;
+  --text-callout-size: 16px;
+  --text-callout-weight: 400;
+  --text-callout-tracking: -0.32px;
+  --text-body-size: 17px;
+  --text-body-weight: 400;
+  --text-body-tracking: -0.43px;
+  --text-headline-size: 17px;
+  --text-headline-weight: 600;
+  --text-headline-tracking: -0.43px;
+  --text-title-3-size: 20px;
+  --text-title-3-weight: 400;
+  --text-title-3-tracking: 0.38px;
+  --text-title-2-size: 22px;
+  --text-title-2-weight: 400;
+  --text-title-2-tracking: 0.35px;
+  --text-title-1-size: 28px;
+  --text-title-1-weight: 400;
+  --text-title-1-tracking: 0.36px;
+  --text-large-title-size: 34px;
+  --text-large-title-weight: 400;
+  --text-large-title-tracking: 0.37px;
+
+  /* §7.4 Espacement 8pt grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* §7.5 Radius — squircles iOS */
+  --radius-small: 6px;
+  --radius-medium: 10px;
+  --radius-large: 14px;
+  --radius-xlarge: 20px;
+  --radius-continuous: 18px;
+
+  /* Alias compat */
+  --radius-sm: var(--radius-small);
+  --radius-md: var(--radius-medium);
+  --radius-lg: var(--radius-large);
+  --radius: var(--radius-medium);
+
+  /* §7.7 Ombres — 3 niveaux */
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.16);
+
+  /* §7.8 Animations — easing */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* §7.8 Animations — durées (max 500ms) */
+  --duration-fast: 200ms;
+  --duration-medium: 350ms;
+  --duration-slow: 500ms;
 }
 
 @theme inline {
@@ -38,6 +130,167 @@
 
 body {
   background-color: var(--color-background);
-  color: var(--color-text);
-  font-family: var(--font-body);
+  color: var(--color-label);
+  font-family: var(--font-system);
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  letter-spacing: var(--text-body-tracking);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* §7.3 Classes utilitaires typo (11 tokens) */
+.text-caption-2 { font-size: var(--text-caption-2-size); font-weight: var(--text-caption-2-weight); letter-spacing: var(--text-caption-2-tracking); }
+.text-caption-1 { font-size: var(--text-caption-1-size); font-weight: var(--text-caption-1-weight); letter-spacing: var(--text-caption-1-tracking); }
+.text-footnote { font-size: var(--text-footnote-size); font-weight: var(--text-footnote-weight); letter-spacing: var(--text-footnote-tracking); }
+.text-subheadline { font-size: var(--text-subheadline-size); font-weight: var(--text-subheadline-weight); letter-spacing: var(--text-subheadline-tracking); }
+.text-callout { font-size: var(--text-callout-size); font-weight: var(--text-callout-weight); letter-spacing: var(--text-callout-tracking); }
+.text-body { font-size: var(--text-body-size); font-weight: var(--text-body-weight); letter-spacing: var(--text-body-tracking); }
+.text-headline { font-size: var(--text-headline-size); font-weight: var(--text-headline-weight); letter-spacing: var(--text-headline-tracking); }
+.text-title-3 { font-size: var(--text-title-3-size); font-weight: var(--text-title-3-weight); letter-spacing: var(--text-title-3-tracking); }
+.text-title-2 { font-size: var(--text-title-2-size); font-weight: var(--text-title-2-weight); letter-spacing: var(--text-title-2-tracking); }
+.text-title-1 { font-size: var(--text-title-1-size); font-weight: var(--text-title-1-weight); letter-spacing: var(--text-title-1-tracking); }
+.text-large-title { font-size: var(--text-large-title-size); font-weight: var(--text-large-title-weight); letter-spacing: var(--text-large-title-tracking); }
+
+/* §8.1-§8.2 Boutons — états interactifs */
+.cfs-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  user-select: none;
+}
+.cfs-button:focus-visible {
+  outline: 2px solid var(--color-system-blue);
+  outline-offset: 2px;
+}
+.cfs-button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.cfs-button--primary:active:not([disabled]) {
+  background-color: var(--color-system-blue-pressed) !important;
+  transform: scale(0.97);
+}
+.cfs-button--secondary:active:not([disabled]) {
+  opacity: 0.5;
+}
+
+/* §8.3 Card */
+.cfs-card {
+  background-color: var(--color-surface-elevated);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-1);
+  padding: var(--space-5);
+  transition: box-shadow var(--duration-medium) var(--ease-out-quart), transform var(--duration-medium) var(--ease-out-quart);
+}
+.cfs-card:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+
+/* §8.5 List cell */
+.cfs-list-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-grouped);
+  border-bottom: 1px solid var(--color-separator);
+}
+.cfs-list-cell:last-child {
+  border-bottom: none;
+}
+.cfs-list-cell__title {
+  flex: 1;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  letter-spacing: var(--text-body-tracking);
+  color: var(--color-label);
+}
+.cfs-list-cell__value {
+  font-size: var(--text-body-size);
+  color: var(--color-secondary-label);
+}
+
+/* §8.7 Toggle segmented control */
+.cfs-toggle {
+  display: inline-flex;
+  height: 32px;
+  padding: 4px;
+  border-radius: 9999px;
+  gap: 0;
+}
+.cfs-toggle__segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--color-secondary-label);
+  font-size: var(--text-footnote-size);
+  font-weight: 500;
+  letter-spacing: var(--text-footnote-tracking);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out-quart), color var(--duration-fast) var(--ease-out-quart);
+}
+.cfs-toggle__segment[aria-selected="true"] {
+  background-color: #FFFFFF;
+  color: var(--color-label);
+  box-shadow: var(--shadow-1);
+}
+
+/* §8.6 Sheet glass-thick — overlay + container */
+.cfs-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.32);
+  z-index: 50;
+}
+.cfs-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 90vh;
+  border-top-left-radius: var(--radius-xlarge);
+  border-top-right-radius: var(--radius-xlarge);
+  padding: var(--space-5);
+  z-index: 51;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  animation: cfs-sheet-in var(--duration-slow) var(--ease-spring) both;
+}
+@keyframes cfs-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* NavigationBar iOS large title */
+.cfs-navbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: var(--space-12) var(--space-5) var(--space-4);
+}
+.cfs-navbar__title {
+  font-size: var(--text-large-title-size);
+  font-weight: 700;
+  letter-spacing: var(--text-large-title-tracking);
+  color: var(--color-label);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfs-card,
+  .cfs-button,
+  .cfs-toggle__segment {
+    transition: none;
+  }
+  .cfs-sheet {
+    animation: none;
+  }
 }

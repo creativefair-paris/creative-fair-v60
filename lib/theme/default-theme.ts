@@ -1,24 +1,25 @@
 import type { TenantTheme } from '@/types/tenant'
 
+// Sprint 33 — palette Apple iOS stricte (§7.2). Vert forêt retiré du système.
 export const defaultTheme: TenantTheme = {
   colors: {
-    background: '#FBFAF7',
+    background: '#F2F2F7',
     surface: '#FFFFFF',
-    text: '#1A1F1B',
-    textMuted: '#5A6260',
-    border: '#E8E5DD',
-    accent: '#1F4937',
+    text: '#000000',
+    textMuted: 'rgba(60,60,67,0.6)',
+    border: 'rgba(60,60,67,0.29)',
+    accent: '#007AFF',
     accentForeground: '#FFFFFF',
-    error: '#B91C1C',
+    error: '#FF3B30',
   },
   fonts: {
-    display: '-apple-system, "SF Pro Display", system-ui, sans-serif',
-    body: '-apple-system, "SF Pro Text", system-ui, sans-serif',
-    mono: 'ui-monospace, "SF Mono", monospace',
+    display: '-apple-system, system-ui, sans-serif',
+    body: '-apple-system, system-ui, sans-serif',
+    mono: 'ui-monospace, SFMono-Regular, monospace',
   },
   radius: {
     sm: '6px',
-    md: '12px',
-    lg: '20px',
+    md: '10px',
+    lg: '14px',
   },
 }
