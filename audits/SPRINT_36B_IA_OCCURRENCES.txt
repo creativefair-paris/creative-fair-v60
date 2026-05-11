@@ -1,0 +1,11 @@
+app/api/ai/chat/route.ts:25:Tu es le Conseiller IA de Creative Fair Studio.
+app/api/ai/post-generation/route.ts:202:  // Avant l'appel IA, propage le userInput dans le draft pour les étapes où
+app/api/onboarding/complete/route.ts:252:  // 5. Génération IA
+app/(programme)/programme/page.tsx:161:                L&apos;IA analyse ta marque et génère un plan sur mesure.
+components/ui/AdaptedBadge.tsx:6:// Badge discret — rend visible que l'IA s'appuie sur le brand book
+components/layout/Header.tsx:72:          aria-label="Conseiller IA"
+components/onboarding/OnboardingFlow.tsx:3:// Écran d'attente narratif sobre pendant la génération IA (15-45 s).
+components/onboarding/OnboardingFlow.tsx:145:          L’IA réfléchit comme une équipe de communication.
+lib/ai/brand-context.ts:6:// Utilisé par les routes IA (coaching, post generation, suggestions...).
+lib/ai/prompts/system.ts:2:// Règles de voix et de ton pour tous les messages générés par le Conseiller IA.
+lib/ai/prompts/system.ts:4:Tu es le Conseiller IA de Creative Fair Studio.

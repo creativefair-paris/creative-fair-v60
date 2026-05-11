@@ -69,7 +69,7 @@ export function Header({
           href="/conseiller"
           className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:opacity-80"
           style={{ color: 'var(--color-text-muted)' }}
-          aria-label="Conseiller IA"
+          aria-label="Conseiller Creative Fair"
         >
           <MessageCircle size={18} />
         </Link>

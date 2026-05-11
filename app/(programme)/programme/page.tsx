@@ -158,7 +158,7 @@ export default async function ProgrammePage() {
                   margin: 0,
                 }}
               >
-                L&apos;IA analyse ta marque et génère un plan sur mesure.
+                Creative Fair analyse ta marque et structure ton plan éditorial.
               </p>
               <Button
                 disabled

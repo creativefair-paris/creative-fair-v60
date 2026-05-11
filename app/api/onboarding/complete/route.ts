@@ -249,7 +249,7 @@ export async function POST(req: NextRequest) {
     brandId = inserted.id
   }
 
-  // 5. Génération IA
+  // 5. Génération Creative Fair
   const brand: BrandData = {
     id: brandId,
     tenantId,

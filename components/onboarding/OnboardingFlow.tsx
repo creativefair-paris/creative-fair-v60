@@ -1,6 +1,6 @@
 // Sprint 36.A — Flux inversé Marcus : 4 questions essentielles avant le premier wow.
 // Time-to-Wow visé < 4 min. Aucune décision imposée avant la timeline.
-// Écran d'attente narratif sobre pendant la génération IA (15-45 s).
+// Écran d'attente narratif sobre pendant la génération Creative Fair (15-45 s).
 'use client'
 
 import { useMemo, useState } from 'react'
@@ -142,7 +142,7 @@ export function OnboardingFlow() {
           className="text-body"
           style={{ color: 'var(--color-secondary-label)', margin: 0 }}
         >
-          L’IA réfléchit comme une équipe de communication.
+          Creative Fair structure ta semaine éditoriale.
         </p>
       </div>
     )
