@@ -1,6 +1,7 @@
-// Sprint 35 — Page Programme (cahier §4 — destination Mode 1).
-// Server Component. Toujours état vide ce sprint : table programmes
-// non utilisée avant Sprint 36 (génération IA reportée).
+// Sprint 36.A — Page Programme : timeline verticale ou état vide (Chantier D.3).
+// Server Component. Auth chain identique Sprint 35.
+// Si programme actif présent : timeline 3 cards.
+// Sinon : empty state Sprint 35 (bouton désactivé).
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -8,6 +9,20 @@ import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
 import { NavigationBar } from '@/components/layout/NavigationBar'
 import { ProgrammeOutilsToggle } from '@/components/layout/ProgrammeOutilsToggle'
+import { Timeline } from '@/components/programme/Timeline'
+import type { PilierNarratif, PostRow } from '@/types/programme'
+
+export const dynamic = 'force-dynamic'
+
+type BrandRowWithExtras = {
+  id: string
+  piliers_narratifs?: unknown
+}
+
+type ProgrammeRow = {
+  id: string
+  arc_narratif: unknown
+}
 
 export default async function ProgrammePage() {
   const supabase = await createClient()
@@ -29,6 +44,54 @@ export default async function ProgrammePage() {
   if (!brand || brand.brand_book_status !== 'complete') {
     redirect('/onboarding/analyse-marque')
   }
+
+  // Récupération piliers (colonne brands.piliers_narratifs, Sprint 36.A)
+  let piliers: PilierNarratif[] = []
+  const { data: rawBrandExtras } = await supabase
+    .from('brands')
+    .select('id, piliers_narratifs')
+    .eq('id', brand.id)
+    .maybeSingle()
+  const extras = rawBrandExtras as BrandRowWithExtras | null
+  if (extras && Array.isArray(extras.piliers_narratifs)) {
+    piliers = extras.piliers_narratifs as PilierNarratif[]
+  }
+
+  // Récupération programme actif le plus récent
+  const { data: rawProgramme } = await supabase
+    .from('programmes')
+    .select('id, arc_narratif')
+    .eq('tenant_id', tenantId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const programme = rawProgramme as ProgrammeRow | null
+
+  let posts: PostRow[] = []
+  let arcNarratif = ''
+
+  if (programme) {
+    // Extraction du thème depuis arc_narratif (forme { semaines: [{ theme }] })
+    const arc = programme.arc_narratif as
+      | { semaines?: Array<{ theme?: string }> }
+      | null
+    arcNarratif = arc?.semaines?.[0]?.theme ?? ''
+
+    const { data: rawPosts } = await supabase
+      .from('posts')
+      .select(
+        'id, programme_id, tenant_id, brand_id, pilier_nom, jour, date_prevue, heure_prevue, titre, angle, type_contenu, statut, contenu_genere, created_at, updated_at',
+      )
+      .eq('programme_id', programme.id)
+      .order('date_prevue', { ascending: true })
+
+    if (Array.isArray(rawPosts)) {
+      posts = rawPosts as unknown as PostRow[]
+    }
+  }
+
+  const hasProgramme = programme != null && posts.length > 0
 
   return (
     <main
@@ -52,57 +115,61 @@ export default async function ProgrammePage() {
       >
         <NavigationBar title="Mon Programme" trailing={<ProgrammeOutilsToggle />} />
 
-        <section
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 'var(--space-6)',
-            gap: 'var(--space-5)',
-            textAlign: 'center',
-          }}
-        >
-          <div
+        {hasProgramme ? (
+          <Timeline posts={posts} piliers={piliers} arcNarratif={arcNarratif} />
+        ) : (
+          <section
             style={{
+              flex: 1,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
+              padding: 'var(--space-6)',
               gap: 'var(--space-5)',
-              maxWidth: 560,
-              width: '100%',
+              textAlign: 'center',
             }}
           >
-            <h1
+            <div
               style={{
-                fontSize: 'var(--text-title-1-size)',
-                fontWeight: 700,
-                letterSpacing: '-0.022em',
-                color: 'var(--color-label)',
-                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 'var(--space-5)',
+                maxWidth: 560,
+                width: '100%',
               }}
             >
-              Ton programme éditorial n&apos;existe pas encore.
-            </h1>
-            <p
-              className="text-body"
-              style={{
-                color: 'var(--color-secondary-label)',
-                margin: 0,
-              }}
-            >
-              L&apos;IA analyse ta marque et génère un plan sur mesure.
-            </p>
-            <Button
-              disabled
-              aria-disabled="true"
-              title="Génération en préparation"
-            >
-              Générer mon programme
-            </Button>
-          </div>
-        </section>
+              <h1
+                style={{
+                  fontSize: 'var(--text-title-1-size)',
+                  fontWeight: 700,
+                  letterSpacing: '-0.022em',
+                  color: 'var(--color-label)',
+                  margin: 0,
+                }}
+              >
+                Ton programme éditorial n&apos;existe pas encore.
+              </h1>
+              <p
+                className="text-body"
+                style={{
+                  color: 'var(--color-secondary-label)',
+                  margin: 0,
+                }}
+              >
+                L&apos;IA analyse ta marque et génère un plan sur mesure.
+              </p>
+              <Button
+                disabled
+                aria-disabled="true"
+                title="Génération en préparation"
+              >
+                Générer mon programme
+              </Button>
+            </div>
+          </section>
+        )}
       </div>
     </main>
   )
