@@ -1,11 +1,12 @@
-// Sprint 36.B — Page Ma Marque minimale (lecture seule).
-// 4 champs onboarding + 3 piliers narratifs. Aucune édition pour Sprint 36.B
-// (le tableau de bord enrichi est dette ouverte Sprint 36.B.2).
+// Sprint 36.B — Page Ma Marque (lecture + édition des 4 champs principaux).
+// Sprint 36.B.1 — Boutons "Modifier" par bloc + Sheet d'édition.
+// Piliers narratifs restent en lecture seule (régénération Sprint 36.B.2).
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { NavigationBar } from '@/components/layout/NavigationBar'
+import { MaMarqueFields } from '@/components/ma-marque/MaMarqueFields'
 import type { PilierNarratif } from '@/types/programme'
 
 export const dynamic = 'force-dynamic'
@@ -90,10 +91,14 @@ export default async function MaMarquePage() {
             gap: 'var(--space-5)',
           }}
         >
-          <Field label="Nom" value={nom} />
-          <Field label="Secteur" value={secteur} />
-          <Field label="Voix" value={ton} />
-          <Field label="Singularité" value={singularite} />
+          <MaMarqueFields
+            initialValues={{
+              name: nom,
+              secteur,
+              ton,
+              singularite,
+            }}
+          />
 
           {piliers.length > 0 ? (
             <section
@@ -169,40 +174,5 @@ export default async function MaMarquePage() {
         </div>
       </div>
     </div>
-  )
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <section
-      className="glass-thin"
-      style={{
-        padding: 'var(--space-5)',
-        borderRadius: 20,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--space-2)',
-      }}
-    >
-      <span
-        style={{
-          fontFamily: 'var(--font-system)',
-          fontSize: 13,
-          color: 'var(--color-secondary-label)',
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontFamily: 'var(--font-system)',
-          fontSize: 17,
-          lineHeight: 1.4,
-          color: 'var(--color-label)',
-        }}
-      >
-        {value || '—'}
-      </span>
-    </section>
   )
 }

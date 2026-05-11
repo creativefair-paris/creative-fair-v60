@@ -22,11 +22,13 @@ function colorForPilier(pilierNom: string, piliers: PilierNarratif[]): string {
 export function Timeline({ posts, piliers, arcNarratif }: TimelineProps) {
   return (
     <div
+      id="timeline-start"
       style={{
         width: '100%',
         maxWidth: 680,
         margin: '0 auto',
         padding: 'var(--space-5)',
+        scrollMarginTop: 24,
       }}
     >
       <HeroSemaine arcNarratif={arcNarratif} piliers={piliers} />

@@ -534,3 +534,178 @@ h1, h2, h3, h4, h5, h6 {
     animation: none;
   }
 }
+
+/* Sprint 36.B.1 — Chantier C : chips actions + édition par bloc Ma Marque */
+
+/* Chip action (pill cliquable sous le titre Mon Programme) */
+.cfs-chip-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-label);
+  text-decoration: none;
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    transform 150ms var(--ease-out-quart),
+    backdrop-filter 150ms var(--ease-out-quart);
+}
+.cfs-chip-action:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+  transform: scale(1.02);
+}
+.cfs-chip-action:active {
+  transform: scale(0.98);
+  transition-duration: 100ms;
+}
+.cfs-chip-action__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cfs-chip-action__label {
+  line-height: 1;
+}
+
+/* Wrapper grille des 4 champs Ma Marque */
+.cfs-ma-marque-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Bloc individuel (Nom / Secteur / Voix / Singularité) */
+.cfs-ma-marque-field {
+  position: relative;
+  padding: var(--space-5);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.cfs-ma-marque-field__label {
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-secondary-label);
+  letter-spacing: -0.01em;
+}
+.cfs-ma-marque-field__value {
+  font-family: var(--font-system);
+  font-size: 17px;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--color-label);
+  padding-right: 88px; /* réserve l'espace du bouton Modifier */
+  white-space: pre-wrap;
+}
+.cfs-ma-marque-field__edit {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 6px 14px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-label);
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    transform 150ms var(--ease-out-quart);
+}
+.cfs-ma-marque-field__edit:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+.cfs-ma-marque-field__edit:active {
+  transform: scale(0.96);
+}
+
+/* Sheet d'édition d'un bloc */
+.cfs-edit-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+.cfs-edit-bloc__input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: var(--font-system);
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--color-label);
+  background-color: rgba(255, 255, 255, 0.6);
+  resize: vertical;
+  transition: border-color 150ms var(--ease-out-quart);
+}
+.cfs-edit-bloc__input:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+.cfs-edit-bloc__input:disabled {
+  opacity: 0.5;
+}
+.cfs-edit-bloc__counter {
+  font-family: var(--font-system);
+  font-size: 13px;
+  color: var(--color-secondary-label);
+  text-align: right;
+  margin: 0;
+}
+.cfs-edit-bloc__error {
+  font-family: var(--font-system);
+  font-size: 13px;
+  color: #FF3B30;
+  margin: 0;
+}
+.cfs-edit-bloc__actions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+.cfs-edit-bloc__btn {
+  padding: 12px 24px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-label);
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    transform 150ms var(--ease-out-quart);
+}
+.cfs-edit-bloc__btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+.cfs-edit-bloc__btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.cfs-edit-bloc__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.cfs-edit-bloc__btn-primary {
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfs-chip-action,
+  .cfs-ma-marque-field__edit,
+  .cfs-edit-bloc__btn {
+    transition: none;
+  }
+}

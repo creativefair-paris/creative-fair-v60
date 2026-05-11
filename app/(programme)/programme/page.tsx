@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
 import { NavigationBar } from '@/components/layout/NavigationBar'
+import { ChipAction } from '@/components/ui/ChipAction'
 import { Timeline } from '@/components/programme/Timeline'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import type { PilierNarratif, PostRow } from '@/types/programme'
@@ -126,7 +127,26 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
         <NavigationBar title="Mon Programme" />
 
         {hasProgramme ? (
-          <Timeline posts={posts} piliers={piliers} arcNarratif={arcNarratif} />
+          <>
+            <div
+              className="cfs-page-actions"
+              style={{
+                width: '100%',
+                maxWidth: 680,
+                margin: '0 auto',
+                padding: '0 var(--space-5)',
+                marginTop: 16,
+                marginBottom: 32,
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 12,
+              }}
+            >
+              <ChipAction label="Voir un post" href="#timeline-start" />
+              <ChipAction label="Enrichir ma marque" href="/ma-marque" />
+            </div>
+            <Timeline posts={posts} piliers={piliers} arcNarratif={arcNarratif} />
+          </>
         ) : (
           <section
             style={{
