@@ -1049,9 +1049,3 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Sprint 36.B.1 — Animation welcome retirée en vues calendrier
-   (l'animation reste sur Hero + .post-card uniquement en timeline). */
-.cfs-timeline-root.view-semaine .cfs-mini-post,
-.cfs-timeline-root.view-mois .cfs-mini-post {
-  animation: none !important;
-}

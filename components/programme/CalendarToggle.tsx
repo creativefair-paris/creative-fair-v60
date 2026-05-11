@@ -1,9 +1,9 @@
-// Sprint 36.B.1 — Chantier D : Segmented control 3 segments (Timeline / Semaine / Mois).
-// Composant contrôlé. Glass-thin container, segment actif glass-regular avec font 600.
+// Sprint 36.B.1 — Segmented control 2 segments (Semaine / Mois).
+// Patch : retrait du segment Timeline (la vue cards verticales a disparu).
 
 'use client'
 
-export type ViewMode = 'timeline' | 'semaine' | 'mois'
+export type ViewMode = 'semaine' | 'mois'
 
 type CalendarToggleProps = {
   value: ViewMode
@@ -11,7 +11,6 @@ type CalendarToggleProps = {
 }
 
 const SEGMENTS: Array<{ value: ViewMode; label: string }> = [
-  { value: 'timeline', label: 'Timeline' },
   { value: 'semaine', label: 'Semaine' },
   { value: 'mois', label: 'Mois' },
 ]
