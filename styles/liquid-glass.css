@@ -87,29 +87,30 @@
   .bg-halo { animation: none; }
 }
 
-/* Variantes positionnement — rgba intègre l'alpha, opacity reste à 1 */
+/* Variantes positionnement — couvrent toute la surface de la page */
 .bg-halo-1 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(0, 122, 255, 0.35), transparent 70%);
-  top: -200px; left: -150px;
+  width: 900px; height: 900px;
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.30), transparent 65%);
+  top: -350px; left: -300px;
   animation-duration: 18s;
-  --drift-x: 30px; --drift-y: -25px;
+  --drift-x: 40px; --drift-y: -30px;
 }
 
 .bg-halo-2 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(175, 82, 222, 0.28), transparent 70%);
-  top: 40%; right: -180px;
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(175, 82, 222, 0.25), transparent 65%);
+  bottom: -300px; right: -250px;
   animation-duration: 22s;
   animation-delay: -8s;
-  --drift-x: -25px; --drift-y: 20px;
+  --drift-x: -30px; --drift-y: 25px;
 }
 
 .bg-halo-3 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(0, 122, 255, 0.20), transparent 70%);
-  bottom: -100px; left: 30%;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.18), transparent 65%);
+  top: 50%; left: 50%;
+  margin-top: -350px; margin-left: -350px; /* centrage sans conflit avec drift */
   animation-duration: 26s;
   animation-delay: -14s;
-  --drift-x: 15px; --drift-y: -15px;
+  --drift-x: 20px; --drift-y: -20px;
 }
