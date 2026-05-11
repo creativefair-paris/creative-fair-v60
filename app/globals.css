@@ -870,7 +870,7 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1;
 }
 .cfs-vue-semaine__col.is-today .cfs-vue-semaine__day-number {
-  color: var(--pilier-1, #1F4937);
+  color: #1F4937;
 }
 .cfs-vue-semaine__posts {
   display: flex;
@@ -945,7 +945,7 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1;
 }
 .cfs-vue-mois__cell.is-today .cfs-vue-mois__cell-num {
-  color: var(--pilier-1, #1F4937);
+  color: #1F4937;
 }
 .cfs-vue-mois__cell-posts {
   display: flex;
