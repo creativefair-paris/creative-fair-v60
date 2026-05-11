@@ -1,4 +1,4 @@
-// SUPPRESSION CANDIDATE Sprint 33 — composant legacy déplacé en Sprint 32.5
+// SUPPRESSION CANDIDATE Sprint 36 — composant legacy déplacé en Sprint 32.5
 'use client'
 
 import { useEffect, useRef, useState } from 'react'

@@ -205,20 +205,32 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 44px;
+  min-height: 60px;
   padding: var(--space-3) var(--space-4);
-  background-color: var(--color-surface-grouped);
+  background-color: transparent;
   border-bottom: 1px solid var(--color-separator);
 }
 .cfs-list-cell:last-child {
   border-bottom: none;
 }
-.cfs-list-cell__title {
+.cfs-list-cell__content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cfs-list-cell__title {
   font-size: var(--text-body-size);
   font-weight: var(--text-body-weight);
   letter-spacing: var(--text-body-tracking);
   color: var(--color-label);
+}
+.cfs-list-cell__description {
+  font-size: var(--text-subheadline-size);
+  font-weight: var(--text-subheadline-weight);
+  letter-spacing: var(--text-subheadline-tracking);
+  color: var(--color-secondary-label);
 }
 .cfs-list-cell__value {
   font-size: var(--text-body-size);
@@ -293,6 +305,18 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   letter-spacing: var(--text-large-title-tracking);
   color: var(--color-label);
+}
+
+/* Sprint 35 — Lien outil dans catalogue (hover/active iOS-native) */
+.cfs-outil-link {
+  transition: background-color var(--duration-fast) var(--ease-out-quart);
+  border-radius: var(--radius-medium);
+}
+.cfs-outil-link:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+.cfs-outil-link:active {
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 /* Sprint 34 — Bifurcation card (page accueil) */
