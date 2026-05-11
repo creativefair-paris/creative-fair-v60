@@ -46,7 +46,10 @@ export default async function AccueilPage() {
   const firstName = extractFirstName(user.user_metadata ?? null, user.email ?? null)
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main
+      className="min-h-screen"
+      style={{ position: 'relative', background: 'var(--color-background)' }}
+    >
       <div className="bg-halo bg-halo-1" aria-hidden="true" />
       <div className="bg-halo bg-halo-2" aria-hidden="true" />
       <div className="bg-halo bg-halo-3" aria-hidden="true" />
