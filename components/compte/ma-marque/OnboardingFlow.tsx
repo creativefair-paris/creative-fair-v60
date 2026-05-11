@@ -1,4 +1,5 @@
-// SUPPRESSION CANDIDATE Sprint 33 — composant legacy déplacé en Sprint 32.5
+// DEPRECATED — remplacé par components/onboarding/OnboardingFlow.tsx (Sprint 34).
+// Conservé temporairement pour éviter des imports cassés. Suppression au Sprint 36+.
 'use client'
 
 import { useState } from 'react'
