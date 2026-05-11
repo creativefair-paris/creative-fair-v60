@@ -13,8 +13,10 @@ import type {
 } from '@/types/programme'
 import { SYSTEM_PROMPT_INITIAL, buildUserPromptInitial } from './prompts'
 
-const MODEL_PRIMARY = 'claude-opus-4-5'
-const MODEL_FALLBACK = 'claude-opus-4-1'
+// Cascade modèles : Opus 4-5 → Opus 4-1 → Sonnet 4-5 (dernière chance).
+// Documentée dans audits/SPRINT_36A.md (décisions prises seul).
+const MODELS_CASCADE = ['claude-opus-4-5', 'claude-opus-4-1', 'claude-sonnet-4-5'] as const
+const MODEL_PRIMARY = MODELS_CASCADE[0]
 const MAX_TOKENS = 2048
 const TEMPERATURE = 0.7
 const TIMEOUT_MS = 45_000
@@ -53,9 +55,9 @@ const anthropicClient = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-// ── Appel Anthropic avec fallback de modèle ──────────────────────────────────
+// ── Appel Anthropic avec cascade de modèles ──────────────────────────────────
 
-async function callAnthropic(userPrompt: string): Promise<string> {
+async function callAnthropic(userPrompt: string): Promise<{ text: string; modelUsed: string }> {
   const tryModel = async (model: string) => {
     return anthropicClient.messages.create(
       {
@@ -75,28 +77,68 @@ async function callAnthropic(userPrompt: string): Promise<string> {
     )
   }
 
-  let response: Awaited<ReturnType<typeof tryModel>>
-  try {
-    response = await tryModel(MODEL_PRIMARY)
-  } catch (err) {
-    const is404 = err instanceof APIError && err.status === 404
-    if (!is404) {
-      const message = err instanceof Error ? err.message : String(err)
-      throw new GenerationError('api_failed', message)
-    }
+  let response: Awaited<ReturnType<typeof tryModel>> | null = null
+  let modelUsed = ''
+  const errors: string[] = []
+
+  for (const model of MODELS_CASCADE) {
     try {
-      response = await tryModel(MODEL_FALLBACK)
-    } catch (errFallback) {
-      const message = errFallback instanceof Error ? errFallback.message : String(errFallback)
-      throw new GenerationError('api_failed', `fallback ${MODEL_FALLBACK} failed: ${message}`)
+      response = await tryModel(model)
+      modelUsed = model
+      if (model !== MODEL_PRIMARY) {
+        console.warn(`[generation] modèle de repli utilisé : ${model}`)
+      } else {
+        console.info(`[generation] modèle utilisé : ${model}`)
+      }
+      break
+    } catch (err) {
+      const is404 = err instanceof APIError && err.status === 404
+      const message = err instanceof Error ? err.message : String(err)
+      errors.push(`${model}: ${message}`)
+      // 404 = modèle non disponible → on tente le suivant.
+      // Autre erreur = on s'arrête immédiatement (clé invalide, quota, etc.).
+      if (!is404) {
+        throw new GenerationError('api_failed', message)
+      }
     }
   }
 
-  return response.content
+  if (!response) {
+    throw new GenerationError(
+      'api_failed',
+      `cascade épuisée — ${errors.join(' | ')}`,
+    )
+  }
+
+  const text = response.content
     .filter((b) => b.type === 'text')
     .map((b) => ('text' in b ? b.text : ''))
     .join('')
     .trim()
+
+  return { text, modelUsed }
+}
+
+// ── Nettoyage JSON brut Anthropic ────────────────────────────────────────────
+// Claude répond parfois avec des fences markdown (```json ... ```) ou du texte
+// d'introduction malgré les instructions strictes. On extrait le bloc JSON.
+
+export function extractJsonFromText(rawText: string): string {
+  const trimmed = rawText.trim()
+  // 1. Fence ```json ... ```
+  const jsonFence = /```json\s*([\s\S]*?)```/i.exec(trimmed)
+  if (jsonFence?.[1]) return jsonFence[1].trim()
+  // 2. Fence générique ``` ... ```
+  const anyFence = /```\s*([\s\S]*?)```/.exec(trimmed)
+  if (anyFence?.[1]) return anyFence[1].trim()
+  // 3. Substring entre premier { et dernier } (objet racine)
+  const firstBrace = trimmed.indexOf('{')
+  const lastBrace = trimmed.lastIndexOf('}')
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    return trimmed.slice(firstBrace, lastBrace + 1)
+  }
+  // 4. Rien trouvé : on laisse JSON.parse échouer naturellement
+  return trimmed
 }
 
 // ── Validation structure ─────────────────────────────────────────────────────
@@ -191,6 +233,7 @@ export async function saveProgrammeInitial(
   brandId: string,
   tenantId: string,
   supabaseAdmin: SupabaseClient,
+  modelUsed: string = MODEL_PRIMARY,
 ): Promise<string> {
   const today = new Date()
 
@@ -220,7 +263,7 @@ export async function saveProgrammeInitial(
       context_generation: {
         sprint: '36.A',
         comprehension: parsed.comprehension,
-        model: MODEL_PRIMARY,
+        model: modelUsed,
       },
       status: 'active',
     })
@@ -265,17 +308,27 @@ export async function generateProgrammeInitial(
   supabaseAdmin: SupabaseClient,
 ): Promise<{ programmeId: string }> {
   const userPrompt = buildUserPromptInitial(brand)
-  const raw = await callAnthropic(userPrompt)
+  const { text: raw, modelUsed } = await callAnthropic(userPrompt)
+  const cleaned = extractJsonFromText(raw)
 
   let parsed: unknown
   try {
-    parsed = JSON.parse(raw)
+    parsed = JSON.parse(cleaned)
   } catch {
-    throw new GenerationError('invalid_json_response', raw.slice(0, 200))
+    // Log brut pour debug — pas de clé API (jamais loguée), juste le payload texte.
+    console.error('[generation] invalid_json_response, raw Anthropic text:')
+    console.error(raw)
+    throw new GenerationError('invalid_json_response', cleaned.slice(0, 200))
   }
 
   const validated = validateInitialResponse(parsed)
-  const programmeId = await saveProgrammeInitial(validated, brand.id, brand.tenantId, supabaseAdmin)
+  const programmeId = await saveProgrammeInitial(
+    validated,
+    brand.id,
+    brand.tenantId,
+    supabaseAdmin,
+    modelUsed,
+  )
 
   return { programmeId }
 }

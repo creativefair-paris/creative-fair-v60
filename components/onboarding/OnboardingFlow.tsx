@@ -142,7 +142,7 @@ export function OnboardingFlow() {
           className="text-body"
           style={{ color: 'var(--color-secondary-label)', margin: 0 }}
         >
-          L\u2019IA réfléchit comme une équipe de communication.
+          L’IA réfléchit comme une équipe de communication.
         </p>
       </div>
     )
