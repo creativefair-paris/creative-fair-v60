@@ -1,10 +1,20 @@
-// Sprint 36.B — Timeline verticale enrichie.
-// Server Component. Rend Hero + cards avec accent couleur par pilier + CTA Ma Marque.
+// Sprint 36.B.1 — Chantier D : Timeline orchestre 3 vues + Sheet détail.
+// Modes : timeline (par défaut, hero + cards verticales), semaine (7 cols), mois (grille).
+// Hero (HeroSemaine) reste visible uniquement en mode timeline.
+// CTA Ma Marque toujours en bas.
 
+'use client'
+
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { PilierNarratif, PostRow } from '@/types/programme'
+import { colorForPilier } from '@/lib/programme/colors'
 import { HeroSemaine } from './HeroSemaine'
 import { PostCard } from './PostCard'
+import { CalendarToggle, type ViewMode } from './CalendarToggle'
+import { VueSemaine } from './VueSemaine'
+import { VueMois } from './VueMois'
+import { PostDetailSheet } from './PostDetailSheet'
 
 type TimelineProps = {
   posts: PostRow[]
@@ -12,17 +22,27 @@ type TimelineProps = {
   arcNarratif: string
 }
 
-const PILIER_COLOR_VARS = ['var(--pilier-1)', 'var(--pilier-2)', 'var(--pilier-3)'] as const
-
-function colorForPilier(pilierNom: string, piliers: PilierNarratif[]): string {
-  const idx = piliers.findIndex((p) => p.nom === pilierNom)
-  return PILIER_COLOR_VARS[idx] ?? PILIER_COLOR_VARS[0]
-}
-
 export function Timeline({ posts, piliers, arcNarratif }: TimelineProps) {
+  const [view, setView] = useState<ViewMode>('timeline')
+  const [selectedPost, setSelectedPost] = useState<PostRow | null>(null)
+
+  const referenceDate = useMemo(() => {
+    const first = posts.find((p) => Boolean(p.date_prevue))
+    if (first?.date_prevue) {
+      const d = new Date(first.date_prevue)
+      if (!Number.isNaN(d.getTime())) return d
+    }
+    return new Date()
+  }, [posts])
+
+  const selectedAccent = selectedPost
+    ? colorForPilier(selectedPost.pilier_nom, piliers)
+    : undefined
+
   return (
     <div
       id="timeline-start"
+      className={`cfs-timeline-root view-${view}`}
       style={{
         width: '100%',
         maxWidth: 680,
@@ -31,23 +51,48 @@ export function Timeline({ posts, piliers, arcNarratif }: TimelineProps) {
         scrollMarginTop: 24,
       }}
     >
-      <HeroSemaine arcNarratif={arcNarratif} piliers={piliers} />
+      <div className="cfs-timeline-controls">
+        <CalendarToggle value={view} onChange={setView} />
+      </div>
 
-      <ol
-        style={{
-          listStyle: 'none',
-          padding: 0,
-          margin: 0,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {posts.map((post) => (
-          <li key={post.id}>
-            <PostCard post={post} accentColor={colorForPilier(post.pilier_nom, piliers)} />
-          </li>
-        ))}
-      </ol>
+      {view === 'timeline' ? (
+        <>
+          <HeroSemaine arcNarratif={arcNarratif} piliers={piliers} />
+
+          <ol
+            style={{
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {posts.map((post) => (
+              <li key={post.id}>
+                <PostCard
+                  post={post}
+                  accentColor={colorForPilier(post.pilier_nom, piliers)}
+                />
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : view === 'semaine' ? (
+        <VueSemaine
+          posts={posts}
+          piliers={piliers}
+          referenceDate={referenceDate}
+          onSelectPost={setSelectedPost}
+        />
+      ) : (
+        <VueMois
+          posts={posts}
+          piliers={piliers}
+          referenceDate={referenceDate}
+          onSelectPost={setSelectedPost}
+        />
+      )}
 
       <Link
         href="/ma-marque"
@@ -71,6 +116,13 @@ export function Timeline({ posts, piliers, arcNarratif }: TimelineProps) {
       >
         Affine ta marque avec Creative Fair →
       </Link>
+
+      <PostDetailSheet
+        open={selectedPost != null}
+        post={selectedPost}
+        accentColor={selectedAccent}
+        onClose={() => setSelectedPost(null)}
+      />
     </div>
   )
 }

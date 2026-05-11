@@ -3,7 +3,7 @@
 // L'UI affiche le label "Voix", la DB stocke dans "ton".
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Sheet } from '@/components/layout/Sheet'
 
 export type BrandFieldColumn = 'name' | 'secteur' | 'ton' | 'singularite'
@@ -29,17 +29,22 @@ export function EditBlocSheet({
   multiline = false,
   onSaved,
 }: EditBlocSheetProps) {
+  // Pattern React : on dérive l'état du prop `open` en comparant avec sa valeur
+  // précédente. Ainsi à chaque ré-ouverture (open passe de false à true) on
+  // réinitialise les champs locaux sans recourir à useEffect+setState.
+  const [prevOpen, setPrevOpen] = useState(open)
   const [localValue, setLocalValue] = useState(currentValue)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (open) {
       setLocalValue(currentValue)
       setError(null)
       setSaving(false)
     }
-  }, [open, currentValue])
+  }
 
   async function handleSave() {
     const trimmed = localValue.trim()
