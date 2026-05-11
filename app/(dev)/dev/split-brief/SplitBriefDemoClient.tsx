@@ -1,9 +1,10 @@
 // Sprint 36.B — Client wrapper de la démo Split Brief.
+// Sprint 36.B.1 — NavigationBar rendu par la page server. Ici on ne gère
+// que l'ouverture du Split Brief.
 'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
-import { NavigationBar } from '@/components/layout/NavigationBar'
 import { SplitBrief } from '@/components/split-brief/SplitBrief'
 
 const MOCK_QUESTIONS = [
@@ -25,44 +26,30 @@ export function SplitBriefDemoClient() {
   const [open, setOpen] = useState(false)
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ position: 'relative', background: 'var(--color-background)' }}
-    >
-      <div className="bg-halo bg-halo-1" aria-hidden="true" />
-      <div className="bg-halo bg-halo-2" aria-hidden="true" />
-      <div className="bg-halo bg-halo-3" aria-hidden="true" />
-      <div className="bg-halo bg-halo-4" aria-hidden="true" />
-      <div className="bg-halo bg-halo-5" aria-hidden="true" />
-      <div className="bg-halo bg-halo-6" aria-hidden="true" />
-
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <NavigationBar title="Démo Split Brief" />
-
-        <div
+    <>
+      <div
+        style={{
+          maxWidth: 560,
+          margin: '0 auto',
+          padding: 'var(--space-6) var(--space-5)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-5)',
+        }}
+      >
+        <p
           style={{
-            maxWidth: 560,
-            margin: '0 auto',
-            padding: 'var(--space-6) var(--space-5)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--space-5)',
+            fontFamily: 'var(--font-system)',
+            fontSize: 17,
+            lineHeight: 1.4,
+            color: 'var(--color-secondary-label)',
+            margin: 0,
           }}
         >
-          <p
-            style={{
-              fontFamily: 'var(--font-system)',
-              fontSize: 17,
-              lineHeight: 1.4,
-              color: 'var(--color-secondary-label)',
-              margin: 0,
-            }}
-          >
-            Cette page sert à valider le pattern Split Brief avant de l\u2019intégrer
-            sur les cards posts et les sous-blocs Ma Marque.
-          </p>
-          <Button onClick={() => setOpen(true)}>Ouvrir Split Brief de démo</Button>
-        </div>
+          Cette page sert à valider le pattern Split Brief avant de l&rsquo;intégrer
+          sur les cards posts et les sous-blocs Ma Marque.
+        </p>
+        <Button onClick={() => setOpen(true)}>Ouvrir Split Brief de démo</Button>
       </div>
 
       {open ? (
@@ -154,6 +141,6 @@ export function SplitBriefDemoClient() {
           }
         />
       ) : null}
-    </div>
+    </>
   )
 }

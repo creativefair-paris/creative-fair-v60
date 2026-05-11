@@ -338,6 +338,169 @@ h1, h2, h3, h4, h5, h6 {
   transition-duration: 120ms;
 }
 
+/* Sprint 36.B.1 — Avatar + menu rond (UserMenuTrigger + UserMenuBubble) */
+.cfs-user-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 150ms var(--ease-out-quart);
+}
+.cfs-user-menu-trigger:hover {
+  opacity: 0.85;
+}
+.cfs-user-menu-trigger:active {
+  transform: scale(0.96);
+  transition-duration: 120ms;
+}
+
+.cfs-user-menu-bubble {
+  position: absolute;
+  top: 76px;
+  right: 24px;
+  width: 280px;
+  padding: 16px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: cfs-user-menu-in 200ms var(--ease-out-quart) both;
+}
+@keyframes cfs-user-menu-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cfs-user-menu-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 8px;
+}
+.cfs-user-menu-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cfs-user-menu-prenom {
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--color-label);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cfs-user-menu-marque {
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-secondary-label);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cfs-user-menu-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 8px 0;
+}
+
+.cfs-user-menu-nav,
+.cfs-user-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cfs-user-menu-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--color-label);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 150ms var(--ease-out-quart);
+}
+.cfs-user-menu-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.cfs-user-menu-item.is-active {
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.cfs-user-menu-action {
+  font-size: 15px;
+}
+.cfs-user-menu-destructive {
+  color: #FF3B30;
+}
+.cfs-user-menu-destructive:hover {
+  background-color: rgba(255, 59, 48, 0.08);
+}
+
+.cfs-user-menu-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 4px 8px;
+}
+
+/* Logout Sheet — confirmation déconnexion */
+.cfs-logout-message {
+  font-family: var(--font-system);
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--color-secondary-label);
+  margin: 0 0 16px;
+}
+.cfs-logout-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.cfs-logout-btn {
+  padding: 12px 24px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-label);
+  transition: background-color 200ms var(--ease-out-quart);
+}
+.cfs-logout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.cfs-logout-btn-destructive {
+  color: #FF3B30;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfs-user-menu-bubble {
+    animation: none;
+  }
+}
+
 /* Sprint 35 — Lien outil dans catalogue (hover/active iOS-native) */
 .cfs-outil-link {
   transition: background-color var(--duration-fast) var(--ease-out-quart);
