@@ -300,11 +300,42 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   padding: var(--space-12) var(--space-5) var(--space-4);
 }
+.cfs-navbar__leading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cfs-navbar__trailing {
+  display: flex;
+  align-items: center;
+}
 .cfs-navbar__title {
   font-size: var(--text-large-title-size);
   font-weight: 700;
   letter-spacing: var(--text-large-title-tracking);
   color: var(--color-label);
+  margin: 0;
+}
+
+/* Sprint 36.B.1 — BackButton (44×44 chevron pill) */
+.cfs-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  color: var(--color-label);
+  transition: background-color 200ms var(--ease-out-quart), backdrop-filter 200ms var(--ease-out-quart);
+}
+.cfs-back-button:hover {
+  background-color: rgba(255, 255, 255, 0.45);
+}
+.cfs-back-button:active {
+  transform: scale(0.96);
+  transition-duration: 120ms;
 }
 
 /* Sprint 35 — Lien outil dans catalogue (hover/active iOS-native) */

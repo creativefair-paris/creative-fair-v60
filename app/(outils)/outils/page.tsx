@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { NavigationBar } from '@/components/layout/NavigationBar'
-import { ProgrammeOutilsToggle } from '@/components/layout/ProgrammeOutilsToggle'
 import { CatalogueOutils } from '@/components/outils/CatalogueOutils'
 
 export default async function OutilsPage() {
@@ -50,7 +49,7 @@ export default async function OutilsPage() {
           flexDirection: 'column',
         }}
       >
-        <NavigationBar title="Mes Outils" trailing={<ProgrammeOutilsToggle />} />
+        <NavigationBar title="Mes Outils" />
 
         <section
           style={{

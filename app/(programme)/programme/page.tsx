@@ -8,7 +8,6 @@ import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
 import { NavigationBar } from '@/components/layout/NavigationBar'
-import { ProgrammeOutilsToggle } from '@/components/layout/ProgrammeOutilsToggle'
 import { Timeline } from '@/components/programme/Timeline'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import type { PilierNarratif, PostRow } from '@/types/programme'
@@ -124,7 +123,7 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
         }}
       >
         {isWelcome ? <WelcomeURLCleaner /> : null}
-        <NavigationBar title="Programme" trailing={<ProgrammeOutilsToggle />} />
+        <NavigationBar title="Mon Programme" />
 
         {hasProgramme ? (
           <Timeline posts={posts} piliers={piliers} arcNarratif={arcNarratif} />
