@@ -53,6 +53,8 @@ export default async function AccueilPage() {
       <div className="bg-halo bg-halo-1" aria-hidden="true" />
       <div className="bg-halo bg-halo-2" aria-hidden="true" />
       <div className="bg-halo bg-halo-3" aria-hidden="true" />
+      <div className="bg-halo bg-halo-4" aria-hidden="true" />
+      <div className="bg-halo bg-halo-5" aria-hidden="true" />
 
       <section
         style={{

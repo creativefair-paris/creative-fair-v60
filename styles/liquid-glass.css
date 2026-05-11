@@ -67,12 +67,14 @@
   }
 }
 
-/* Halos atmosphériques — couche de profondeur */
+/* ═══════════════════════════════════════════
+   Halos atmosphériques — 5 couches iOS 26
+   Doctrine : profondeur, pas décoration
+═══════════════════════════════════════════ */
+
 .bg-halo {
   position: fixed;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 1;
   pointer-events: none;
   z-index: 0;
   animation: drift ease-in-out infinite;
@@ -80,37 +82,76 @@
 
 @keyframes drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(var(--drift-x, 20px), var(--drift-y, -20px)) scale(1.05); }
+  33%       { transform: translate(var(--dx, 20px), var(--dy, -20px)) scale(1.04); }
+  66%       { transform: translate(calc(var(--dx, 20px) * -0.6), calc(var(--dy, -20px) * 0.8)) scale(0.97); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .bg-halo { animation: none; }
 }
 
-/* Variantes positionnement — couvrent toute la surface de la page */
+/* Halo 1 — Grand bleu, coin supérieur gauche */
 .bg-halo-1 {
-  width: 900px; height: 900px;
-  background: radial-gradient(circle, rgba(0, 122, 255, 0.30), transparent 65%);
-  top: -350px; left: -300px;
-  animation-duration: 18s;
-  --drift-x: 40px; --drift-y: -30px;
+  width: 1200px; height: 1200px;
+  background: radial-gradient(circle at center,
+    rgba(0, 122, 255, 0.28) 0%,
+    rgba(0, 122, 255, 0.10) 40%,
+    transparent 70%);
+  top: -500px; left: -400px;
+  animation-duration: 20s;
+  --dx: 50px; --dy: -40px;
 }
 
+/* Halo 2 — Grand lilas, coin inférieur droit */
 .bg-halo-2 {
-  width: 800px; height: 800px;
-  background: radial-gradient(circle, rgba(175, 82, 222, 0.25), transparent 65%);
-  bottom: -300px; right: -250px;
-  animation-duration: 22s;
-  animation-delay: -8s;
-  --drift-x: -30px; --drift-y: 25px;
+  width: 1100px; height: 1100px;
+  background: radial-gradient(circle at center,
+    rgba(175, 82, 222, 0.24) 0%,
+    rgba(175, 82, 222, 0.08) 40%,
+    transparent 70%);
+  bottom: -450px; right: -350px;
+  animation-duration: 25s;
+  animation-delay: -10s;
+  --dx: -40px; --dy: 35px;
 }
 
+/* Halo 3 — Moyen bleu, coin supérieur droit */
 .bg-halo-3 {
   width: 700px; height: 700px;
-  background: radial-gradient(circle, rgba(0, 122, 255, 0.18), transparent 65%);
+  background: radial-gradient(circle at center,
+    rgba(0, 122, 255, 0.18) 0%,
+    rgba(0, 122, 255, 0.06) 45%,
+    transparent 70%);
+  top: -100px; right: -200px;
+  animation-duration: 18s;
+  animation-delay: -6s;
+  --dx: -30px; --dy: 40px;
+}
+
+/* Halo 4 — Moyen lilas, coin inférieur gauche */
+.bg-halo-4 {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle at center,
+    rgba(88, 86, 214, 0.20) 0%,
+    rgba(88, 86, 214, 0.07) 45%,
+    transparent 70%);
+  bottom: -150px; left: -150px;
+  animation-duration: 22s;
+  animation-delay: -15s;
+  --dx: 35px; --dy: -25px;
+}
+
+/* Halo 5 — Central diffus indigo */
+.bg-halo-5 {
+  width: 900px; height: 900px;
+  background: radial-gradient(circle at center,
+    rgba(88, 86, 214, 0.12) 0%,
+    rgba(88, 86, 214, 0.04) 50%,
+    transparent 70%);
   top: 50%; left: 50%;
-  margin-top: -350px; margin-left: -350px; /* centrage sans conflit avec drift */
-  animation-duration: 26s;
-  animation-delay: -14s;
-  --drift-x: 20px; --drift-y: -20px;
+  margin-top: -450px;
+  margin-left: -450px;
+  animation-duration: 30s;
+  animation-delay: -20s;
+  --dx: 15px; --dy: -15px;
 }
