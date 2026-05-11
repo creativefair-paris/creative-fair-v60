@@ -8,7 +8,7 @@ export type CreditFeature =
   | 'brand_book'
   | 'conseiller'
 
-// Tarifs Anthropic par million de tokens (en USD).
+// Tarifs Anthropic par million d'unités de texte (en USD).
 // Source : https://www.anthropic.com/pricing — à mettre à jour si évolution.
 const PRICING_USD_PER_M: Record<string, { input: number; output: number }> = {
   'claude-opus-4-7': { input: 15, output: 75 },

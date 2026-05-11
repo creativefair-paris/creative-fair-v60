@@ -23,7 +23,7 @@
   --color-system-green: #34C759;
   --color-system-orange: #FF9500;
 
-  /* Alias compatibilité theming par tenant. Pointent vers les tokens iOS. */
+  /* Alias compatibilité theming par tenant. Pointent vers les variables iOS. */
   --color-surface: var(--color-surface-elevated);
   --color-text: var(--color-label);
   --color-text-muted: var(--color-secondary-label);
@@ -150,7 +150,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.022em;
 }
 
-/* §7.3 Classes utilitaires typo (11 tokens) */
+/* §7.3 Classes utilitaires typo (11 variables) */
 .text-caption-2 { font-size: var(--text-caption-2-size); font-weight: var(--text-caption-2-weight); letter-spacing: var(--text-caption-2-tracking); }
 .text-caption-1 { font-size: var(--text-caption-1-size); font-weight: var(--text-caption-1-weight); letter-spacing: var(--text-caption-1-tracking); }
 .text-footnote { font-size: var(--text-footnote-size); font-weight: var(--text-footnote-weight); letter-spacing: var(--text-footnote-tracking); }

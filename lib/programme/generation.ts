@@ -301,7 +301,7 @@ export async function saveProgrammeInitial(
   return programmeId
 }
 
-// ── Pipeline d'entrée ────────────────────────────────────────────────────────
+// ── Point d'entrée ───────────────────────────────────────────────────────────
 
 export async function generateProgrammeInitial(
   brand: BrandData,
