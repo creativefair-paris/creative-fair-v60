@@ -9,6 +9,8 @@ type OnboardingStepProps = {
   onChange: (next: string) => void
   multiline?: boolean
   placeholder?: string
+  maxLength?: number
+  rows?: number
 }
 
 export function OnboardingStep({
@@ -17,6 +19,8 @@ export function OnboardingStep({
   onChange,
   multiline = false,
   placeholder,
+  maxLength,
+  rows = 4,
 }: OnboardingStepProps) {
   const id = useId()
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null)
@@ -60,7 +64,8 @@ export function OnboardingStep({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          rows={4}
+          rows={rows}
+          maxLength={maxLength}
           className="cfs-onboarding-input"
           style={{ ...sharedStyle, resize: 'none' }}
         />
@@ -74,6 +79,7 @@ export function OnboardingStep({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          maxLength={maxLength}
           className="cfs-onboarding-input"
           style={sharedStyle}
         />

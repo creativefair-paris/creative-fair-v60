@@ -13,7 +13,7 @@ export function Button({ variant = 'primary', children, className, style, ...res
   const baseStyle = {
     height: isPrimary ? 50 : 'auto',
     padding: isPrimary ? '0 24px' : '0 8px',
-    borderRadius: 14,
+    borderRadius: 16,
     fontFamily: 'var(--font-system)',
     fontSize: 'var(--text-headline-size)',
     fontWeight: 600,

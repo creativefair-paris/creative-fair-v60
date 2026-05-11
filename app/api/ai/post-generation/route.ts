@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
   const step = body.step as StepId
   const draftIn = body.draft ?? post.content ?? {}
 
-  // Avant l'appel IA, propage le userInput dans le draft pour les étapes où
+  // Avant l'appel Creative Fair, propage le userInput dans le draft pour les étapes où
   // il représente une décision utilisateur (choix d'option à l'étape précédente,
   // ou texte initial pour anecdote_custom).
   const workingDraft: PostDraft = { ...draftIn }

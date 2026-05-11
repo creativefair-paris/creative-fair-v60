@@ -16,6 +16,11 @@
   --glass-regular-blur: 30px;
   --glass-thick-bg: rgba(255, 255, 255, 0.92);
   --glass-thick-blur: 50px;
+
+  /* Sprint 36.B — Couleurs piliers signature (mapping par index) */
+  --pilier-1: #007AFF;
+  --pilier-2: #AF52DE;
+  --pilier-3: #FF9500;
 }
 
 /* Niveau thin — navigation bars, tab bars, toggle segmented */
@@ -154,4 +159,85 @@
   animation-duration: 30s;
   animation-delay: -20s;
   --dx: 15px; --dy: -15px;
+}
+
+/* Halo 6 — Sprint 36.B — Orange chaud, milieu-droit, pour réchauffer la palette */
+.bg-halo-6 {
+  width: 800px; height: 800px;
+  background: radial-gradient(circle at center,
+    rgba(255, 149, 0, 0.16) 0%,
+    rgba(255, 149, 0, 0.05) 45%,
+    transparent 70%);
+  top: 30%; right: -200px;
+  animation-duration: 24s;
+  animation-delay: -8s;
+  --dx: -25px; --dy: 30px;
+}
+
+/* Sprint 36.B — Animation d'arrivée séquentielle (première visite uniquement).
+   Déclenchée par la classe `.programme-wrapper.is-welcome` sur le wrapper.
+   Patch Sprint 36.B.1 : retrait des sélecteurs .post-card et .cta-affiner
+   (vue Timeline + CTA bas supprimés). Animation hero-only désormais. */
+.programme-wrapper.is-welcome .intro-subtle,
+.programme-wrapper.is-welcome .arc-narratif,
+.programme-wrapper.is-welcome .piliers-chips {
+  opacity: 0;
+  transform: translateY(8px);
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.programme-wrapper.is-welcome .intro-subtle {
+  animation-name: programme-fade-in;
+  animation-duration: 300ms;
+  animation-delay: 200ms;
+}
+.programme-wrapper.is-welcome .arc-narratif {
+  animation-name: programme-fade-in;
+  animation-duration: 300ms;
+  animation-delay: 500ms;
+}
+.programme-wrapper.is-welcome .piliers-chips {
+  animation-name: programme-fade-in;
+  animation-duration: 200ms;
+  animation-delay: 700ms;
+}
+
+@keyframes programme-fade-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .programme-wrapper.is-welcome .intro-subtle,
+  .programme-wrapper.is-welcome .arc-narratif,
+  .programme-wrapper.is-welcome .piliers-chips {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* Halo pulsant — écran d'attente Sprint 36.A.
+   Doux, central, respiration ample. Pas de spinner agressif. */
+.bg-halo-pulse {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+    rgba(0, 122, 255, 0.22) 0%,
+    rgba(88, 86, 214, 0.12) 50%,
+    transparent 75%);
+  pointer-events: none;
+  animation: halo-pulse 3.2s ease-in-out infinite;
+  margin: 0 auto var(--space-2);
+}
+
+@keyframes halo-pulse {
+  0%, 100% { transform: scale(0.92); opacity: 0.7; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-halo-pulse { animation: none; opacity: 0.85; }
 }

@@ -3,7 +3,7 @@ type Props = {
   type?: 'coaching' | 'post'
 }
 
-// Badge discret — rend visible que l'IA s'appuie sur le brand book
+// Badge discret — rend visible que Creative Fair s'appuie sur le brand book
 // et le calendrier business du tenant. Pilier transparence radicale.
 export function AdaptedBadge({ context, type = 'coaching' }: Props) {
   const prefix =

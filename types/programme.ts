@@ -1,5 +1,5 @@
-// Types programme — Sprint 32.5
-// Source : §15.8 Cahier des charges v2.0
+// Types programme — Sprint 32.5 (base) + Sprint 36.A (extension flux inversé Marcus)
+// Source : §15.8 Cahier des charges v2.0 + Sprint 36.A Chantier C.4
 
 export type ProgrammePeriode = 'semaine' | 'mois' | 'trimestre'
 
@@ -24,4 +24,68 @@ export type Programme = {
   status: ProgrammeStatus
   createdAt: string
   updatedAt: string
+}
+
+// ── Sprint 36.A — Flux inversé Marcus ─────────────────────────────────────────
+
+export interface PilierNarratif {
+  nom: string
+  description: string
+  ratio_suggere: number
+}
+
+export interface BrandData {
+  id: string
+  tenantId: string
+  nom: string
+  secteur: string
+  ton: string
+  singularite: string
+}
+
+export type Jour =
+  | 'lundi'
+  | 'mardi'
+  | 'mercredi'
+  | 'jeudi'
+  | 'vendredi'
+  | 'samedi'
+  | 'dimanche'
+
+export type TypeContenu = 'photo' | 'carousel' | 'video' | 'texte'
+
+export interface PostPrevu {
+  pilier_nom: string
+  jour: Jour
+  date_relative: string
+  titre: string
+  angle: string
+  type: TypeContenu
+  heure_suggeree: string
+}
+
+export interface ResponseProgrammeInitial {
+  comprehension: string
+  piliers: PilierNarratif[]
+  arc_narratif: string
+  posts: PostPrevu[]
+}
+
+// Post tel que persisté en base (table posts, Sprint 36.A)
+export interface PostRow {
+  id: string
+  programme_id: string
+  tenant_id: string
+  brand_id: string
+  pilier_nom: string
+  jour: Jour
+  date_prevue: string
+  heure_prevue: string
+  titre: string
+  angle: string
+  type_contenu: TypeContenu
+  statut: 'planifie' | 'genere' | 'publie' | 'archive'
+  contenu_genere: unknown
+  created_at: string
+  updated_at: string
 }

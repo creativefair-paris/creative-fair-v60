@@ -23,7 +23,7 @@
   --color-system-green: #34C759;
   --color-system-orange: #FF9500;
 
-  /* Alias compatibilité theming par tenant. Pointent vers les tokens iOS. */
+  /* Alias compatibilité theming par tenant. Pointent vers les variables iOS. */
   --color-surface: var(--color-surface-elevated);
   --color-text: var(--color-label);
   --color-text-muted: var(--color-secondary-label);
@@ -150,7 +150,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.022em;
 }
 
-/* §7.3 Classes utilitaires typo (11 tokens) */
+/* §7.3 Classes utilitaires typo (11 variables) */
 .text-caption-2 { font-size: var(--text-caption-2-size); font-weight: var(--text-caption-2-weight); letter-spacing: var(--text-caption-2-tracking); }
 .text-caption-1 { font-size: var(--text-caption-1-size); font-weight: var(--text-caption-1-weight); letter-spacing: var(--text-caption-1-tracking); }
 .text-footnote { font-size: var(--text-footnote-size); font-weight: var(--text-footnote-weight); letter-spacing: var(--text-footnote-tracking); }
@@ -300,11 +300,205 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   padding: var(--space-12) var(--space-5) var(--space-4);
 }
+.cfs-navbar__leading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cfs-navbar__trailing {
+  display: flex;
+  align-items: center;
+}
 .cfs-navbar__title {
   font-size: var(--text-large-title-size);
   font-weight: 700;
   letter-spacing: var(--text-large-title-tracking);
   color: var(--color-label);
+  margin: 0;
+}
+
+/* Sprint 36.B.1 — BackButton (44×44 chevron pill) */
+.cfs-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  color: var(--color-label);
+  transition: background-color 200ms var(--ease-out-quart), backdrop-filter 200ms var(--ease-out-quart);
+}
+.cfs-back-button:hover {
+  background-color: rgba(255, 255, 255, 0.45);
+}
+.cfs-back-button:active {
+  transform: scale(0.96);
+  transition-duration: 120ms;
+}
+
+/* Sprint 36.B.1 — Avatar + menu rond (UserMenuTrigger + UserMenuBubble) */
+.cfs-user-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 150ms var(--ease-out-quart);
+}
+.cfs-user-menu-trigger:hover {
+  opacity: 0.85;
+}
+.cfs-user-menu-trigger:active {
+  transform: scale(0.96);
+  transition-duration: 120ms;
+}
+
+.cfs-user-menu-bubble {
+  position: absolute;
+  top: 76px;
+  right: 24px;
+  width: 280px;
+  padding: 16px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: cfs-user-menu-in 200ms var(--ease-out-quart) both;
+}
+@keyframes cfs-user-menu-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cfs-user-menu-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 8px;
+}
+.cfs-user-menu-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cfs-user-menu-prenom {
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--color-label);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cfs-user-menu-marque {
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-secondary-label);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cfs-user-menu-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 8px 0;
+}
+
+.cfs-user-menu-nav,
+.cfs-user-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cfs-user-menu-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--color-label);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 150ms var(--ease-out-quart);
+}
+.cfs-user-menu-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.cfs-user-menu-item.is-active {
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.cfs-user-menu-action {
+  font-size: 15px;
+}
+.cfs-user-menu-destructive {
+  color: #FF3B30;
+}
+.cfs-user-menu-destructive:hover {
+  background-color: rgba(255, 59, 48, 0.08);
+}
+
+.cfs-user-menu-toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 4px 8px;
+}
+
+/* Logout Sheet — confirmation déconnexion */
+.cfs-logout-message {
+  font-family: var(--font-system);
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--color-secondary-label);
+  margin: 0 0 16px;
+}
+.cfs-logout-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.cfs-logout-btn {
+  padding: 12px 24px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-label);
+  transition: background-color 200ms var(--ease-out-quart);
+}
+.cfs-logout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.cfs-logout-btn-destructive {
+  color: #FF3B30;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfs-user-menu-bubble {
+    animation: none;
+  }
 }
 
 /* Sprint 35 — Lien outil dans catalogue (hover/active iOS-native) */
@@ -340,3 +534,518 @@ h1, h2, h3, h4, h5, h6 {
     animation: none;
   }
 }
+
+/* Sprint 36.B.1 — Chantier C : chips actions + édition par bloc Ma Marque */
+
+/* Chip action (pill cliquable sous le titre Mon Programme) */
+.cfs-chip-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-label);
+  text-decoration: none;
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    transform 150ms var(--ease-out-quart),
+    backdrop-filter 150ms var(--ease-out-quart);
+}
+.cfs-chip-action:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+  transform: scale(1.02);
+}
+.cfs-chip-action:active {
+  transform: scale(0.98);
+  transition-duration: 100ms;
+}
+.cfs-chip-action__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cfs-chip-action__label {
+  line-height: 1;
+}
+
+/* Wrapper grille des 4 champs Ma Marque */
+.cfs-ma-marque-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Bloc individuel (Nom / Secteur / Voix / Singularité) */
+.cfs-ma-marque-field {
+  position: relative;
+  padding: var(--space-5);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.cfs-ma-marque-field__label {
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-secondary-label);
+  letter-spacing: -0.01em;
+}
+.cfs-ma-marque-field__value {
+  font-family: var(--font-system);
+  font-size: 17px;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--color-label);
+  padding-right: 88px; /* réserve l'espace du bouton Modifier */
+  white-space: pre-wrap;
+}
+.cfs-ma-marque-field__edit {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 6px 14px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-label);
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    transform 150ms var(--ease-out-quart);
+}
+.cfs-ma-marque-field__edit:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+.cfs-ma-marque-field__edit:active {
+  transform: scale(0.96);
+}
+
+/* Sheet d'édition d'un bloc */
+.cfs-edit-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+.cfs-edit-bloc__input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: var(--font-system);
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--color-label);
+  background-color: rgba(255, 255, 255, 0.6);
+  resize: vertical;
+  transition: border-color 150ms var(--ease-out-quart);
+}
+.cfs-edit-bloc__input:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+.cfs-edit-bloc__input:disabled {
+  opacity: 0.5;
+}
+.cfs-edit-bloc__counter {
+  font-family: var(--font-system);
+  font-size: 13px;
+  color: var(--color-secondary-label);
+  text-align: right;
+  margin: 0;
+}
+.cfs-edit-bloc__error {
+  font-family: var(--font-system);
+  font-size: 13px;
+  color: #FF3B30;
+  margin: 0;
+}
+.cfs-edit-bloc__actions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+.cfs-edit-bloc__btn {
+  padding: 12px 24px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-label);
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    transform 150ms var(--ease-out-quart);
+}
+.cfs-edit-bloc__btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+.cfs-edit-bloc__btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.cfs-edit-bloc__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.cfs-edit-bloc__btn-primary {
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfs-chip-action,
+  .cfs-ma-marque-field__edit,
+  .cfs-edit-bloc__btn {
+    transition: none;
+  }
+}
+
+/* Sprint 36.B.1 — Chantier D : Vue calendrier Semaine/Mois */
+
+/* Contrôles (toggle 3 segments) */
+.cfs-timeline-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-5);
+}
+
+/* Segmented control Timeline / Semaine / Mois */
+.cfs-calendar-toggle {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 22px;
+  gap: 2px;
+}
+.cfs-calendar-toggle__segment {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px 18px;
+  border-radius: 18px;
+  font-family: var(--font-system);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-secondary-label);
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    color 150ms var(--ease-out-quart),
+    font-weight 150ms var(--ease-out-quart);
+}
+.cfs-calendar-toggle__segment:hover {
+  color: var(--color-label);
+}
+.cfs-calendar-toggle__segment.is-active {
+  background-color: rgba(255, 255, 255, 0.7);
+  color: var(--color-label);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* MiniPostCard (commun semaine + mois) */
+.cfs-mini-post {
+  appearance: none;
+  display: flex;
+  cursor: pointer;
+  border: none;
+  border-left: 3px solid transparent;
+  font-family: var(--font-system);
+  text-align: left;
+  color: var(--color-label);
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    transform 150ms var(--ease-out-quart);
+}
+.cfs-mini-post:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+.cfs-mini-post:active {
+  transform: scale(0.98);
+}
+
+/* MiniPostCard variant Semaine (full info, vertical) */
+.cfs-mini-post--semaine {
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  width: 100%;
+}
+.cfs-mini-post--semaine .cfs-mini-post__heure {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-secondary-label);
+  letter-spacing: -0.005em;
+}
+.cfs-mini-post--semaine .cfs-mini-post__titre {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-label);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.cfs-mini-post--semaine .cfs-mini-post__type {
+  font-size: 11px;
+  color: var(--color-secondary-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* MiniPostCard variant Mois (ultra-compact, horizontal) */
+.cfs-mini-post--mois {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  width: 100%;
+}
+.cfs-mini-post--mois .cfs-mini-post__heure {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-secondary-label);
+  flex-shrink: 0;
+}
+.cfs-mini-post--mois .cfs-mini-post__titre {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-label);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Vue Semaine — 7 colonnes */
+.cfs-vue-semaine {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: var(--space-5);
+}
+.cfs-vue-semaine__col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.cfs-vue-semaine__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: 10px;
+}
+.cfs-vue-semaine__col.is-today .cfs-vue-semaine__header {
+  background-color: rgba(31, 73, 55, 0.08);
+}
+.cfs-vue-semaine__day-label {
+  font-family: var(--font-system);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-secondary-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.cfs-vue-semaine__day-number {
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-label);
+  line-height: 1;
+}
+.cfs-vue-semaine__col.is-today .cfs-vue-semaine__day-number {
+  color: #1F4937;
+}
+.cfs-vue-semaine__posts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 60px;
+}
+.cfs-vue-semaine__empty {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-tertiary-label, rgba(60, 60, 67, 0.35));
+  padding: 12px 0;
+}
+
+/* Vue Mois — grille 7 colonnes */
+.cfs-vue-mois {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.cfs-vue-mois__title {
+  font-family: var(--font-system);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--color-label);
+  margin: 0;
+}
+.cfs-vue-mois__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 0 4px;
+}
+.cfs-vue-mois__weekday {
+  font-family: var(--font-system);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-secondary-label);
+  text-align: center;
+}
+.cfs-vue-mois__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.cfs-vue-mois__cell {
+  min-height: 72px;
+  padding: 6px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cfs-vue-mois__cell.is-outside {
+  opacity: 0.4;
+}
+.cfs-vue-mois__cell.is-today {
+  background-color: rgba(31, 73, 55, 0.1);
+  outline: 1px solid rgba(31, 73, 55, 0.3);
+}
+.cfs-vue-mois__cell-num {
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-label);
+  line-height: 1;
+}
+.cfs-vue-mois__cell.is-today .cfs-vue-mois__cell-num {
+  color: #1F4937;
+}
+.cfs-vue-mois__cell-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.cfs-vue-mois__more {
+  font-family: var(--font-system);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-secondary-label);
+  padding: 0 8px;
+}
+
+/* PostDetailSheet (Sheet de détail post) */
+.cfs-post-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-2) 0 0;
+}
+.cfs-post-detail__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--pilier-1);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.cfs-post-detail__date {
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-label);
+}
+.cfs-post-detail__heure {
+  font-family: var(--font-system);
+  font-size: 13px;
+  color: var(--color-secondary-label);
+}
+.cfs-post-detail__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+}
+.cfs-post-detail__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cfs-post-detail__field dt {
+  font-family: var(--font-system);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-secondary-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+.cfs-post-detail__field dd {
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--color-label);
+  margin: 0;
+}
+.cfs-post-detail__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+.cfs-post-detail__btn {
+  padding: 12px 24px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-label);
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    transform 150ms var(--ease-out-quart);
+}
+.cfs-post-detail__btn:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+.cfs-post-detail__btn:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfs-calendar-toggle__segment,
+  .cfs-mini-post,
+  .cfs-post-detail__btn {
+    transition: none;
+  }
+}
+

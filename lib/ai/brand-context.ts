@@ -3,7 +3,7 @@ import type { BusinessCalendar } from '@/types/business-calendar'
 
 // Construit un contexte texte structuré pour Claude à partir
 // du brand book + business calendar du tenant.
-// Utilisé par les routes IA (coaching, post generation, suggestions...).
+// Utilisé par les routes Creative Fair (coaching, post generation, suggestions...).
 export function buildStructuredBrandContext(
   brand: BrandBook | null,
   calendar: BusinessCalendar | null,
