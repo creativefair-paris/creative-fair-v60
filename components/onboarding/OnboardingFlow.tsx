@@ -107,8 +107,10 @@ export function OnboardingFlow() {
         const data = (await res.json().catch(() => ({}))) as { error?: string }
         throw new Error(data.error ?? `Erreur ${res.status}`)
       }
-      // Succès : redirect vers point d'entrée qui renverra sur /programme.
-      router.push('/programme/bienvenue')
+      // Succès : redirect direct vers /programme avec flag welcome.
+      // Le composant WelcomeURLCleaner retire le param après animation pour
+      // qu'un refresh ultérieur ne rejoue pas la séquence d'arrivée.
+      router.push('/programme?welcome=true')
       router.refresh()
     } catch (err) {
       setStatus('error')

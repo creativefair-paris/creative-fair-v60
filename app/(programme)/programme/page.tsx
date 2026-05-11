@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { NavigationBar } from '@/components/layout/NavigationBar'
 import { ProgrammeOutilsToggle } from '@/components/layout/ProgrammeOutilsToggle'
 import { Timeline } from '@/components/programme/Timeline'
+import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import type { PilierNarratif, PostRow } from '@/types/programme'
 
 export const dynamic = 'force-dynamic'
@@ -24,7 +25,14 @@ type ProgrammeRow = {
   arc_narratif: unknown
 }
 
-export default async function ProgrammePage() {
+type ProgrammePageProps = {
+  searchParams?: Promise<{ welcome?: string }>
+}
+
+export default async function ProgrammePage({ searchParams }: ProgrammePageProps) {
+  const resolvedSearch = (await searchParams) ?? {}
+  const isWelcome = resolvedSearch.welcome === 'true'
+
   const supabase = await createClient()
   const {
     data: { user },
@@ -103,8 +111,10 @@ export default async function ProgrammePage() {
       <div className="bg-halo bg-halo-3" aria-hidden="true" />
       <div className="bg-halo bg-halo-4" aria-hidden="true" />
       <div className="bg-halo bg-halo-5" aria-hidden="true" />
+      <div className="bg-halo bg-halo-6" aria-hidden="true" />
 
       <div
+        className={`programme-wrapper${isWelcome ? ' is-welcome' : ''}`}
         style={{
           position: 'relative',
           zIndex: 1,
@@ -113,7 +123,8 @@ export default async function ProgrammePage() {
           flexDirection: 'column',
         }}
       >
-        <NavigationBar title="Mon Programme" trailing={<ProgrammeOutilsToggle />} />
+        {isWelcome ? <WelcomeURLCleaner /> : null}
+        <NavigationBar title="Programme" trailing={<ProgrammeOutilsToggle />} />
 
         {hasProgramme ? (
           <Timeline posts={posts} piliers={piliers} arcNarratif={arcNarratif} />
