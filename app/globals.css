@@ -284,10 +284,21 @@ body {
   color: var(--color-label);
 }
 
+/* Sprint 34 — Bifurcation card (page accueil) */
+.cfs-bifurcation-card:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+.cfs-bifurcation-card:active {
+  transform: scale(0.98);
+  transition-duration: 150ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cfs-card,
   .cfs-button,
-  .cfs-toggle__segment {
+  .cfs-toggle__segment,
+  .cfs-bifurcation-card {
     transition: none;
   }
   .cfs-sheet {
