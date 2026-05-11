@@ -1,8 +1,6 @@
-// Sprint 34 — Flux onboarding 10 questions (cahier §3.1)
-// 3 blocs séquentiels : Identité (3) / Calendrier business (4) / Objectifs (3).
-// À la fin, appel /api/ai/brand-book avec les 3 réponses du Bloc 1.
-// Les 7 autres réponses sont persistées en localStorage pour consommation
-// par Sprint 35 (programme) et 36 (calendrier business).
+// Sprint 36.A — Flux inversé Marcus : 4 questions essentielles avant le premier wow.
+// Time-to-Wow visé < 4 min. Aucune décision imposée avant la timeline.
+// Écran d'attente narratif sobre pendant la génération IA (15-45 s).
 'use client'
 
 import { useMemo, useState } from 'react'
@@ -12,107 +10,68 @@ import { OnboardingProgress } from './OnboardingProgress'
 import { OnboardingStep } from './OnboardingStep'
 
 type Question = {
-  id: string
-  bloc: 'identity' | 'calendar' | 'objectives'
+  id: 'nom' | 'secteur' | 'ton' | 'singularite'
   prompt: string
   placeholder: string
   multiline: boolean
+  maxLength: number
+  rows?: number
 }
 
 const QUESTIONS: readonly Question[] = [
-  // Bloc 1 — Identité
   {
-    id: 'identity',
-    bloc: 'identity',
-    prompt: 'Comment s\u2019appelle ta marque et qu\u2019est-ce qu\u2019elle fait ?',
-    placeholder: 'Deux ou trois phrases.',
-    multiline: true,
-  },
-  {
-    id: 'audience',
-    bloc: 'identity',
-    prompt: 'À qui s\u2019adresse-t-elle ?',
-    placeholder: 'Décris les personnes que tu veux toucher.',
-    multiline: true,
-  },
-  {
-    id: 'voice',
-    bloc: 'identity',
-    prompt: 'Comment décrirais-tu sa voix ?',
-    placeholder: 'Formelle, chaleureuse, poétique, directe…',
-    multiline: true,
-  },
-  // Bloc 2 — Calendrier business
-  {
-    id: 'recurring_events',
-    bloc: 'calendar',
-    prompt: 'Quels sont tes événements récurrents ?',
-    placeholder: 'Lancements, ventes, saisonnalité…',
-    multiline: true,
-  },
-  {
-    id: 'planning_horizon',
-    bloc: 'calendar',
-    prompt: 'Sur combien de mois veux-tu planifier ?',
-    placeholder: 'Un nombre, ou une période.',
+    id: 'nom',
+    prompt: 'Quel est le nom de ta marque ?',
+    placeholder: '',
     multiline: false,
+    maxLength: 80,
   },
   {
-    id: 'frequency',
-    bloc: 'calendar',
-    prompt: 'À quelle fréquence publies-tu ?',
-    placeholder: '3 par semaine, 5 par semaine, quotidien…',
+    id: 'secteur',
+    prompt: 'Dans quel secteur évolue ta marque ?',
+    placeholder: 'Joaillerie contemporaine, café de spécialité, hôtellerie haut de gamme…',
     multiline: false,
+    maxLength: 120,
   },
   {
-    id: 'best_slots',
-    bloc: 'calendar',
-    prompt: 'Quels jours et heures fonctionnent le mieux pour les tiens ?',
-    placeholder: 'Mardi 18h, dimanche matin…',
+    id: 'ton',
+    prompt: 'Comment ta marque s\u2019exprime-t-elle ?',
+    placeholder: 'Avec retenue et précision, en privilégiant le mot juste plutôt que l\u2019effet…',
     multiline: true,
+    maxLength: 280,
+    rows: 3,
   },
-  // Bloc 3 — Objectifs
   {
-    id: 'main_goal',
-    bloc: 'objectives',
-    prompt: 'Quel est ton objectif principal pour les 3 prochains mois ?',
-    placeholder: 'Une phrase suffit.',
+    id: 'singularite',
+    prompt: 'Qu\u2019est-ce qui rend ta marque unique ?',
+    placeholder:
+      'Notre savoir-faire transmis depuis trois générations, ou notre approche radicale d\u2019un secteur saturé…',
     multiline: true,
-  },
-  {
-    id: 'content_priorities',
-    bloc: 'objectives',
-    prompt: 'Quelles sont tes 3 priorités de contenu ?',
-    placeholder: 'Notoriété, vente, communauté…',
-    multiline: true,
-  },
-  {
-    id: 'dominant_tone',
-    bloc: 'objectives',
-    prompt: 'Quel ton dominant pour cette période ?',
-    placeholder: 'Intime, expert, festif…',
-    multiline: false,
+    maxLength: 400,
+    rows: 4,
   },
 ] as const
 
 const TOTAL = QUESTIONS.length
-const LOCAL_KEY = 'cfs.onboarding.answers.v1'
 
-type Answers = Record<string, string>
+type Answers = Record<Question['id'], string>
+
+type Status = 'editing' | 'submitting' | 'error'
 
 export function OnboardingFlow() {
   const router = useRouter()
   const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState<Answers>(() => {
-    const seed: Answers = {}
-    for (const q of QUESTIONS) seed[q.id] = ''
-    return seed
+  const [answers, setAnswers] = useState<Answers>({
+    nom: '',
+    secteur: '',
+    ton: '',
+    singularite: '',
   })
-  const [submitting, setSubmitting] = useState(false)
+  const [status, setStatus] = useState<Status>('editing')
   const [error, setError] = useState<string | null>(null)
 
   const current = useMemo(() => QUESTIONS[step], [step])
-  const value = current ? (answers[current.id] ?? '') : ''
+  const value = current ? answers[current.id] : ''
   const canContinue = value.trim().length > 0
   const isLast = step === TOTAL - 1
 
@@ -136,37 +95,28 @@ export function OnboardingFlow() {
   }
 
   async function submit() {
-    setSubmitting(true)
+    setStatus('submitting')
     setError(null)
     try {
-      // Persister localement les 10 réponses pour les sprints suivants.
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(LOCAL_KEY, JSON.stringify(answers))
-      }
-      // Appel API existant — accepte identity/audience/voice (Bloc 1).
-      const payload = {
-        identity: answers['identity'] ?? '',
-        audience: answers['audience'] ?? '',
-        voice: answers['voice'] ?? '',
-      }
-      const res = await fetch('/api/ai/brand-book', {
+      const res = await fetch('/api/onboarding/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(answers),
       })
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string }
         throw new Error(data.error ?? `Erreur ${res.status}`)
       }
-      router.push('/')
+      // Succès : redirect vers point d'entrée qui renverra sur /programme.
+      router.push('/programme/bienvenue')
       router.refresh()
     } catch (err) {
-      setSubmitting(false)
+      setStatus('error')
       setError(err instanceof Error ? err.message : 'Erreur inconnue')
     }
   }
 
-  if (submitting) {
+  if (status === 'submitting') {
     return (
       <div
         style={{
@@ -176,13 +126,23 @@ export function OnboardingFlow() {
           justifyContent: 'center',
           flexDirection: 'column',
           gap: 'var(--space-4)',
+          textAlign: 'center',
+          maxWidth: 560,
+          margin: '0 auto',
         }}
       >
-        <p className="text-title-2" style={{ textAlign: 'center' }}>
-          Nous préparons ta marque
-        </p>
-        <p className="text-callout" style={{ color: 'var(--color-secondary-label)' }}>
-          Quelques secondes.
+        <div className="bg-halo-pulse" aria-hidden="true" />
+        <h1
+          className="text-large-title"
+          style={{ color: 'var(--color-label)', margin: 0, fontWeight: 700 }}
+        >
+          Nous préparons ton programme.
+        </h1>
+        <p
+          className="text-body"
+          style={{ color: 'var(--color-secondary-label)', margin: 0 }}
+        >
+          L\u2019IA réfléchit comme une équipe de communication.
         </p>
       </div>
     )
@@ -207,6 +167,8 @@ export function OnboardingFlow() {
         onChange={updateAnswer}
         multiline={current.multiline}
         placeholder={current.placeholder}
+        maxLength={current.maxLength}
+        rows={current.rows}
       />
 
       {error != null ? (
@@ -227,7 +189,7 @@ export function OnboardingFlow() {
           variant="secondary"
           onClick={goBack}
           disabled={step === 0}
-          aria-label="Retour à l\u2019étape précédente"
+          aria-label="Étape précédente"
         >
           retour
         </Button>

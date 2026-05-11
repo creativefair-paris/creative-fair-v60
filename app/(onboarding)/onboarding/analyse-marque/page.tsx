@@ -1,11 +1,17 @@
-// Sprint 34 — Page onboarding 10 questions (cahier §3)
+// Sprint 36.A — Page onboarding flux inversé Marcus (4 questions).
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow'
 
 export default function AnalyseMarquePage() {
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main
+      className="min-h-screen"
+      style={{ position: 'relative', background: 'var(--color-background)' }}
+    >
       <div className="bg-halo bg-halo-1" aria-hidden="true" />
       <div className="bg-halo bg-halo-2" aria-hidden="true" />
+      <div className="bg-halo bg-halo-3" aria-hidden="true" />
+      <div className="bg-halo bg-halo-4" aria-hidden="true" />
+      <div className="bg-halo bg-halo-5" aria-hidden="true" />
 
       <section
         style={{

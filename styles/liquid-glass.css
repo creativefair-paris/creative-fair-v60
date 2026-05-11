@@ -155,3 +155,28 @@
   animation-delay: -20s;
   --dx: 15px; --dy: -15px;
 }
+
+/* Halo pulsant — écran d'attente Sprint 36.A.
+   Doux, central, respiration ample. Pas de spinner agressif. */
+.bg-halo-pulse {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+    rgba(0, 122, 255, 0.22) 0%,
+    rgba(88, 86, 214, 0.12) 50%,
+    transparent 75%);
+  pointer-events: none;
+  animation: halo-pulse 3.2s ease-in-out infinite;
+  margin: 0 auto var(--space-2);
+}
+
+@keyframes halo-pulse {
+  0%, 100% { transform: scale(0.92); opacity: 0.7; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-halo-pulse { animation: none; opacity: 0.85; }
+}
