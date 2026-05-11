@@ -64,7 +64,7 @@
   position: fixed;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.35;
+  opacity: 1;
   pointer-events: none;
   z-index: 0;
   animation: drift ease-in-out infinite;
@@ -79,10 +79,10 @@
   .bg-halo { animation: none; }
 }
 
-/* Variantes positionnement */
+/* Variantes positionnement — rgba intègre l'alpha, opacity reste à 1 */
 .bg-halo-1 {
   width: 600px; height: 600px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-system-blue) 15%, transparent), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.35), transparent 70%);
   top: -200px; left: -150px;
   animation-duration: 18s;
   --drift-x: 30px; --drift-y: -25px;
@@ -90,7 +90,7 @@
 
 .bg-halo-2 {
   width: 500px; height: 500px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-system-blue) 10%, transparent), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.25), transparent 70%);
   top: 40%; right: -180px;
   animation-duration: 22s;
   animation-delay: -8s;
@@ -99,15 +99,9 @@
 
 .bg-halo-3 {
   width: 400px; height: 400px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-system-blue) 8%, transparent), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.20), transparent 70%);
   bottom: -100px; left: 30%;
   animation-duration: 26s;
   animation-delay: -14s;
   --drift-x: 15px; --drift-y: -15px;
-}
-
-@supports not (color: color-mix(in srgb, black 10%, white)) {
-  .bg-halo-1 { background: radial-gradient(circle, rgba(0,122,255,0.12), transparent 70%); }
-  .bg-halo-2 { background: radial-gradient(circle, rgba(0,122,255,0.08), transparent 70%); }
-  .bg-halo-3 { background: radial-gradient(circle, rgba(0,122,255,0.06), transparent 70%); }
 }
