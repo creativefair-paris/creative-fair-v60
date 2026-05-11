@@ -57,6 +57,7 @@ Le détail SQL + queries de vérification se trouve dans `audits/SPRINT_36A_MIGR
 
 ## Décisions prises seul
 
+0. **Patch auto-création tenant lors du premier onboarding standard** (post-test visuel Lead) — l'endpoint `POST /api/onboarding/complete` provisionne automatiquement un tenant (`plan='b2c'`, slug `personnel-{user.id.slice(0,8)}`) + un profile (`role='admin'`) si le user authentifié n'en a pas encore. Tenants B2B (Angelina Paris, Tous en Tête, Comptoir Général) restent gérés manuellement via seed `003_seed_tenants.sql`. Helper `ensureTenantForUser` retry-safe (lookup tenant par slug avant insert pour tolérer une tentative précédente partiellement échouée).
 1. **Migration 007 étendue** — Le prompt ne listait que `singularite` + `piliers_narratifs`, mais Chantier B référence `brands.secteur` et `brands.ton`. Décision soustractive : tout regrouper dans `007_brands_extension.sql` plutôt que créer un `008`. Documenté dans `SPRINT_36A_MIGRATIONS.md`.
 2. **`brands.nom` vs `brands.name`** — Colonne DB existante = `name`. Le payload utilise `nom` (vocabulaire Marcus). Persistance via `name`, type `BrandData.nom` côté code. Aucune migration de renommage (Pilier 6 : pas de churn pour cosmétique).
 3. **Type cast étroit dans route handler** — Stub `types/database.ts` permissif (`Record<string, unknown>`) faisait perdre les types sur `.from('brands').insert(...)`. Création d'un cast custom `adminBrands` dans `route.ts` pour préserver la sécurité de type sur les écritures.

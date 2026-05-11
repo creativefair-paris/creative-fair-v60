@@ -26,6 +26,101 @@ const LIMITS: Record<keyof CompleteBody, number> = {
   singularite: 400,
 }
 
+// Helper Sprint 36.A patch — auto-création tenant + profile au signup standard.
+// Plan 'b2c' = mode personnel (un user = un tenant). Les tenants B2B
+// (Angelina Paris, Tous en Tête, Comptoir Général) sont gérés via seed séparé.
+type AdminLike = ReturnType<typeof createAdmin>
+
+async function ensureTenantForUser(
+  admin: AdminLike,
+  args: { userId: string; userEmail: string | null; fallbackName: string },
+): Promise<string | null> {
+  const adminTyped = admin as unknown as {
+    from: (t: 'profiles' | 'tenants') => {
+      select: (cols: string) => {
+        eq: (col: string, val: string) => {
+          maybeSingle: () => Promise<{
+            data: { tenant_id?: string; id?: string } | null
+            error: { message: string } | null
+          }>
+        }
+      }
+      insert: (row: Record<string, unknown>) => {
+        select: (cols: string) => {
+          single: () => Promise<{
+            data: { id?: string; tenant_id?: string } | null
+            error: { message: string } | null
+          }>
+        }
+      }
+    }
+  }
+
+  // 1. Profile déjà présent ?
+  const { data: existingProfile } = await adminTyped
+    .from('profiles')
+    .select('tenant_id')
+    .eq('id', args.userId)
+    .maybeSingle()
+  if (existingProfile?.tenant_id) {
+    return existingProfile.tenant_id
+  }
+
+  // 2. Pas de profile → provisioning tenant + profile (plan b2c, role admin)
+  const slug = `personnel-${args.userId.slice(0, 8)}`
+  const tenantName =
+    args.fallbackName.trim().length > 0
+      ? args.fallbackName.trim()
+      : `Tenant ${args.userEmail ?? args.userId}`
+
+  // Retry-safe : si une tentative précédente a créé le tenant puis échoué sur
+  // le profile, on le retrouve par slug au lieu de buter sur la contrainte unique.
+  const { data: existingTenantBySlug } = await adminTyped
+    .from('tenants')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  let newTenantId: string | undefined = existingTenantBySlug?.id
+  if (!newTenantId) {
+    const { data: tenantInserted, error: tenantErr } = await adminTyped
+      .from('tenants')
+      .insert({
+        slug,
+        name: tenantName,
+        plan: 'b2c',
+        theme: {},
+        enabled_channels: ['instagram'],
+      })
+      .select('id')
+      .single()
+    if (tenantErr || !tenantInserted?.id) {
+      return null
+    }
+    newTenantId = tenantInserted.id
+  }
+  const email = args.userEmail ?? `${args.userId}@local.unknown`
+
+  const { error: profileErr } = await adminTyped
+    .from('profiles')
+    .insert({
+      id: args.userId,
+      tenant_id: newTenantId,
+      email,
+      role: 'admin',
+    })
+    .select('id')
+    .single()
+  if (profileErr) {
+    // Pas de rollback automatique : la prochaine tentative trouvera le tenant
+    // orphelin via slug et le profile pourra être recréé. Mieux que de laisser
+    // un user sans accès. Le slug unique évite les duplicates futurs.
+    return null
+  }
+
+  return newTenantId
+}
+
 function validateBody(value: unknown): CompleteBody | string {
   if (!value || typeof value !== 'object') return 'invalid payload'
   const v = value as Record<string, unknown>
@@ -54,26 +149,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
   }
 
-  // 2. Tenant
-  const { data: rawProfile } = await supabase
-    .from('profiles')
-    .select('tenant_id')
-    .eq('id', user.id)
-    .maybeSingle()
-  const tenantId = (rawProfile as { tenant_id?: string } | null)?.tenant_id
-  if (!tenantId) {
-    return NextResponse.json({ error: 'Aucun tenant associé' }, { status: 401 })
-  }
-
-  // 3. Validation payload
+  // 2. Validation payload (avant tenant pour pouvoir nommer le tenant depuis le body)
   const body = (await req.json().catch(() => null)) as unknown
   const validated = validateBody(body)
   if (typeof validated === 'string') {
     return NextResponse.json({ error: validated }, { status: 400 })
   }
 
-  // 4. Upsert brand via admin (bypass RLS pour init brand_book_status)
+  // 3. Tenant + profile (auto-création si premier onboarding standard)
   const admin = createAdmin()
+  const tenantId = await ensureTenantForUser(admin, {
+    userId: user.id,
+    userEmail: user.email ?? null,
+    fallbackName: validated.nom,
+  })
+  if (!tenantId) {
+    return NextResponse.json(
+      { error: 'tenant provisioning failed' },
+      { status: 500 },
+    )
+  }
+
+  // 4. Upsert brand via admin (bypass RLS pour init brand_book_status)
   // Cast lâche : le stub types/database.ts est volontairement minimaliste, on
   // contourne avec un type sur-mesure pour les colonnes Sprint 36.A.
   const adminBrands = admin as unknown as {
