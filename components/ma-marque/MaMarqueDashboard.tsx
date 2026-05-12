@@ -11,7 +11,6 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { EtatMarque } from './EtatMarque'
 import { MarqueGroup } from './MarqueGroup'
 import { MarqueRow } from './MarqueRow'
@@ -47,6 +46,7 @@ import type { BrandArchive } from '@/types/ma-marque'
 type Props = {
   snapshot: BrandSnapshot14
   archives: BrandArchive[]
+  userEmail?: string
 }
 
 // CAS A — édition inline desktop (mêmes 6 que MarquePreview).
@@ -61,7 +61,7 @@ const CAS_A: ReadonlyArray<BlocId> = [
 
 const DESKTOP_BREAKPOINT = 1024
 
-export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props) {
+export function MaMarqueDashboard({ snapshot: initialSnapshot, archives, userEmail }: Props) {
   const [snapshot, setSnapshot] = useState<BrandSnapshot14>(initialSnapshot)
   const [openSheet, setOpenSheet] = useState<BlocId | null>(null)
   const [selectedBloc, setSelectedBloc] = useState<BlocId | null>(null)
@@ -153,22 +153,7 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
 
   const liste = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <Breadcrumb items={["Aujourd'hui", 'Ma Marque']} />
-        <h1
-          style={{
-            fontFamily: 'var(--font-system)',
-            fontSize: 28,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            color: '#1C1C1E',
-            margin: 0,
-          }}
-        >
-          Ma Marque
-        </h1>
-      </div>
-
+      {/* Sprint 36.B.5 — breadcrumb + H1 portés désormais par PageHeader (au-dessus). */}
       <EtatMarque snapshot={snapshot} />
 
       <MarqueGroup title="Identité">
@@ -332,6 +317,7 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
       {openSheet === 'canaux' ? (
         <SheetCanaux
           initialValue={snapshot.canaux}
+          {...(userEmail ? { defaultEmail: userEmail } : {})}
           onClose={fermerSheet}
           onAllerVers={aller}
         />

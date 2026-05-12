@@ -99,7 +99,10 @@ export function benchmarksEstVide(b: Benchmark[] | null | undefined): boolean {
 // Canaux : 4 destinations adjacentes V1 (LinkedIn, Newsletter, Site, GMB).
 // TikTok / X / YouTube / Facebook : refus assumé V1.
 
-export type CanalId = 'linkedin' | 'newsletter' | 'site' | 'gmb'
+// Sprint 36.B.5 — Instagram ajouté comme canal principal V1.
+// Instagram est toujours actif (canal principal de Creative Fair) — il
+// peut avoir une URL/handle vide mais reste compté comme "présent".
+export type CanalId = 'instagram' | 'linkedin' | 'newsletter' | 'site' | 'gmb'
 
 export type CanalConfig = {
   actif: boolean
@@ -109,6 +112,7 @@ export type CanalConfig = {
 export type Canaux = Record<CanalId, CanalConfig>
 
 export const CANAUX_VIDES: Canaux = {
+  instagram:  { actif: true,  url: '' }, // canal principal — actif par défaut
   linkedin:   { actif: false, url: '' },
   newsletter: { actif: false, url: '' },
   site:       { actif: false, url: '' },
@@ -116,17 +120,36 @@ export const CANAUX_VIDES: Canaux = {
 }
 
 export const CANAUX_LABELS: Record<CanalId, string> = {
+  instagram:  'Instagram',
   linkedin:   'LinkedIn',
   newsletter: 'Newsletter',
   site:       'Site web',
   gmb:        'Google My Business',
 }
 
-export const CANAUX_ORDRE: CanalId[] = ['linkedin', 'newsletter', 'site', 'gmb']
+// Ordre : Instagram en tête (canal principal), puis extensions V1.
+export const CANAUX_ORDRE: CanalId[] = ['instagram', 'linkedin', 'newsletter', 'site', 'gmb']
+
+// Sprint 36.B.5 — Canaux Bientôt (waiting list).
+export type CanalBientotId = 'tiktok' | 'x' | 'youtube' | 'facebook'
+
+export const CANAUX_BIENTOT_LABELS: Record<CanalBientotId, string> = {
+  tiktok:   'TikTok',
+  x:        'X',
+  youtube:  'YouTube',
+  facebook: 'Facebook',
+}
+
+export const CANAUX_BIENTOT_ORDRE: CanalBientotId[] = ['tiktok', 'x', 'youtube', 'facebook']
 
 export function canauxNormaliser(c: Partial<Canaux> | null | undefined): Canaux {
   if (!c) return CANAUX_VIDES
   return {
+    // Instagram : actif par défaut sur les brands legacy sans la clé.
+    // Si la clé existe (nouvelle structure), respecte le booléen.
+    instagram:  c.instagram
+      ? { actif: c.instagram.actif ?? true, url: c.instagram.url ?? '' }
+      : { actif: true, url: '' },
     linkedin:   { actif: c.linkedin?.actif ?? false,   url: c.linkedin?.url ?? '' },
     newsletter: { actif: c.newsletter?.actif ?? false, url: c.newsletter?.url ?? '' },
     site:       { actif: c.site?.actif ?? false,       url: c.site?.url ?? '' },
@@ -134,10 +157,15 @@ export function canauxNormaliser(c: Partial<Canaux> | null | undefined): Canaux 
   }
 }
 
+// Liste des canaux actifs avec URL renseignée. Instagram est toujours
+// actif mais n'apparaît pas tant que son URL est vide (sinon un canal
+// "actif sans handle" pollue la preview).
 export function canauxActifs(c: Canaux): CanalId[] {
   return CANAUX_ORDRE.filter((id) => c[id]?.actif && (c[id]?.url ?? '').trim().length > 0)
 }
 
+// Pour la complétude Ma Marque : le bloc est "vide" si AUCUN canal (y
+// compris Instagram) n'a d'URL renseignée.
 export function canauxEstVide(c: Canaux | null | undefined): boolean {
   if (!c) return true
   return canauxActifs(canauxNormaliser(c)).length === 0

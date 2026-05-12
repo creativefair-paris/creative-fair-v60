@@ -417,6 +417,49 @@ h1, h2, h3, h4, h5, h6 {
   color: rgba(0,0,0,0.7) !important;
 }
 
+/* Sprint 36.B.5 — Patch 3 : PageHeader unifié pour toutes les pages mères.
+   Breadcrumb sur sa ligne, H1 + avatar sur la même ligne en dessous. */
+.cfs-page-header {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+.cfs-page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+.cfs-page-header-title {
+  font-family: var(--font-system);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1C1C1E;
+  line-height: 1.2;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+.cfs-page-header-trailing {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .cfs-page-header {
+    padding: 16px;
+  }
+  .cfs-page-header-title {
+    font-size: 24px;
+  }
+}
+
 /* Sprint 36.B.4 — Patch 5.A : utilitaires typographiques canoniques.
    Source de vérité pour les nouvelles pages et migrations futures. */
 .cfs-h1 {

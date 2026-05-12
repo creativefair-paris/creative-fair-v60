@@ -150,7 +150,8 @@ function validateRessources(value: unknown): Ressources | null {
 
 // ── Sprint 36.B.3 — Validators benchmarks / canaux / brand_book ──────
 
-const CANAUX_IDS = new Set(['linkedin', 'newsletter', 'site', 'gmb'])
+// Sprint 36.B.5 — Instagram ajouté comme canal principal V1.
+const CANAUX_IDS = new Set(['instagram', 'linkedin', 'newsletter', 'site', 'gmb'])
 const HEX_RE = /^#[0-9A-Fa-f]{6}$/
 
 function validateBenchmarks(value: unknown): Benchmark[] | null {
@@ -176,9 +177,17 @@ function validateCanaux(value: unknown): Canaux | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null
   const r = value as Record<string, unknown>
   const out: Partial<Canaux> = {}
-  for (const id of ['linkedin', 'newsletter', 'site', 'gmb'] as const) {
+  // Sprint 36.B.5 — instagram ajouté comme canal principal V1.
+  // Le payload peut omettre instagram (brands legacy) : on le complète
+  // avec actif:true + url:'' pour rester compatible.
+  for (const id of ['instagram', 'linkedin', 'newsletter', 'site', 'gmb'] as const) {
     if (!CANAUX_IDS.has(id)) return null
     const c = r[id]
+    if (c === undefined) {
+      // Compat ascendante : si la clé n'est pas envoyée, défaut neutre.
+      out[id] = id === 'instagram' ? { actif: true, url: '' } : { actif: false, url: '' }
+      continue
+    }
     if (!c || typeof c !== 'object' || Array.isArray(c)) return null
     const cc = c as Record<string, unknown>
     if (typeof cc.actif !== 'boolean') return null

@@ -1,17 +1,14 @@
-// Sprint 36.B.3 → 36.B.4 — Hero gauche de /programme en Split Brief 40/60.
+// Sprint 36.B.3 → 36.B.5 — Hero gauche de /programme en Split Brief 40/60.
 //
-// Patches Sprint 36.B.4 :
-//   - Breadcrumb "Aujourd'hui › Mon Programme" en tête.
-//   - H1 "Mon Programme" déplacé dans la colonne contexte (alignement
-//     visuel avec le reste du Hero).
-//   - Boutons d'action différenciés des chips piliers : "Voir un post" =
-//     primaire (fond noir), "Enrichir ma marque" = secondaire (outline).
+// Patches Sprint 36.B.5 :
+//   - Breadcrumb et H1 "Mon Programme" portés désormais par PageHeader
+//     (au-dessus du Split Brief). Le Hero démarre directement avec
+//     l'intro contextuelle.
 
 'use client'
 
 import Link from 'next/link'
 import type { PilierNarratif } from '@/types/programme'
-import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { ChipsPiliersActifs } from './ChipsPiliersActifs'
 
 type Props = {
@@ -39,23 +36,6 @@ export function ProgrammeHero({
         gap: 'var(--space-5)',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <Breadcrumb items={["Aujourd'hui", 'Mon Programme']} />
-        <h1
-          style={{
-            fontFamily: 'var(--font-system)',
-            fontSize: 28,
-            lineHeight: 1.2,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            color: '#1C1C1E',
-            margin: 0,
-          }}
-        >
-          Mon Programme
-        </h1>
-      </div>
-
       <p
         style={{
           fontFamily: 'var(--font-system)',

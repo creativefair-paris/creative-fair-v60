@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
-import { NavigationBar } from '@/components/layout/NavigationBar'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import type { PilierNarratif, PostRow } from '@/types/programme'
@@ -134,8 +134,8 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
         }}
       >
         {isWelcome ? <WelcomeURLCleaner /> : null}
-        {/* Sprint 36.B.4 — H1 + breadcrumb portés par ProgrammeHero (colonne contexte). */}
-        <NavigationBar title="" />
+        {/* Sprint 36.B.5 — PageHeader unifié : breadcrumb + H1 + avatar même ligne. */}
+        <PageHeader title="Mon Programme" />
 
         {hasProgramme ? (
           <ProgrammeDashboard

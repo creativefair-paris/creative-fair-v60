@@ -192,6 +192,27 @@ export function compterRemplis(snap: BrandSnapshot14): number {
   }, 0)
 }
 
+// Sprint 36.B.5 — Aggrégats pour la BarreFondations.
+export type BlocsAggregat = {
+  total: number
+  complets: number
+  partiels: number
+  prioritaires: number // priority et non-complete
+}
+
+export function calculerAggregat(snap: BrandSnapshot14): BlocsAggregat {
+  let complets = 0
+  let partiels = 0
+  let prioritaires = 0
+  for (const bloc of BLOCS_ORDRE) {
+    const e = etatDuBloc(bloc, snap)
+    if (e === 'complete') complets += 1
+    else if (e === 'partial') partiels += 1
+    if (BLOCS_PRIORITAIRES.includes(bloc) && e !== 'complete') prioritaires += 1
+  }
+  return { total: BLOCS_ORDRE.length, complets, partiels, prioritaires }
+}
+
 // Phrase contextuelle en hero — narration humaine, jamais de pourcentage global.
 // Le compteur N/14 est lisible (pas un score gamifié), aligné sur le spec.
 export function getPhrase14(snap: BrandSnapshot14): string {

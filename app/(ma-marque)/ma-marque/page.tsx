@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdmin } from '@/lib/supabase/admin'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
-import { NavigationBar } from '@/components/layout/NavigationBar'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { MaMarqueDashboard } from '@/components/ma-marque/MaMarqueDashboard'
 import type { BrandSnapshot14 } from '@/lib/ma-marque/completude'
 import type {
@@ -158,9 +158,8 @@ export default async function MaMarquePage() {
           flexDirection: 'column',
         }}
       >
-        {/* Sprint 36.B.4 — title vide : H1 porté par la colonne liste dans
-            MaMarqueDashboard. Le layout 2 colonnes est géré par le dashboard. */}
-        <NavigationBar title="" />
+        {/* Sprint 36.B.5 — PageHeader unifié au-dessus de la grille 2 colonnes. */}
+        <PageHeader title="Ma Marque" />
 
         <div
           style={{
@@ -170,7 +169,11 @@ export default async function MaMarquePage() {
             flexDirection: 'column',
           }}
         >
-          <MaMarqueDashboard snapshot={snapshot} archives={archives} />
+          <MaMarqueDashboard
+            snapshot={snapshot}
+            archives={archives}
+            {...(user.email ? { userEmail: user.email } : {})}
+          />
         </div>
       </div>
     </div>
