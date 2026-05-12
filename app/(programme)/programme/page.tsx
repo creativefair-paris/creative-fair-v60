@@ -1,23 +1,25 @@
-// Sprint 36.A — Page Programme : timeline verticale ou état vide (Chantier D.3).
-// Server Component. Auth chain identique Sprint 35.
-// Si programme actif présent : timeline 3 cards.
-// Sinon : empty state Sprint 35 (bouton désactivé).
+// Sprint 36.B.3 — Page Programme refondue en Split Brief 40/60.
+//
+// Server Component. Lit programme + posts + piliers + brand_book.
+// Délègue l'orchestration (vue/semaine, sheet détail) au client
+// ProgrammeDashboard.
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
 import { NavigationBar } from '@/components/layout/NavigationBar'
-import { ChipAction } from '@/components/ui/ChipAction'
-import { Timeline } from '@/components/programme/Timeline'
+import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import type { PilierNarratif, PostRow } from '@/types/programme'
+import type { BrandBook } from '@/types/ma-marque'
 
 export const dynamic = 'force-dynamic'
 
 type BrandRowWithExtras = {
   id: string
   piliers_narratifs?: unknown
+  brand_book?: unknown
 }
 
 type ProgrammeRow = {
@@ -27,6 +29,11 @@ type ProgrammeRow = {
 
 type ProgrammePageProps = {
   searchParams?: Promise<{ welcome?: string }>
+}
+
+function asObjet<T>(v: unknown): T | null {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null
+  return v as T
 }
 
 export default async function ProgrammePage({ searchParams }: ProgrammePageProps) {
@@ -44,7 +51,6 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
     .select('tenant_id')
     .eq('id', user.id)
     .maybeSingle()
-
   const tenantId = (rawProfile as { tenant_id?: string } | null)?.tenant_id ?? null
   if (!tenantId) redirect('/onboarding/analyse-marque')
 
@@ -53,19 +59,23 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
     redirect('/onboarding/analyse-marque')
   }
 
-  // Récupération piliers (colonne brands.piliers_narratifs, Sprint 36.A)
+  // Récupère piliers + brand_book (palette utilisée pour les chips).
   let piliers: PilierNarratif[] = []
+  let brandBook: BrandBook | null = null
   const { data: rawBrandExtras } = await supabase
     .from('brands')
-    .select('id, piliers_narratifs')
+    .select('id, piliers_narratifs, brand_book')
     .eq('id', brand.id)
     .maybeSingle()
   const extras = rawBrandExtras as BrandRowWithExtras | null
   if (extras && Array.isArray(extras.piliers_narratifs)) {
     piliers = extras.piliers_narratifs as PilierNarratif[]
   }
+  if (extras) {
+    brandBook = asObjet<BrandBook>(extras.brand_book)
+  }
 
-  // Récupération programme actif le plus récent
+  // Programme actif le plus récent
   const { data: rawProgramme } = await supabase
     .from('programmes')
     .select('id, arc_narratif')
@@ -80,7 +90,6 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
   let arcNarratif = ''
 
   if (programme) {
-    // Extraction du thème depuis arc_narratif (forme { semaines: [{ theme }] })
     const arc = programme.arc_narratif as
       | { semaines?: Array<{ theme?: string }> }
       | null
@@ -121,32 +130,19 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
+          paddingBottom: 'var(--space-6)',
         }}
       >
         {isWelcome ? <WelcomeURLCleaner /> : null}
         <NavigationBar title="Mon Programme" />
 
         {hasProgramme ? (
-          <>
-            <div
-              className="cfs-page-actions"
-              style={{
-                width: '100%',
-                maxWidth: 680,
-                margin: '0 auto',
-                padding: '0 var(--space-5)',
-                marginTop: 16,
-                marginBottom: 32,
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 12,
-              }}
-            >
-              <ChipAction label="Voir un post" href="#timeline-start" />
-              <ChipAction label="Enrichir ma marque" href="/ma-marque" />
-            </div>
-            <Timeline posts={posts} piliers={piliers} arcNarratif={arcNarratif} />
-          </>
+          <ProgrammeDashboard
+            posts={posts}
+            piliers={piliers}
+            arcNarratif={arcNarratif}
+            brandBook={brandBook}
+          />
         ) : (
           <section
             style={{

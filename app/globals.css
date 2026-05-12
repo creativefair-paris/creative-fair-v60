@@ -763,23 +763,29 @@ h1, h2, h3, h4, h5, h6 {
   text-align: left;
   color: var(--color-label);
   transition:
-    background-color 150ms var(--ease-out-quart),
-    transform 150ms var(--ease-out-quart);
+    background-color 180ms var(--ease-out-quart),
+    transform 180ms var(--ease-out-quart),
+    box-shadow 180ms var(--ease-out-quart);
 }
 .cfs-mini-post:hover {
   background-color: rgba(255, 255, 255, 0.55);
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 .cfs-mini-post:active {
   transform: scale(0.98);
 }
 
-/* MiniPostCard variant Semaine (full info, vertical) */
+/* Sprint 36.B.3 — Densité réduite : 110px hauteur, gap 12px inter-cards.
+   MiniPostCard variant Semaine (full info, vertical). */
 .cfs-mini-post--semaine {
   flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px;
-  border-radius: 12px;
+  gap: 6px;
+  padding: 14px 14px;
+  border-radius: 14px;
   width: 100%;
+  min-height: 110px;
+  justify-content: space-between;
 }
 .cfs-mini-post--semaine .cfs-mini-post__heure {
   font-size: 12px;
@@ -875,7 +881,8 @@ h1, h2, h3, h4, h5, h6 {
 .cfs-vue-semaine__posts {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  /* Sprint 36.B.3 — densité réduite : 12px inter-cards. */
+  gap: 12px;
   min-height: 60px;
 }
 .cfs-vue-semaine__empty {
