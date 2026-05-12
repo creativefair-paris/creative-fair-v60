@@ -68,7 +68,7 @@ export function UserMenuBubble({
       ref={containerRef}
       role="menu"
       aria-label="Menu utilisateur"
-      className="cfs-user-menu-bubble glass-regular"
+      className="cfs-user-menu-bubble"
     >
       <div className="cfs-user-menu-header">
         <Avatar prenom={prenom} photoUrl={photoUrl} size={48} />

@@ -123,7 +123,10 @@ export async function NavigationBar({
     <header className="cfs-navbar">
       <div className="cfs-navbar__leading">
         {showBackButton ? <BackButton href={backHref} /> : null}
-        <h1 className="cfs-navbar__title">{title}</h1>
+        {/* Sprint 36.B.4 — chaque page mère porte son propre H1 dans son
+            Hero / colonne gauche. Title NavigationBar masqué quand vide
+            pour éviter le doublon visuel. */}
+        {title.length > 0 ? <h1 className="cfs-navbar__title">{title}</h1> : null}
       </div>
       {trailingNode != null ? (
         <div className="cfs-navbar__trailing">{trailingNode}</div>

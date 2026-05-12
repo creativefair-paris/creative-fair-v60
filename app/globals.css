@@ -357,19 +357,237 @@ h1, h2, h3, h4, h5, h6 {
   transition-duration: 120ms;
 }
 
+/* Sprint 36.B.4 — Patch 3 : grille 2 colonnes Ma Marque desktop ≥ 1024px.
+   Liste à gauche (40%), preview/édition à droite (60%). Mobile : 1 colonne. */
+.cfs-ma-marque-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+.cfs-ma-marque-liste {
+  min-width: 0;
+}
+.cfs-ma-marque-preview {
+  display: none;
+  min-width: 0;
+}
+@media (min-width: 1024px) {
+  .cfs-ma-marque-grid {
+    grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+    gap: 40px;
+  }
+  .cfs-ma-marque-preview {
+    display: block;
+    position: sticky;
+    top: 24px;
+    align-self: flex-start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+}
+@media (max-width: 640px) {
+  .cfs-ma-marque-grid {
+    padding: 0 16px;
+  }
+}
+
+/* Sprint 36.B.4 — Patch 3 : rangs hover/active normalisés. */
+.cfs-marque-row:hover {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+.cfs-marque-row:active {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+.cfs-marque-row.is-selected:hover {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfs-marque-row {
+    transition: none !important;
+  }
+}
+
+/* Sprint 36.B.4 — Patch 4 : hover breadcrumb. */
+.cfs-breadcrumb-link:hover {
+  color: rgba(0,0,0,0.7) !important;
+}
+
+/* Sprint 36.B.4 — Patch 5.A : utilitaires typographiques canoniques.
+   Source de vérité pour les nouvelles pages et migrations futures. */
+.cfs-h1 {
+  font-family: var(--font-system);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1C1C1E;
+  line-height: 1.2;
+  margin: 0;
+}
+.cfs-h2 {
+  font-family: var(--font-system);
+  font-size: 20px;
+  font-weight: 600;
+  color: #1C1C1E;
+  letter-spacing: -0.012em;
+  line-height: 1.3;
+  margin: 0;
+}
+.cfs-label-group {
+  font-family: var(--font-system);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+.cfs-body {
+  font-family: var(--font-system);
+  font-size: 16px;
+  font-weight: 400;
+  color: #1C1C1E;
+  line-height: 1.5;
+}
+.cfs-summary {
+  font-family: var(--font-system);
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cfs-hero-intro {
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.55);
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0;
+}
+
+/* Sprint 36.B.4 — Patch 5.D : carte unifiée niveau 2.
+   À utiliser pour les nouvelles cards (posts, outils, blocs). */
+.cfs-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .cfs-card {
+    background: rgba(255, 255, 255, 0.95);
+  }
+}
+
+/* Sprint 36.B.4 — Patch 5.G : hygiène d'animation globale.
+   Toutes les animations désactivées si l'utilisateur a coché reduce-motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Sprint 36.B.4 — Patch 5.B : 3 variantes de boutons unifiées.
+   Primaire (action principale), Secondaire (outline), Destructif. */
+.cfs-btn-primaire,
+.cfs-btn-secondaire,
+.cfs-btn-destructif {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 980px;
+  font-family: var(--font-system);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 150ms ease, background-color 150ms ease;
+}
+.cfs-btn-primaire {
+  background: #1C1C1E;
+  color: #FFFFFF;
+  border: none;
+}
+.cfs-btn-primaire:hover {
+  opacity: 0.85;
+}
+.cfs-btn-primaire:active {
+  opacity: 0.7;
+}
+.cfs-btn-primaire:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.cfs-btn-secondaire {
+  background: transparent;
+  color: #1C1C1E;
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+}
+.cfs-btn-secondaire:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.cfs-btn-secondaire:active {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+.cfs-btn-destructif {
+  background: transparent;
+  color: #FF3B30;
+  border: none;
+  font-weight: 500;
+}
+.cfs-btn-destructif:hover {
+  background-color: rgba(255, 59, 48, 0.08);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfs-btn-primaire,
+  .cfs-btn-secondaire,
+  .cfs-btn-destructif {
+    transition: none;
+  }
+}
+
+/* Sprint 36.B.4 — Patch 1 : fond solide lisible sur tout gradient.
+   Niveau 3 Liquid Glass : background 0.92, blur 20, shadow renforcée. */
 .cfs-user-menu-bubble {
   position: absolute;
   top: 76px;
   right: 24px;
   width: 280px;
   padding: 16px;
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
   z-index: 100;
   display: flex;
   flex-direction: column;
   gap: 0;
+  color: #1C1C1E;
   animation: cfs-user-menu-in 200ms var(--ease-out-quart) both;
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .cfs-user-menu-bubble {
+    background: rgba(255, 255, 255, 0.98);
+  }
 }
 @keyframes cfs-user-menu-in {
   from { opacity: 0; transform: translateY(-8px); }
@@ -413,7 +631,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .cfs-user-menu-divider {
   height: 1px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.06);
   margin: 8px 0;
 }
 
@@ -431,7 +649,8 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-system);
   font-size: 17px;
   font-weight: 400;
-  color: var(--color-label);
+  /* Sprint 36.B.4 — noir Apple solide, jamais transparent. */
+  color: #1C1C1E;
   text-decoration: none;
   background: transparent;
   border: none;
@@ -450,7 +669,9 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 15px;
 }
 .cfs-user-menu-destructive {
+  /* Sprint 36.B.4 — rouge Apple plein, jamais transparent. */
   color: #FF3B30;
+  font-weight: 500;
 }
 .cfs-user-menu-destructive:hover {
   background-color: rgba(255, 59, 48, 0.08);

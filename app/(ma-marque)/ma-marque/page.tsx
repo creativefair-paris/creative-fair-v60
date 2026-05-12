@@ -158,17 +158,16 @@ export default async function MaMarquePage() {
           flexDirection: 'column',
         }}
       >
-        <NavigationBar title="Ma Marque" />
+        {/* Sprint 36.B.4 — title vide : H1 porté par la colonne liste dans
+            MaMarqueDashboard. Le layout 2 colonnes est géré par le dashboard. */}
+        <NavigationBar title="" />
 
         <div
           style={{
             width: '100%',
-            maxWidth: 720,
-            margin: '0 auto',
-            padding: 'var(--space-5)',
+            padding: '24px 0',
             display: 'flex',
             flexDirection: 'column',
-            gap: 'var(--space-4)',
           }}
         >
           <MaMarqueDashboard snapshot={snapshot} archives={archives} />

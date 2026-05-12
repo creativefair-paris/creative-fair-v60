@@ -1,12 +1,21 @@
-// Sprint 36.B.3 — Orchestrateur client de /ma-marque (14 rangs + sheets).
-// Pattern iOS Settings : liste verticale dense, sheets bottom plein écran.
+// Sprint 36.B.3 → 36.B.4 — Orchestrateur client de /ma-marque.
+//
+// Patch 36.B.4 :
+//   - Layout 2 colonnes permanent desktop (≥ 1024 px) : liste à gauche (40%),
+//     preview/édition à droite (60%).
+//   - CAS A (blocs simples) : édition inline en colonne droite, pas de sheet.
+//   - CAS B (blocs riches) : sheet plein écran (comportement 36.B.3 conservé).
+//   - Mobile : layout 1 colonne, tous les blocs ouvrent une sheet.
+//   - Breadcrumb "Aujourd'hui › Ma Marque" en tête de la colonne gauche.
 
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { EtatMarque } from './EtatMarque'
 import { MarqueGroup } from './MarqueGroup'
 import { MarqueRow } from './MarqueRow'
+import { MarquePreview } from './MarquePreview'
 import { SheetTexteSimple } from './SheetTexteSimple'
 import { SheetCible } from './cible/SheetCible'
 import { SheetUniversRefuse } from './univers-refuse/SheetUniversRefuse'
@@ -40,25 +49,88 @@ type Props = {
   archives: BrandArchive[]
 }
 
+// CAS A — édition inline desktop (mêmes 6 que MarquePreview).
+const CAS_A: ReadonlyArray<BlocId> = [
+  'nom',
+  'secteur',
+  'voix',
+  'singularite',
+  'cible',
+  'univers-refuse',
+]
+
+const DESKTOP_BREAKPOINT = 1024
+
 export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props) {
-  const snapshot = initialSnapshot
-  const [open, setOpen] = useState<BlocId | null>(null)
+  const [snapshot, setSnapshot] = useState<BrandSnapshot14>(initialSnapshot)
+  const [openSheet, setOpenSheet] = useState<BlocId | null>(null)
+  const [selectedBloc, setSelectedBloc] = useState<BlocId | null>(null)
+
+  // Détection desktop : lazy initializer (lit window une fois au mount).
+  // SSR : pas de window → true par défaut (le layout 2 colonnes est l'attendu
+  // sur grand écran ; un mobile non-JS verrait un état dégradé acceptable).
+  const [isDesktop, setIsDesktop] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true
+    return window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`).matches
+  })
+
+  // Subscribe au resize — uniquement par l'event listener, pas de setState
+  // synchrone dans l'effet (lint react-hooks/set-state-in-effect).
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`)
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
 
   function ouvrir(bloc: BlocId) {
-    setOpen(bloc)
+    setSelectedBloc(bloc)
+    if (isDesktop && CAS_A.includes(bloc)) {
+      // CAS A desktop → édition inline, pas de sheet.
+      setOpenSheet(null)
+      return
+    }
+    setOpenSheet(bloc)
   }
-  function fermer() {
-    setOpen(null)
+  function fermerSheet() {
+    setOpenSheet(null)
   }
   function aller(suivant: BlocId) {
-    setOpen(suivant)
+    setSelectedBloc(suivant)
+    if (isDesktop && CAS_A.includes(suivant)) {
+      setOpenSheet(null)
+      return
+    }
+    setOpenSheet(suivant)
+  }
+
+  // Met à jour le snapshot après save inline (CAS A).
+  const onSavedInline = useCallback((bloc: BlocId, value: string) => {
+    setSnapshot((s) => {
+      switch (bloc) {
+        case 'nom':           return { ...s, nom: value }
+        case 'secteur':       return { ...s, secteur: value }
+        case 'voix':          return { ...s, ton: value }
+        case 'singularite':   return { ...s, singularite: value }
+        case 'cible':         return { ...s, cible: value }
+        case 'univers-refuse': return { ...s, universRefuse: value }
+        default:              return s
+      }
+    })
+  }, [])
+
+  // Mapping bloc → valeur texte courante (pour MarquePreview).
+  const valeursTexte: Record<string, string> = {
+    nom: snapshot.nom,
+    secteur: snapshot.secteur,
+    voix: snapshot.ton,
+    singularite: snapshot.singularite,
+    cible: snapshot.cible,
+    'univers-refuse': snapshot.universRefuse,
   }
 
   // Helpers pour chaque rang.
-  function rowFor(
-    bloc: BlocId,
-    summary: string,
-  ): React.ReactElement {
+  function rowFor(bloc: BlocId, summary: string): React.ReactElement {
     const state = etatDuBloc(bloc, snapshot)
     const priority = BLOCS_PRIORITAIRES.includes(bloc)
     return (
@@ -68,6 +140,7 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
         summary={summary}
         state={state}
         priority={priority}
+        selected={selectedBloc === bloc && isDesktop}
         onClick={() => ouvrir(bloc)}
       />
     )
@@ -78,8 +151,24 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
     return value.length > 80 ? value.slice(0, 77) + '…' : value
   }
 
-  return (
-    <>
+  const liste = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <Breadcrumb items={["Aujourd'hui", 'Ma Marque']} />
+        <h1
+          style={{
+            fontFamily: 'var(--font-system)',
+            fontSize: 28,
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            color: '#1C1C1E',
+            margin: 0,
+          }}
+        >
+          Ma Marque
+        </h1>
+      </div>
+
       <EtatMarque snapshot={snapshot} />
 
       <MarqueGroup title="Identité">
@@ -107,9 +196,24 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
         {rowFor('brand-book', resumeBrandBook(snapshot.brandBook))}
         {rowFor('archives', resumeArchives(snapshot.archivesCount))}
       </MarqueGroup>
+    </div>
+  )
 
-      {/* Sheets — une seule active à la fois */}
-      {open === 'nom' ? (
+  return (
+    <>
+      <div className="cfs-ma-marque-grid">
+        <aside className="cfs-ma-marque-liste">{liste}</aside>
+        <section className="cfs-ma-marque-preview">
+          <MarquePreview
+            bloc={selectedBloc}
+            values={valeursTexte}
+            onSaved={onSavedInline}
+          />
+        </section>
+      </div>
+
+      {/* Sheets — desktop CAS B uniquement, ou mobile pour tout. */}
+      {openSheet === 'nom' ? (
         <SheetTexteSimple
           title="Nom"
           bloc="nom"
@@ -118,12 +222,12 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
           field="name"
           maxLength={80}
           initialValue={snapshot.nom}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'secteur' ? (
+      {openSheet === 'secteur' ? (
         <SheetTexteSimple
           title="Secteur"
           bloc="secteur"
@@ -132,12 +236,12 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
           field="secteur"
           maxLength={120}
           initialValue={snapshot.secteur}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'voix' ? (
+      {openSheet === 'voix' ? (
         <SheetTexteSimple
           title="Voix"
           bloc="voix"
@@ -147,12 +251,12 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
           multiline
           maxLength={280}
           initialValue={snapshot.ton}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'singularite' ? (
+      {openSheet === 'singularite' ? (
         <SheetTexteSimple
           title="Singularité"
           bloc="singularite"
@@ -162,89 +266,89 @@ export function MaMarqueDashboard({ snapshot: initialSnapshot, archives }: Props
           multiline
           maxLength={400}
           initialValue={snapshot.singularite}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'cible' ? (
+      {openSheet === 'cible' ? (
         <SheetCible
           initialValue={snapshot.cible}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'piliers' ? (
+      {openSheet === 'piliers' ? (
         <PiliersSheet
           initialPiliers={snapshot.piliers}
           brandBook={snapshot.brandBook}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'cap-saison' ? (
+      {openSheet === 'cap-saison' ? (
         <ObjectifsSheet
           initialObjectifs={snapshot.objectifs}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'univers-refuse' ? (
+      {openSheet === 'univers-refuse' ? (
         <SheetUniversRefuse
           initialValue={snapshot.universRefuse}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'benchmarks' ? (
+      {openSheet === 'benchmarks' ? (
         <SheetBenchmarks
           initialValue={snapshot.benchmarks}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'calendrier-business' ? (
+      {openSheet === 'calendrier-business' ? (
         <CalendrierBusinessSheet
           initialMoments={snapshot.calendrierBusiness}
           piliers={snapshot.piliers}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'ressources' ? (
+      {openSheet === 'ressources' ? (
         <RessourcesSheet
           initialRessources={snapshot.ressources}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'canaux' ? (
+      {openSheet === 'canaux' ? (
         <SheetCanaux
           initialValue={snapshot.canaux}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'brand-book' ? (
+      {openSheet === 'brand-book' ? (
         <SheetBrandBook
           initialValue={snapshot.brandBook}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}
 
-      {open === 'archives' ? (
+      {openSheet === 'archives' ? (
         <SheetArchives
           initialItems={archives}
-          onClose={fermer}
+          onClose={fermerSheet}
           onAllerVers={aller}
         />
       ) : null}

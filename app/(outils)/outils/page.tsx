@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { NavigationBar } from '@/components/layout/NavigationBar'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { CatalogueOutils } from '@/components/outils/CatalogueOutils'
 
 export default async function OutilsPage() {
@@ -49,16 +50,42 @@ export default async function OutilsPage() {
           flexDirection: 'column',
         }}
       >
-        <NavigationBar title="Mes Outils" />
+        {/* Sprint 36.B.4 — H1 + breadcrumb portés dans la colonne contenu. */}
+        <NavigationBar title="" />
 
         <section
           style={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            padding: 'var(--space-6) var(--space-5) var(--space-12)',
+            padding: '24px var(--space-5) var(--space-12)',
+            gap: 24,
           }}
         >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 1080,
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4,
+            }}
+          >
+            <Breadcrumb items={["Aujourd'hui", 'Mes Outils']} />
+            <h1
+              style={{
+                fontFamily: 'var(--font-system)',
+                fontSize: 28,
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                color: '#1C1C1E',
+                margin: 0,
+              }}
+            >
+              Mes Outils
+            </h1>
+          </div>
           <CatalogueOutils />
         </section>
       </div>

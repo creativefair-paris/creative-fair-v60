@@ -16,6 +16,7 @@ type Props = {
   state: MarqueRowState
   priority?: boolean
   isLast?: boolean
+  selected?: boolean
   onClick: () => void
   icon?: ReactNode
 }
@@ -48,6 +49,7 @@ export function MarqueRow({
   state,
   priority = false,
   isLast = false,
+  selected = false,
   onClick,
   icon,
 }: Props) {
@@ -58,31 +60,22 @@ export function MarqueRow({
       type="button"
       onClick={onClick}
       aria-label={`Ouvrir ${label}`}
+      aria-current={selected ? 'true' : undefined}
+      className={`cfs-marque-row${selected ? ' is-selected' : ''}`}
       style={{
         all: 'unset',
         boxSizing: 'border-box',
         display: 'flex',
         alignItems: 'center',
         gap: 'var(--space-3)',
-        padding: '0 var(--space-4)',
-        minHeight: 64,
+        padding: '0 20px',
+        minHeight: 56,
         width: '100%',
         cursor: 'pointer',
-        color: 'var(--color-label)',
+        color: '#1C1C1E',
+        background: selected ? 'rgba(0,0,0,0.05)' : 'transparent',
         borderBottom: isLast ? 'none' : '1px solid rgba(0,0,0,0.06)',
-        transition: 'background 160ms ease',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'transparent'
-      }}
-      onFocus={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
-      }}
-      onBlur={(e) => {
-        e.currentTarget.style.background = 'transparent'
+        transition: 'background 100ms ease',
       }}
     >
       {/* Point lilas priorité — 6px */}

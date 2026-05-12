@@ -1,12 +1,17 @@
-// Sprint 36.B.3 — Hero gauche de /programme en Split Brief 40/60.
+// Sprint 36.B.3 → 36.B.4 — Hero gauche de /programme en Split Brief 40/60.
 //
-// Narrative + chips piliers actifs + mention pilier dominant + actions rapides.
-// Pas de pourcentage. Pas de badge. Prose tranquille.
+// Patches Sprint 36.B.4 :
+//   - Breadcrumb "Aujourd'hui › Mon Programme" en tête.
+//   - H1 "Mon Programme" déplacé dans la colonne contexte (alignement
+//     visuel avec le reste du Hero).
+//   - Boutons d'action différenciés des chips piliers : "Voir un post" =
+//     primaire (fond noir), "Enrichir ma marque" = secondaire (outline).
 
 'use client'
 
 import Link from 'next/link'
 import type { PilierNarratif } from '@/types/programme'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { ChipsPiliersActifs } from './ChipsPiliersActifs'
 
 type Props = {
@@ -34,31 +39,49 @@ export function ProgrammeHero({
         gap: 'var(--space-5)',
       }}
     >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <Breadcrumb items={["Aujourd'hui", 'Mon Programme']} />
+        <h1
+          style={{
+            fontFamily: 'var(--font-system)',
+            fontSize: 28,
+            lineHeight: 1.2,
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            color: '#1C1C1E',
+            margin: 0,
+          }}
+        >
+          Mon Programme
+        </h1>
+      </div>
+
       <p
         style={{
           fontFamily: 'var(--font-system)',
           fontSize: 15,
-          lineHeight: 1.5,
-          color: 'var(--color-secondary-label)',
+          lineHeight: 1.6,
+          color: 'rgba(0,0,0,0.55)',
           margin: 0,
+          maxWidth: 480,
         }}
       >
         Voici comment Creative Fair a interprété ta marque cette semaine.
       </p>
 
-      <h1
+      <h2
         style={{
           fontFamily: 'var(--font-system)',
-          fontSize: 30,
-          lineHeight: 1.2,
+          fontSize: 26,
+          lineHeight: 1.25,
           fontWeight: 600,
           letterSpacing: '-0.018em',
-          color: 'var(--color-label)',
+          color: '#1C1C1E',
           margin: 0,
         }}
       >
         {arcNarratif || 'Ton programme prend forme cette semaine.'}
-      </h1>
+      </h2>
 
       <ChipsPiliersActifs
         piliers={piliers}
@@ -70,7 +93,7 @@ export function ProgrammeHero({
         style={{
           fontFamily: 'var(--font-system)',
           fontSize: 13,
-          color: 'var(--color-tertiary-label)',
+          color: 'rgba(0,0,0,0.4)',
           margin: 0,
         }}
       >
@@ -85,39 +108,19 @@ export function ProgrammeHero({
           display: 'flex',
           flexWrap: 'wrap',
           gap: 12,
-          marginTop: 'var(--space-3)',
+          marginTop: 24,
         }}
       >
         <button
           type="button"
           onClick={onVoirPost}
-          className="glass-thin"
-          style={{
-            padding: '10px 18px',
-            borderRadius: 22,
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--color-label)',
-            fontFamily: 'var(--font-system)',
-            fontSize: 14,
-            fontWeight: 500,
-          }}
+          className="cfs-btn-primaire"
         >
           Voir un post
         </button>
         <Link
           href="/ma-marque"
-          className="glass-thin"
-          style={{
-            padding: '10px 18px',
-            borderRadius: 22,
-            color: 'var(--color-label)',
-            fontFamily: 'var(--font-system)',
-            fontSize: 14,
-            fontWeight: 500,
-            textDecoration: 'none',
-            display: 'inline-block',
-          }}
+          className="cfs-btn-secondaire"
         >
           Enrichir ma marque
         </Link>

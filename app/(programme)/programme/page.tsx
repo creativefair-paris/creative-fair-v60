@@ -134,7 +134,8 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
         }}
       >
         {isWelcome ? <WelcomeURLCleaner /> : null}
-        <NavigationBar title="Mon Programme" />
+        {/* Sprint 36.B.4 — H1 + breadcrumb portés par ProgrammeHero (colonne contexte). */}
+        <NavigationBar title="" />
 
         {hasProgramme ? (
           <ProgrammeDashboard
