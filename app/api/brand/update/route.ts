@@ -1,24 +1,112 @@
-// Sprint 36.B.1 — PATCH /api/brand/update.
+// Sprint 36.B.1 → 36.B.2 — PATCH /api/brand/update.
 // Édite un champ de la brand de l'utilisateur courant.
-// Champs autorisés : name, secteur, ton, singularite.
+//
+// Champs autorisés :
+//   - Texte (Sprint 36.B.1) : name, secteur, ton, singularite
+//   - JSONB (Sprint 36.B.2) : calendrier_business, objectifs, ressources
+//
 // Mapping UI ↔ DB :
-//   "Nom"         → name
-//   "Secteur"     → secteur
-//   "Voix"        → ton
-//   "Singularité" → singularite
+//   "Nom"                → name
+//   "Secteur"            → secteur
+//   "Voix"               → ton
+//   "Singularité"        → singularite
+//   "Calendrier"         → calendrier_business (array)
+//   "Objectifs"          → objectifs (array)
+//   "Ressources"         → ressources (object)
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdmin } from '@/lib/supabase/admin'
+import type { MomentBusiness, Objectif, Ressources, CapaciteProduction } from '@/types/ma-marque'
 
-const FIELD_MAX_LENGTH: Record<string, number> = {
+// ── Champs texte ─────────────────────────────────────────────────────────────
+
+const TEXT_FIELD_MAX_LENGTH: Record<string, number> = {
   name: 80,
   secteur: 120,
   ton: 280,
   singularite: 400,
 }
+const TEXT_FIELDS = new Set(Object.keys(TEXT_FIELD_MAX_LENGTH))
 
-const ALLOWED_FIELDS = new Set(Object.keys(FIELD_MAX_LENGTH))
+// ── Champs JSONB ─────────────────────────────────────────────────────────────
+
+const JSONB_FIELDS = new Set(['calendrier_business', 'objectifs', 'ressources'])
+
+const TYPES_MOMENT = new Set(['lancement', 'evenement', 'operation', 'saison'])
+const CAPACITES_PRODUCTION = new Set([
+  'aucune',
+  'occasionnelle',
+  'reguliere',
+  'soutenue',
+])
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
+function validateCalendrierBusiness(value: unknown): MomentBusiness[] | null {
+  if (!Array.isArray(value)) return null
+  if (value.length > 60) return null // garde-fou
+  const out: MomentBusiness[] = []
+  for (const raw of value) {
+    if (!raw || typeof raw !== 'object') return null
+    const r = raw as Record<string, unknown>
+    if (typeof r.id !== 'string' || r.id.trim().length === 0) return null
+    if (typeof r.titre !== 'string' || r.titre.trim().length === 0 || r.titre.length > 120) {
+      return null
+    }
+    if (typeof r.date_debut !== 'string' || !ISO_DATE_RE.test(r.date_debut)) return null
+    if (
+      r.date_fin !== undefined &&
+      r.date_fin !== null &&
+      (typeof r.date_fin !== 'string' || !ISO_DATE_RE.test(r.date_fin))
+    ) {
+      return null
+    }
+    if (typeof r.type !== 'string' || !TYPES_MOMENT.has(r.type)) return null
+    out.push({
+      id: r.id,
+      titre: r.titre.trim(),
+      date_debut: r.date_debut,
+      ...(r.date_fin ? { date_fin: r.date_fin as string } : {}),
+      type: r.type as MomentBusiness['type'],
+    })
+  }
+  return out
+}
+
+function validateObjectifs(value: unknown): Objectif[] | null {
+  if (!Array.isArray(value)) return null
+  if (value.length > 12) return null
+  const out: Objectif[] = []
+  for (const raw of value) {
+    if (!raw || typeof raw !== 'object') return null
+    const r = raw as Record<string, unknown>
+    if (typeof r.id !== 'string' || r.id.trim().length === 0) return null
+    if (typeof r.label !== 'string' || r.label.trim().length === 0 || r.label.length > 160) {
+      return null
+    }
+    const p = r.priorite
+    if (p !== 1 && p !== 2 && p !== 3) return null
+    out.push({ id: r.id, label: r.label.trim(), priorite: p })
+  }
+  return out
+}
+
+function validateRessources(value: unknown): Ressources | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const r = value as Record<string, unknown>
+  if (typeof r.photo !== 'string' || !CAPACITES_PRODUCTION.has(r.photo)) return null
+  if (typeof r.video !== 'string' || !CAPACITES_PRODUCTION.has(r.video)) return null
+  if (typeof r.terrain !== 'boolean') return null
+  if (typeof r.studio !== 'boolean') return null
+  return {
+    photo: r.photo as CapaciteProduction,
+    video: r.video as CapaciteProduction,
+    terrain: r.terrain,
+    studio: r.studio,
+  }
+}
+
+// ── Body type ────────────────────────────────────────────────────────────────
 
 type UpdateBody = {
   field?: unknown
@@ -37,34 +125,72 @@ export async function PATCH(request: Request) {
   }
 
   const { field, value } = body
-  if (typeof field !== 'string' || !ALLOWED_FIELDS.has(field)) {
+  if (typeof field !== 'string' || (!TEXT_FIELDS.has(field) && !JSONB_FIELDS.has(field))) {
     return NextResponse.json(
       { error: 'invalid_field', detail: 'Champ non autorisé.' },
       { status: 400 },
     )
   }
-  if (typeof value !== 'string') {
-    return NextResponse.json(
-      { error: 'invalid_value', detail: 'Valeur attendue : chaîne.' },
-      { status: 400 },
-    )
-  }
-  const trimmed = value.trim()
-  if (trimmed.length === 0) {
-    return NextResponse.json(
-      { error: 'empty_value', detail: 'La valeur ne peut pas être vide.' },
-      { status: 400 },
-    )
-  }
-  const maxLength = FIELD_MAX_LENGTH[field]!
-  if (trimmed.length > maxLength) {
-    return NextResponse.json(
-      {
-        error: 'value_too_long',
-        detail: `Longueur max ${maxLength} caractères.`,
-      },
-      { status: 400 },
-    )
+
+  // Validation typée par catégorie
+  let normalizedValue: string | MomentBusiness[] | Objectif[] | Ressources
+
+  if (TEXT_FIELDS.has(field)) {
+    if (typeof value !== 'string') {
+      return NextResponse.json(
+        { error: 'invalid_value', detail: 'Valeur attendue : chaîne.' },
+        { status: 400 },
+      )
+    }
+    const trimmed = value.trim()
+    if (trimmed.length === 0) {
+      return NextResponse.json(
+        { error: 'empty_value', detail: 'La valeur ne peut pas être vide.' },
+        { status: 400 },
+      )
+    }
+    const maxLength = TEXT_FIELD_MAX_LENGTH[field]!
+    if (trimmed.length > maxLength) {
+      return NextResponse.json(
+        {
+          error: 'value_too_long',
+          detail: `Longueur max ${maxLength} caractères.`,
+        },
+        { status: 400 },
+      )
+    }
+    normalizedValue = trimmed
+  } else {
+    // Champ JSONB
+    if (field === 'calendrier_business') {
+      const v = validateCalendrierBusiness(value)
+      if (!v) {
+        return NextResponse.json(
+          { error: 'invalid_structure', detail: 'Structure calendrier_business invalide.' },
+          { status: 400 },
+        )
+      }
+      normalizedValue = v
+    } else if (field === 'objectifs') {
+      const v = validateObjectifs(value)
+      if (!v) {
+        return NextResponse.json(
+          { error: 'invalid_structure', detail: 'Structure objectifs invalide.' },
+          { status: 400 },
+        )
+      }
+      normalizedValue = v
+    } else {
+      // ressources
+      const v = validateRessources(value)
+      if (!v) {
+        return NextResponse.json(
+          { error: 'invalid_structure', detail: 'Structure ressources invalide.' },
+          { status: 400 },
+        )
+      }
+      normalizedValue = v
+    }
   }
 
   const supabase = await createClient()
@@ -109,8 +235,8 @@ export async function PATCH(request: Request) {
   // Update via admin client (RLS bypass — l'auth + l'appartenance ont
   // déjà été vérifiées côté server avec le user authentifié).
   const admin = createAdmin()
-  const updatePayload: Record<string, string | unknown> = {
-    [field]: trimmed,
+  const updatePayload: Record<string, unknown> = {
+    [field]: normalizedValue,
     updated_at: new Date().toISOString(),
   }
   const adminTyped = admin as unknown as {
@@ -131,7 +257,7 @@ export async function PATCH(request: Request) {
     .from('brands')
     .update(updatePayload)
     .eq('id', brandId)
-    .select('id, name, secteur, ton, singularite')
+    .select('id, name, secteur, ton, singularite, calendrier_business, objectifs, ressources')
     .maybeSingle()
 
   if (updateErr) {
