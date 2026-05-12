@@ -17,26 +17,42 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdmin } from '@/lib/supabase/admin'
-import type { MomentBusiness, Objectif, Ressources, CapaciteProduction } from '@/types/ma-marque'
+import type {
+  MomentBusiness,
+  Objectif,
+  Ressources,
+  CapaciteProduction,
+  Benchmark,
+  Canaux,
+  BrandBook,
+  PaletteCouleur,
+} from '@/types/ma-marque'
 import type { PilierNarratif } from '@/types/programme'
 
 // ── Champs texte ─────────────────────────────────────────────────────────────
+// Sprint 36.B.3 — ajout des champs cible et univers_refuse.
 
 const TEXT_FIELD_MAX_LENGTH: Record<string, number> = {
   name: 80,
   secteur: 120,
   ton: 280,
   singularite: 400,
+  cible: 1200,
+  univers_refuse: 800,
 }
 const TEXT_FIELDS = new Set(Object.keys(TEXT_FIELD_MAX_LENGTH))
 
 // ── Champs JSONB ─────────────────────────────────────────────────────────────
+// Sprint 36.B.3 — ajout de benchmarks, canaux, brand_book.
 
 const JSONB_FIELDS = new Set([
   'calendrier_business',
   'objectifs',
   'ressources',
   'piliers_narratifs',
+  'benchmarks',
+  'canaux',
+  'brand_book',
 ])
 
 const TYPES_MOMENT = new Set(['lancement', 'evenement', 'operation', 'saison'])
@@ -132,6 +148,97 @@ function validateRessources(value: unknown): Ressources | null {
   }
 }
 
+// ── Sprint 36.B.3 — Validators benchmarks / canaux / brand_book ──────
+
+const CANAUX_IDS = new Set(['linkedin', 'newsletter', 'site', 'gmb'])
+const HEX_RE = /^#[0-9A-Fa-f]{6}$/
+
+function validateBenchmarks(value: unknown): Benchmark[] | null {
+  if (!Array.isArray(value)) return null
+  if (value.length > 6) return null
+  const out: Benchmark[] = []
+  for (const raw of value) {
+    if (!raw || typeof raw !== 'object') return null
+    const r = raw as Record<string, unknown>
+    if (typeof r.id !== 'string' || r.id.trim().length === 0) return null
+    if (typeof r.nom !== 'string') return null
+    if (typeof r.raison !== 'string') return null
+    out.push({
+      id: r.id,
+      nom: r.nom.trim().slice(0, 80),
+      raison: r.raison.trim().slice(0, 200),
+    })
+  }
+  return out
+}
+
+function validateCanaux(value: unknown): Canaux | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const r = value as Record<string, unknown>
+  const out: Partial<Canaux> = {}
+  for (const id of ['linkedin', 'newsletter', 'site', 'gmb'] as const) {
+    if (!CANAUX_IDS.has(id)) return null
+    const c = r[id]
+    if (!c || typeof c !== 'object' || Array.isArray(c)) return null
+    const cc = c as Record<string, unknown>
+    if (typeof cc.actif !== 'boolean') return null
+    if (typeof cc.url !== 'string') return null
+    out[id] = { actif: cc.actif, url: cc.url.trim().slice(0, 400) }
+  }
+  return out as Canaux
+}
+
+function validatePalette(value: unknown): PaletteCouleur[] | null {
+  if (!Array.isArray(value)) return null
+  if (value.length > 12) return null
+  const out: PaletteCouleur[] = []
+  for (const raw of value) {
+    if (!raw || typeof raw !== 'object') return null
+    const r = raw as Record<string, unknown>
+    if (typeof r.nom !== 'string') return null
+    if (typeof r.hex !== 'string') return null
+    const hex = r.hex.trim()
+    if (!HEX_RE.test(hex)) return null
+    out.push({ nom: r.nom.trim().slice(0, 32), hex: hex.toUpperCase() })
+  }
+  return out
+}
+
+function validateBrandBook(value: unknown): BrandBook | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const r = value as Record<string, unknown>
+  const palette = validatePalette(r.palette ?? [])
+  if (palette === null) return null
+
+  const typoRaw = r.typo
+  let typoOut: BrandBook['typo'] = { principale: '' }
+  if (typoRaw && typeof typoRaw === 'object' && !Array.isArray(typoRaw)) {
+    const t = typoRaw as Record<string, unknown>
+    if (typeof t.principale === 'string') {
+      typoOut = { principale: t.principale.trim().slice(0, 80) }
+      if (typeof t.secondaire === 'string' && t.secondaire.trim().length > 0) {
+        typoOut.secondaire = t.secondaire.trim().slice(0, 80)
+      }
+      if (typeof t.specimen_url === 'string' && t.specimen_url.length > 0) {
+        typoOut.specimen_url = t.specimen_url.slice(0, 600)
+      }
+    }
+  }
+
+  const logo_url = typeof r.logo_url === 'string' ? r.logo_url.slice(0, 600) : ''
+
+  const dos =
+    Array.isArray(r.dos) && r.dos.every((s) => typeof s === 'string')
+      ? (r.dos as string[]).slice(0, 12).map((s) => s.slice(0, 600))
+      : []
+  const donts =
+    Array.isArray(r.donts) && r.donts.every((s) => typeof s === 'string')
+      ? (r.donts as string[]).slice(0, 12).map((s) => s.slice(0, 600))
+      : []
+
+  return { palette, typo: typoOut, logo_url, dos, donts }
+}
+
 // ── Body type ────────────────────────────────────────────────────────────────
 
 type UpdateBody = {
@@ -165,6 +272,9 @@ export async function PATCH(request: Request) {
     | Objectif[]
     | Ressources
     | PilierNarratif[]
+    | Benchmark[]
+    | Canaux
+    | BrandBook
 
   if (TEXT_FIELDS.has(field)) {
     if (typeof value !== 'string') {
@@ -220,12 +330,39 @@ export async function PATCH(request: Request) {
         )
       }
       normalizedValue = v
-    } else {
-      // piliers_narratifs
+    } else if (field === 'piliers_narratifs') {
       const v = validatePiliersNarratifs(value)
       if (!v) {
         return NextResponse.json(
           { error: 'invalid_structure', detail: 'Structure piliers_narratifs invalide (3 items, nom/description/ratio_suggere).' },
+          { status: 400 },
+        )
+      }
+      normalizedValue = v
+    } else if (field === 'benchmarks') {
+      const v = validateBenchmarks(value)
+      if (!v) {
+        return NextResponse.json(
+          { error: 'invalid_structure', detail: 'Structure benchmarks invalide.' },
+          { status: 400 },
+        )
+      }
+      normalizedValue = v
+    } else if (field === 'canaux') {
+      const v = validateCanaux(value)
+      if (!v) {
+        return NextResponse.json(
+          { error: 'invalid_structure', detail: 'Structure canaux invalide.' },
+          { status: 400 },
+        )
+      }
+      normalizedValue = v
+    } else {
+      // brand_book
+      const v = validateBrandBook(value)
+      if (!v) {
+        return NextResponse.json(
+          { error: 'invalid_structure', detail: 'Structure brand_book invalide.' },
           { status: 400 },
         )
       }
@@ -297,7 +434,7 @@ export async function PATCH(request: Request) {
     .from('brands')
     .update(updatePayload)
     .eq('id', brandId)
-    .select('id, name, secteur, ton, singularite, calendrier_business, objectifs, ressources, piliers_narratifs')
+    .select('id, name, secteur, ton, singularite, cible, univers_refuse, calendrier_business, objectifs, ressources, piliers_narratifs, benchmarks, canaux, brand_book')
     .maybeSingle()
 
   if (updateErr) {

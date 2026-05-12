@@ -1,5 +1,9 @@
-// Sprint 36.B.2 — Panneau gauche (40%) du Split Brief Calendrier business.
-// 3 propositions sur-mesure (silent swap) + formulaire d'ajout + liste éditable.
+// Sprint 36.B.2 → 36.B.3 — Panneau gauche du Split Brief Calendrier business.
+//
+// Patches Sprint 36.B.3 :
+//   - Fix bug : click sur piste = pré-remplit (titre + type), pas d'insertion.
+//   - Layout dates "Du __ au __" sur une seule ligne.
+//   - Accordéon Détails : importance, pilier associé, visibilité, notes.
 
 'use client'
 
@@ -7,13 +11,17 @@ import { useState } from 'react'
 import type {
   MomentBusiness,
   MomentBusinessType,
+  MomentImportance,
+  MomentVisibilite,
   PropositionCalendrier,
 } from '@/types/ma-marque'
+import type { PilierNarratif } from '@/types/programme'
 import { TYPE_COULEURS } from './CalendrierPreview'
 
 type Props = {
   moments: MomentBusiness[]
   propositions: PropositionCalendrier[]
+  piliers?: PilierNarratif[]
   onAdd: (m: Omit<MomentBusiness, 'id'>) => void
   onRemove: (id: string) => void
 }
@@ -23,6 +31,17 @@ const TYPES: { value: MomentBusinessType; label: string }[] = [
   { value: 'evenement', label: 'Événement' },
   { value: 'operation', label: 'Opération' },
   { value: 'saison', label: 'Saison' },
+]
+
+const IMPORTANCES: { value: MomentImportance; label: string }[] = [
+  { value: 'mineur', label: 'Mineur' },
+  { value: 'structurant', label: 'Structurant' },
+  { value: 'majeur', label: 'Majeur' },
+]
+
+const VISIBILITES: { value: MomentVisibilite; label: string }[] = [
+  { value: 'public', label: 'Public' },
+  { value: 'confidentiel', label: 'Confidentiel' },
 ]
 
 function todayISO(): string {
@@ -35,12 +54,23 @@ function formaterDate(iso: string): string {
   return `${d}/${m}/${y}`
 }
 
-export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Props) {
+export function CalendrierContext({
+  moments,
+  propositions,
+  piliers = [],
+  onAdd,
+  onRemove,
+}: Props) {
   const [titre, setTitre] = useState('')
   const [type, setType] = useState<MomentBusinessType>('lancement')
   const [dateDebut, setDateDebut] = useState(todayISO())
   const [dateFin, setDateFin] = useState('')
   const [erreur, setErreur] = useState<string | null>(null)
+  const [detailsOuverts, setDetailsOuverts] = useState(false)
+  const [importance, setImportance] = useState<MomentImportance | ''>('')
+  const [pilierId, setPilierId] = useState<string>('')
+  const [visibilite, setVisibilite] = useState<MomentVisibilite | ''>('')
+  const [notes, setNotes] = useState('')
 
   function reset() {
     setTitre('')
@@ -48,6 +78,11 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
     setDateDebut(todayISO())
     setDateFin('')
     setErreur(null)
+    setImportance('')
+    setPilierId('')
+    setVisibilite('')
+    setNotes('')
+    setDetailsOuverts(false)
   }
 
   function valider(e: React.FormEvent) {
@@ -74,16 +109,19 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
       type,
       date_debut: dateDebut,
       ...(dateFin ? { date_fin: dateFin } : {}),
+      ...(importance ? { importance } : {}),
+      ...(pilierId ? { pilier_id: pilierId } : {}),
+      ...(visibilite ? { visibilite } : {}),
+      ...(notes.trim().length > 0 ? { notes: notes.trim().slice(0, 600) } : {}),
     })
     reset()
   }
 
-  function ajouterDepuisProposition(p: PropositionCalendrier) {
-    onAdd({
-      titre: p.titre,
-      type: p.type,
-      date_debut: todayISO(),
-    })
+  // Sprint 36.B.3 — Fix bug : pré-remplit le formulaire, n'insère pas.
+  function preremplirDepuisProposition(p: PropositionCalendrier) {
+    setTitre(p.titre)
+    setType(p.type)
+    setErreur(null)
   }
 
   return (
@@ -107,6 +145,16 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
         >
           Quelques pistes pour démarrer
         </h4>
+        <p
+          style={{
+            fontFamily: 'var(--font-system)',
+            fontSize: 13,
+            color: 'var(--color-tertiary-label)',
+            margin: 0,
+          }}
+        >
+          Une piste remplit le formulaire ci-dessous. Tu valides toi-même avec Ajouter.
+        </p>
         <ul
           style={{
             listStyle: 'none',
@@ -121,7 +169,7 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
             <li key={`${i}-${p.titre}`}>
               <button
                 type="button"
-                onClick={() => ajouterDepuisProposition(p)}
+                onClick={() => preremplirDepuisProposition(p)}
                 className="glass-thin"
                 style={{
                   width: '100%',
@@ -153,12 +201,11 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
                 </span>
                 <span
                   style={{
-                    fontSize: 18,
-                    lineHeight: 1,
-                    color: 'var(--color-secondary-label)',
+                    fontSize: 12,
+                    color: 'var(--color-tertiary-label)',
                   }}
                 >
-                  +
+                  Pré-remplir
                 </span>
               </button>
             </li>
@@ -187,11 +234,7 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
         </h4>
         <form
           onSubmit={valider}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-          }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
         >
           <input
             type="text"
@@ -210,33 +253,52 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
               outline: 'none',
             }}
           />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value as MomentBusinessType)}
-              className="glass-thin"
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as MomentBusinessType)}
+            className="glass-thin"
+            style={{
+              padding: '10px 12px',
+              borderRadius: 12,
+              border: '1px solid rgba(0,0,0,0.06)',
+              fontFamily: 'var(--font-system)',
+              fontSize: 14,
+              color: 'var(--color-label)',
+              outline: 'none',
+              appearance: 'none',
+            }}
+          >
+            {TYPES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+
+          {/* Sprint 36.B.3 — Dates sur une seule ligne : Du __ au __ */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'auto 1fr auto 1fr',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <span
               style={{
-                padding: '10px 12px',
-                borderRadius: 12,
-                border: '1px solid rgba(0,0,0,0.06)',
                 fontFamily: 'var(--font-system)',
-                fontSize: 14,
-                color: 'var(--color-label)',
-                outline: 'none',
-                appearance: 'none',
+                fontSize: 13,
+                color: 'var(--color-secondary-label)',
               }}
             >
-              {TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
+              Du
+            </span>
             <input
               type="date"
               value={dateDebut}
               onChange={(e) => setDateDebut(e.target.value)}
               className="glass-thin"
+              aria-label="Date de début"
               style={{
                 padding: '10px 12px',
                 borderRadius: 12,
@@ -247,23 +309,155 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
                 outline: 'none',
               }}
             />
+            <span
+              style={{
+                fontFamily: 'var(--font-system)',
+                fontSize: 13,
+                color: 'var(--color-secondary-label)',
+              }}
+            >
+              au
+            </span>
+            <input
+              type="date"
+              value={dateFin}
+              onChange={(e) => setDateFin(e.target.value)}
+              className="glass-thin"
+              aria-label="Date de fin (optionnel)"
+              style={{
+                padding: '10px 12px',
+                borderRadius: 12,
+                border: '1px solid rgba(0,0,0,0.06)',
+                fontFamily: 'var(--font-system)',
+                fontSize: 14,
+                color: 'var(--color-secondary-label)',
+                outline: 'none',
+              }}
+            />
           </div>
-          <input
-            type="date"
-            value={dateFin}
-            onChange={(e) => setDateFin(e.target.value)}
-            placeholder="Date de fin (optionnel)"
-            className="glass-thin"
+
+          {/* Sprint 36.B.3 — Accordéon Détails */}
+          <details
+            open={detailsOuverts}
+            onToggle={(e) => setDetailsOuverts((e.target as HTMLDetailsElement).open)}
             style={{
-              padding: '10px 12px',
               borderRadius: 12,
-              border: '1px solid rgba(0,0,0,0.06)',
-              fontFamily: 'var(--font-system)',
-              fontSize: 14,
-              color: 'var(--color-secondary-label)',
-              outline: 'none',
+              padding: '6px 0',
             }}
-          />
+          >
+            <summary
+              style={{
+                cursor: 'pointer',
+                fontFamily: 'var(--font-system)',
+                fontSize: 13,
+                fontWeight: 500,
+                color: 'var(--color-secondary-label)',
+                padding: '6px 2px',
+                listStyle: 'none',
+                userSelect: 'none',
+              }}
+            >
+              Détails {detailsOuverts ? '−' : '+'}
+            </summary>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
+                paddingTop: 10,
+              }}
+            >
+              {/* Importance */}
+              <div>
+                <DetailLabel>Importance</DetailLabel>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {IMPORTANCES.map((i) => (
+                    <Chip
+                      key={i.value}
+                      label={i.label}
+                      actif={importance === i.value}
+                      onClick={() =>
+                        setImportance(importance === i.value ? '' : i.value)
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Pilier */}
+              {piliers.length > 0 ? (
+                <div>
+                  <DetailLabel>Pilier associé</DetailLabel>
+                  <select
+                    value={pilierId}
+                    onChange={(e) => setPilierId(e.target.value)}
+                    className="glass-thin"
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      border: '1px solid rgba(0,0,0,0.06)',
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 13,
+                      color: 'var(--color-label)',
+                      outline: 'none',
+                      appearance: 'none',
+                    }}
+                  >
+                    <option value="">Aucun pilier</option>
+                    {piliers.map((p, i) => (
+                      <option key={`${p.nom}-${i}`} value={p.nom}>
+                        {p.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+
+              {/* Visibilité */}
+              <div>
+                <DetailLabel>Visibilité</DetailLabel>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {VISIBILITES.map((v) => (
+                    <Chip
+                      key={v.value}
+                      label={v.label}
+                      actif={visibilite === v.value}
+                      onClick={() =>
+                        setVisibilite(visibilite === v.value ? '' : v.value)
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <DetailLabel>Notes éditoriales</DetailLabel>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Précisions sur l'angle, le ton, les visuels prévus…"
+                  rows={3}
+                  maxLength={600}
+                  className="glass-thin"
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    fontFamily: 'var(--font-system)',
+                    fontSize: 13,
+                    lineHeight: 1.4,
+                    color: 'var(--color-secondary-label)',
+                    outline: 'none',
+                    resize: 'vertical',
+                  }}
+                />
+              </div>
+            </div>
+          </details>
+
           {erreur ? (
             <p
               role="alert"
@@ -411,5 +605,57 @@ export function CalendrierContext({ moments, propositions, onAdd, onRemove }: Pr
         </section>
       ) : null}
     </div>
+  )
+}
+
+// ── Sous-composants accordéon ────────────────────────────────────────
+
+function DetailLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        fontFamily: 'var(--font-system)',
+        fontSize: 12,
+        fontWeight: 500,
+        color: 'var(--color-tertiary-label)',
+        marginBottom: 6,
+        textTransform: 'uppercase',
+        letterSpacing: '0.04em',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function Chip({
+  label,
+  actif,
+  onClick,
+}: {
+  label: string
+  actif: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={actif}
+      style={{
+        padding: '6px 12px',
+        borderRadius: 14,
+        border: 'none',
+        cursor: 'pointer',
+        background: actif ? 'var(--color-label)' : 'rgba(0,0,0,0.04)',
+        color: actif ? 'var(--color-background)' : 'var(--color-secondary-label)',
+        fontFamily: 'var(--font-system)',
+        fontSize: 12,
+        fontWeight: actif ? 600 : 500,
+        transition: 'background 160ms ease, color 160ms ease',
+      }}
+    >
+      {label}
+    </button>
   )
 }

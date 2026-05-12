@@ -14,6 +14,9 @@ type Props = {
   ressources: Ressources
   propositions: PropositionRessources[]
   onChange: (next: Ressources) => void
+  // Sprint 36.B.3 — masque la section "Trois profils possibles" quand le
+  // wrapper RessourcesSheet rend déjà sa propre rangée de chips profils.
+  hidePropositions?: boolean
 }
 
 const CAPACITES: { value: CapaciteProduction; label: string }[] = [
@@ -179,10 +182,16 @@ function Toggle({
   )
 }
 
-export function RessourcesContext({ ressources, propositions, onChange }: Props) {
+export function RessourcesContext({
+  ressources,
+  propositions,
+  onChange,
+  hidePropositions = false,
+}: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
       {/* Propositions sur-mesure */}
+      {hidePropositions ? null : (
       <section
         aria-labelledby="ress-props-title"
         style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}
@@ -241,6 +250,7 @@ export function RessourcesContext({ ressources, propositions, onChange }: Props)
           ))}
         </ul>
       </section>
+      )}
 
       {/* Capacités à la main */}
       <section

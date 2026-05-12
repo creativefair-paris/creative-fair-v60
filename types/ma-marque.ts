@@ -1,5 +1,6 @@
-// Sprint 36.B.2 — Types des 4 blocs Ma Marque (calendrier, objectifs, ressources, piliers).
+// Sprint 36.B.2 → 36.B.3 — Types des 14 blocs Ma Marque.
 // Source unique de vérité pour le front, les endpoints et les validations IA.
+// 36.B.3 ajoute : Cible, UniversRefuse, Benchmarks, Canaux, BrandBook, Archives.
 
 export type MomentBusinessType = 'lancement' | 'evenement' | 'operation' | 'saison'
 
@@ -9,6 +10,11 @@ export type MomentBusiness = {
   date_debut: string // ISO YYYY-MM-DD
   date_fin?: string
   type: MomentBusinessType
+  // Sprint 36.B.3 — détails optionnels, stockés dans le même JSONB.
+  importance?: 'mineur' | 'structurant' | 'majeur'
+  pilier_id?: string
+  visibilite?: 'public' | 'confidentiel'
+  notes?: string
 }
 
 export type Objectif = {
@@ -71,4 +77,163 @@ export function ressourcesEstVide(r: Ressources | null | undefined): boolean {
     !r.terrain &&
     !r.studio
   )
+}
+
+// ── Sprint 36.B.3 — Nouveaux blocs Ma Marque ─────────────────────────
+
+// Cible : texte libre — pas de type spécifique, juste string.
+// UniversRefuse : idem.
+
+export type Benchmark = {
+  id: string
+  nom: string
+  raison: string // max 200 char
+}
+
+export const BENCHMARKS_VIDES: Benchmark[] = []
+
+export function benchmarksEstVide(b: Benchmark[] | null | undefined): boolean {
+  return !b || b.length === 0
+}
+
+// Canaux : 4 destinations adjacentes V1 (LinkedIn, Newsletter, Site, GMB).
+// TikTok / X / YouTube / Facebook : refus assumé V1.
+
+export type CanalId = 'linkedin' | 'newsletter' | 'site' | 'gmb'
+
+export type CanalConfig = {
+  actif: boolean
+  url: string // handle ou URL complète
+}
+
+export type Canaux = Record<CanalId, CanalConfig>
+
+export const CANAUX_VIDES: Canaux = {
+  linkedin:   { actif: false, url: '' },
+  newsletter: { actif: false, url: '' },
+  site:       { actif: false, url: '' },
+  gmb:        { actif: false, url: '' },
+}
+
+export const CANAUX_LABELS: Record<CanalId, string> = {
+  linkedin:   'LinkedIn',
+  newsletter: 'Newsletter',
+  site:       'Site web',
+  gmb:        'Google My Business',
+}
+
+export const CANAUX_ORDRE: CanalId[] = ['linkedin', 'newsletter', 'site', 'gmb']
+
+export function canauxNormaliser(c: Partial<Canaux> | null | undefined): Canaux {
+  if (!c) return CANAUX_VIDES
+  return {
+    linkedin:   { actif: c.linkedin?.actif ?? false,   url: c.linkedin?.url ?? '' },
+    newsletter: { actif: c.newsletter?.actif ?? false, url: c.newsletter?.url ?? '' },
+    site:       { actif: c.site?.actif ?? false,       url: c.site?.url ?? '' },
+    gmb:        { actif: c.gmb?.actif ?? false,        url: c.gmb?.url ?? '' },
+  }
+}
+
+export function canauxActifs(c: Canaux): CanalId[] {
+  return CANAUX_ORDRE.filter((id) => c[id]?.actif && (c[id]?.url ?? '').trim().length > 0)
+}
+
+export function canauxEstVide(c: Canaux | null | undefined): boolean {
+  if (!c) return true
+  return canauxActifs(canauxNormaliser(c)).length === 0
+}
+
+// Brand book : palette + typo + logo + dos / donts.
+
+export type PaletteCouleur = {
+  nom: string
+  hex: string // #RRGGBB
+}
+
+export type BrandBookTypo = {
+  principale: string
+  secondaire?: string
+  specimen_url?: string
+}
+
+export type BrandBook = {
+  palette: PaletteCouleur[]
+  typo: BrandBookTypo
+  logo_url: string
+  dos: string[]   // URLs Storage
+  donts: string[] // URLs Storage
+}
+
+export const BRAND_BOOK_VIDE: BrandBook = {
+  palette: [],
+  typo: { principale: '' },
+  logo_url: '',
+  dos: [],
+  donts: [],
+}
+
+export function brandBookNormaliser(b: Partial<BrandBook> | null | undefined): BrandBook {
+  if (!b) return BRAND_BOOK_VIDE
+  return {
+    palette: Array.isArray(b.palette) ? b.palette : [],
+    typo: {
+      principale: b.typo?.principale ?? '',
+      ...(b.typo?.secondaire ? { secondaire: b.typo.secondaire } : {}),
+      ...(b.typo?.specimen_url ? { specimen_url: b.typo.specimen_url } : {}),
+    },
+    logo_url: b.logo_url ?? '',
+    dos: Array.isArray(b.dos) ? b.dos : [],
+    donts: Array.isArray(b.donts) ? b.donts : [],
+  }
+}
+
+export function brandBookEstVide(b: BrandBook | null | undefined): boolean {
+  if (!b) return true
+  const n = brandBookNormaliser(b)
+  return (
+    n.palette.length === 0 &&
+    n.logo_url === '' &&
+    n.typo.principale === '' &&
+    n.dos.length === 0 &&
+    n.donts.length === 0
+  )
+}
+
+// Palette pastel par défaut quand brand_book.palette est vide.
+// Doctrine : aucune saturation forte, tons clairs hérités du moodboard
+// éditorial. Servent aussi à colorer les 3 piliers narratifs par défaut.
+export const PASTELS_DEFAUT: PaletteCouleur[] = [
+  { nom: 'Sable',   hex: '#E8DDD0' },
+  { nom: 'Brume',   hex: '#C9D4DD' },
+  { nom: 'Ardoise', hex: '#B5B2C7' },
+]
+
+// Archives : entrée d'archive dans la mémoire de la marque.
+
+export type ArchiveType = 'texte' | 'pdf' | 'image' | 'video' | 'lien'
+
+export type BrandArchive = {
+  id: string
+  type: ArchiveType
+  titre: string
+  description: string
+  url: string | null
+  fichier_path: string | null
+  tags: string[]
+  created_at: string
+  updated_at: string
+}
+
+// Calendrier business — extension Sprint 36.B.3 (champs optionnels).
+// Tous les nouveaux champs sont optional → compatible avec moments
+// préexistants qui n'ont que id/titre/dates/type.
+
+export type MomentImportance = 'mineur' | 'structurant' | 'majeur'
+export type MomentVisibilite = 'public' | 'confidentiel'
+
+export type MomentBusinessExtras = {
+  importance?: MomentImportance
+  pilier_id?: string
+  visibilite?: MomentVisibilite
+  notes?: string
 }

@@ -14,9 +14,11 @@ type Props = {
   onRegenerer: () => Promise<void>
   regenerationEnCours: boolean
   erreurRegeneration: string | null
+  // Sprint 36.B.3 — palette injectée par le wrapper (brand_book ou pastels).
+  couleurs?: readonly string[]
 }
 
-const PILIER_COULEURS = ['#007AFF', '#AF52DE', '#FF9500'] as const
+const PILIER_COULEURS_DEFAUT = ['#007AFF', '#AF52DE', '#FF9500'] as const
 
 export function PiliersContext({
   piliers,
@@ -24,7 +26,9 @@ export function PiliersContext({
   onRegenerer,
   regenerationEnCours,
   erreurRegeneration,
+  couleurs = PILIER_COULEURS_DEFAUT,
 }: Props) {
+  const palette = couleurs.length >= 1 ? couleurs : PILIER_COULEURS_DEFAUT
   const [confirmationOuverte, setConfirmationOuverte] = useState(false)
 
   async function confirmer() {
@@ -70,7 +74,7 @@ export function PiliersContext({
               style={{
                 borderRadius: 16,
                 padding: 'var(--space-4)',
-                borderLeft: `4px solid ${PILIER_COULEURS[i] ?? PILIER_COULEURS[0]}`,
+                borderLeft: `4px solid ${palette[i] ?? palette[0]}`,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 10,

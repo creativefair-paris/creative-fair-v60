@@ -7,10 +7,13 @@ import type { PilierEditable } from '@/types/ma-marque'
 
 type Props = {
   piliers: PilierEditable[]
+  // Sprint 36.B.3 — couleurs injectables, hérités du brand_book ou pastels.
+  couleurs?: readonly string[]
 }
 
-// Couleurs signature des piliers (cohérent avec styles/liquid-glass.css)
-const PILIER_COULEURS = ['#007AFF', '#AF52DE', '#FF9500'] as const
+// Fallback signature (legacy). Le wrapper PiliersSheet passe désormais
+// des pastels héritées du brand_book (Pilier 1 — artisanat).
+const PILIER_COULEURS_DEFAUT = ['#007AFF', '#AF52DE', '#FF9500'] as const
 
 const TAILLE = 320
 const RAYON = 140
@@ -46,8 +49,9 @@ function normaliserRatios(piliers: PilierEditable[]): number[] {
   return piliers.map((p) => Math.max(0, p.ratio_suggere) / total)
 }
 
-export function PiliersPreview({ piliers }: Props) {
+export function PiliersPreview({ piliers, couleurs = PILIER_COULEURS_DEFAUT }: Props) {
   const ratios = normaliserRatios(piliers)
+  const palette = couleurs.length >= 1 ? couleurs : PILIER_COULEURS_DEFAUT
   // Reduce pour éviter reassignment d'une variable locale après render
   // (react-hooks/immutability).
   const secteurs = piliers.reduce<
@@ -101,7 +105,7 @@ export function PiliersPreview({ piliers }: Props) {
           <path
             key={s.p.id}
             d={arcPath(s.debut, s.fin)}
-            fill={PILIER_COULEURS[s.index] ?? PILIER_COULEURS[0]}
+            fill={palette[s.index] ?? palette[0]}
             opacity={0.92}
             stroke="var(--color-background)"
             strokeWidth={2}
@@ -129,43 +133,44 @@ export function PiliersPreview({ piliers }: Props) {
           marginTop: 'var(--space-3)',
         }}
       >
+        {/* Sprint 36.B.3 — légende ultra-courte : pastille + titre + %.
+            La description vit uniquement à gauche dans le formulaire. */}
         {secteurs.map((s) => (
           <li
             key={s.p.id}
-            className="glass-thin"
             style={{
               display: 'flex',
-              alignItems: 'flex-start',
+              alignItems: 'center',
               gap: 'var(--space-3)',
-              padding: 'var(--space-3) var(--space-4)',
-              borderRadius: 16,
-              borderLeft: `4px solid ${PILIER_COULEURS[s.index] ?? PILIER_COULEURS[0]}`,
+              padding: '6px 4px',
             }}
           >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  fontFamily: 'var(--font-system)',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: 'var(--color-label)',
-                  letterSpacing: '-0.005em',
-                }}
-              >
-                {s.p.nom}
-              </div>
-              <div
-                style={{
-                  fontFamily: 'var(--font-system)',
-                  fontSize: 13,
-                  lineHeight: 1.4,
-                  color: 'var(--color-secondary-label)',
-                  marginTop: 2,
-                }}
-              >
-                {s.p.description}
-              </div>
-            </div>
+            <span
+              aria-hidden="true"
+              style={{
+                flexShrink: 0,
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                background: palette[s.index] ?? palette[0],
+              }}
+            />
+            <span
+              style={{
+                flex: 1,
+                minWidth: 0,
+                fontFamily: 'var(--font-system)',
+                fontSize: 16,
+                fontWeight: 600,
+                color: 'var(--color-label)',
+                letterSpacing: '-0.005em',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {s.p.nom}
+            </span>
             <span
               style={{
                 flexShrink: 0,
@@ -173,7 +178,6 @@ export function PiliersPreview({ piliers }: Props) {
                 fontSize: 13,
                 fontWeight: 600,
                 color: 'var(--color-tertiary-label)',
-                paddingTop: 2,
               }}
             >
               {Math.round(s.ratio * 100)}%

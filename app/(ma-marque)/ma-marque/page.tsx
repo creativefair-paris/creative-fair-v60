@@ -1,22 +1,27 @@
-// Sprint 36.B.2 — Page Ma Marque : tableau de bord 4 blocs en Split Brief.
+// Sprint 36.B.3 — Page Ma Marque : tableau de bord 14 rangs (pattern iOS Settings).
 //
-// Phrase contextuelle dynamique en tête (Pilier 4 — Aspirational storytelling).
-// Quatre tuiles cliquables sous les champs texte :
-//   Piliers narratifs · Cap de saison · Calendrier business · Ressources de production
-// Chaque tuile ouvre un Split Brief plein écran 40/60.
+// Server Component. Lit la marque + les archives, construit le snapshot,
+// délègue toute l'interaction (sheets) au client MaMarqueDashboard.
+//
+// Phrase contextuelle dynamique en tête (Pilier 4 — aspirational storytelling).
+// Aucun pourcentage exposé. Compteur N/14 admissible (lisible, pas gamifié).
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdmin } from '@/lib/supabase/admin'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { NavigationBar } from '@/components/layout/NavigationBar'
-import { MaMarqueFields } from '@/components/ma-marque/MaMarqueFields'
-import { CalendrierBusinessBloc } from '@/components/ma-marque/calendrier/CalendrierBusinessBloc'
-import { ObjectifsBloc } from '@/components/ma-marque/objectifs/ObjectifsBloc'
-import { RessourcesBloc } from '@/components/ma-marque/ressources/RessourcesBloc'
-import { PiliersBloc } from '@/components/ma-marque/piliers/PiliersBloc'
-import { getPhraseContextuelle, type BrandSnapshot } from '@/lib/ma-marque/score'
-import { RESSOURCES_VIDES } from '@/types/ma-marque'
-import type { MomentBusiness, Objectif, Ressources } from '@/types/ma-marque'
+import { MaMarqueDashboard } from '@/components/ma-marque/MaMarqueDashboard'
+import type { BrandSnapshot14 } from '@/lib/ma-marque/completude'
+import type {
+  MomentBusiness,
+  Objectif,
+  Ressources,
+  Benchmark,
+  Canaux,
+  BrandBook,
+  BrandArchive,
+} from '@/types/ma-marque'
 import type { PilierNarratif } from '@/types/programme'
 
 export const dynamic = 'force-dynamic'
@@ -27,22 +32,32 @@ type BrandRow = {
   secteur?: string | null
   ton?: string | null
   singularite?: string | null
+  cible?: string | null
+  univers_refuse?: string | null
   piliers_narratifs?: unknown
   calendrier_business?: unknown
   objectifs?: unknown
   ressources?: unknown
+  benchmarks?: unknown
+  canaux?: unknown
+  brand_book?: unknown
 }
 
 function asArray<T>(v: unknown): T[] {
   return Array.isArray(v) ? (v as T[]) : []
 }
 
-function asRessources(v: unknown): Ressources | null {
+function asObjet<T>(v: unknown): T | null {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return null
-  const r = v as Record<string, unknown>
-  // Rejette les objets incomplets — ex: brands legacy avec default '{}'
-  if (typeof r.photo !== 'string' || typeof r.video !== 'string') return null
-  return r as unknown as Ressources
+  return v as T
+}
+
+// Ressources : reject incomplete `{}`.
+function asRessources(v: unknown): Ressources | null {
+  const o = asObjet<Record<string, unknown>>(v)
+  if (!o) return null
+  if (typeof o.photo !== 'string' || typeof o.video !== 'string') return null
+  return o as unknown as Ressources
 }
 
 export default async function MaMarquePage() {
@@ -65,32 +80,62 @@ export default async function MaMarquePage() {
     redirect('/onboarding/analyse-marque')
   }
 
+  // Sélectionne tous les champs (texte + JSONB nouveaux et anciens).
+  // Si la migration 009 n'est pas encore appliquée, les colonnes manquantes
+  // remontent en `null` et les helpers `??` / `asXxx` gèrent gracieusement.
   const { data: rawExtras } = await supabase
     .from('brands')
     .select(
-      'id, name, secteur, ton, singularite, piliers_narratifs, calendrier_business, objectifs, ressources',
+      'id, name, secteur, ton, singularite, cible, univers_refuse, piliers_narratifs, calendrier_business, objectifs, ressources, benchmarks, canaux, brand_book',
     )
     .eq('id', brand.id)
     .maybeSingle()
   const extras = rawExtras as BrandRow | null
 
-  const nom = extras?.name ?? brand.name ?? ''
-  const secteur = extras?.secteur ?? ''
-  const ton = extras?.ton ?? ''
-  const singularite = extras?.singularite ?? ''
-
-  const calendrierBusiness = asArray<MomentBusiness>(extras?.calendrier_business)
-  const objectifs = asArray<Objectif>(extras?.objectifs)
-  const ressources = asRessources(extras?.ressources)
-  const piliersNarratifs = asArray<PilierNarratif>(extras?.piliers_narratifs)
-
-  const snapshot: BrandSnapshot = {
-    calendrierBusiness,
-    objectifs,
-    ressources,
-    piliersNarratifs,
+  // ── Archives — lecture via admin (RLS gérée serveur)
+  let archives: BrandArchive[] = []
+  try {
+    const admin = createAdmin()
+    const adminTyped = admin as unknown as {
+      from: (t: string) => {
+        select: (cols: string) => {
+          eq: (col: string, val: string) => {
+            order: (col: string, opts: { ascending: boolean }) => Promise<{
+              data: BrandArchive[] | null
+              error: { message: string } | null
+            }>
+          }
+        }
+      }
+    }
+    const { data: arr } = await adminTyped
+      .from('brand_archives')
+      .select('id, type, titre, description, url, fichier_path, tags, created_at, updated_at')
+      .eq('brand_id', brand.id)
+      .order('created_at', { ascending: false })
+    if (Array.isArray(arr)) archives = arr
+  } catch {
+    // table absente → tableau vide, la sheet Archives reste utilisable.
+    archives = []
   }
-  const phrase = getPhraseContextuelle(snapshot)
+
+  const snapshot: BrandSnapshot14 = {
+    nom: extras?.name ?? brand.name ?? '',
+    secteur: extras?.secteur ?? '',
+    ton: extras?.ton ?? '',
+    singularite: extras?.singularite ?? '',
+    cible: extras?.cible ?? '',
+    piliers: asArray<PilierNarratif>(extras?.piliers_narratifs),
+    capSaison: '',
+    objectifs: asArray<Objectif>(extras?.objectifs),
+    universRefuse: extras?.univers_refuse ?? '',
+    benchmarks: asArray<Benchmark>(extras?.benchmarks),
+    calendrierBusiness: asArray<MomentBusiness>(extras?.calendrier_business),
+    ressources: asRessources(extras?.ressources),
+    canaux: asObjet<Canaux>(extras?.canaux),
+    brandBook: asObjet<BrandBook>(extras?.brand_book),
+    archivesCount: archives.length,
+  }
 
   return (
     <div
@@ -118,52 +163,15 @@ export default async function MaMarquePage() {
         <div
           style={{
             width: '100%',
-            maxWidth: 1080,
+            maxWidth: 720,
             margin: '0 auto',
             padding: 'var(--space-5)',
             display: 'flex',
             flexDirection: 'column',
-            gap: 'var(--space-6)',
+            gap: 'var(--space-4)',
           }}
         >
-          {/* Phrase contextuelle — narration humaine, ton calibré sur l'état réel. */}
-          <p
-            style={{
-              fontFamily: 'var(--font-system)',
-              fontSize: 19,
-              lineHeight: 1.45,
-              letterSpacing: '-0.005em',
-              color: 'var(--color-secondary-label)',
-              margin: 0,
-              maxWidth: 640,
-            }}
-          >
-            {phrase}
-          </p>
-
-          <MaMarqueFields
-            initialValues={{
-              name: nom,
-              secteur,
-              ton,
-              singularite,
-            }}
-          />
-
-          {/* Grille 2×2 des 4 blocs Split Brief. */}
-          <section
-            aria-label="Les quatre blocs de ta marque"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-              gap: 'var(--space-4)',
-            }}
-          >
-            <PiliersBloc initialPiliers={piliersNarratifs} />
-            <ObjectifsBloc initialObjectifs={objectifs} />
-            <CalendrierBusinessBloc initialMoments={calendrierBusiness} />
-            <RessourcesBloc initialRessources={ressources ?? RESSOURCES_VIDES} />
-          </section>
+          <MaMarqueDashboard snapshot={snapshot} archives={archives} />
         </div>
       </div>
     </div>
