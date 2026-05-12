@@ -449,7 +449,7 @@ function CanalLigneExtension({
             width: 44,
             height: 26,
             borderRadius: 13,
-            background: canal.actif ? '#34C759' : 'rgba(0,0,0,0.15)',
+            background: canal.actif ? 'var(--color-system-green)' : 'rgba(0,0,0,0.15)',
             position: 'relative',
             transition: 'background 220ms ease',
           }}
