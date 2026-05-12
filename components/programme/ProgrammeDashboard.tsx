@@ -87,6 +87,9 @@ export function ProgrammeDashboard({
     if (cible) setSelectedPost(cible)
   }
 
+  // Sprint 36.B.8 — le container max-width/padding est désormais porté par
+  // .cfs-page-container dans la page parente. Le grid n'ajoute aucun padding
+  // horizontal propre pour rester aligné avec le PageHeader (1200px/24px).
   return (
     <div
       className="programme-split-grid"
@@ -94,10 +97,7 @@ export function ProgrammeDashboard({
         display: 'grid',
         gridTemplateColumns: '40% 60%',
         gap: 40,
-        padding: '0 var(--space-5)',
         width: '100%',
-        maxWidth: 1280,
-        margin: '0 auto',
         boxSizing: 'border-box',
       }}
     >

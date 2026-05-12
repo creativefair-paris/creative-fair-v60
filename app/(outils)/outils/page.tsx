@@ -52,12 +52,14 @@ export default async function OutilsPage() {
         {/* Sprint 36.B.5 — PageHeader unifié. */}
         <PageHeader title="Mes Outils" />
 
+        {/* Sprint 36.B.8 — cfs-page-container aligne sur 1200px/24px comme les autres pages. */}
         <section
+          className="cfs-page-container"
           style={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            padding: '0 var(--space-5) var(--space-12)',
+            paddingBottom: 'var(--space-12)',
           }}
         >
           <CatalogueOutils />

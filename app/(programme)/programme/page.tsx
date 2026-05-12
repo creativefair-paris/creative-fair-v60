@@ -144,9 +144,10 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
         {/* Sprint 36.B.5/7 — PageHeader unifié : breadcrumb + H1 + avatar même ligne. */}
         <PageHeader title="Mon Programme" />
 
-        {/* Contenu de page — programme-wrapper reste ici pour l'animation is-welcome */}
+        {/* Contenu de page — cfs-page-container homogénéise l'alignement 1200px/24px.
+             programme-wrapper only classe les animations is-welcome (Sprint 36.B). */}
         <div
-          className={isWelcome ? 'programme-wrapper is-welcome' : undefined}
+          className={`cfs-page-container${isWelcome ? ' programme-wrapper is-welcome' : ''}`}
           style={{
             flex: 1,
             display: 'flex',

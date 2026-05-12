@@ -5,14 +5,8 @@ export default function MonComptePage() {
   return (
     <main style={{ minHeight: '100vh' }}>
       <PageHeader title="Mon compte" />
-      <section
-        style={{
-          width: '100%',
-          maxWidth: 1200,
-          margin: '0 auto',
-          padding: '0 24px',
-        }}
-      >
+      {/* Sprint 36.B.8 — cfs-page-container homogénéise l'alignement 1200px/24px. */}
+      <section className="cfs-page-container">
         <p
           style={{
             fontFamily: 'var(--font-system)',

@@ -417,62 +417,58 @@ h1, h2, h3, h4, h5, h6 {
   color: rgba(0,0,0,0.7) !important;
 }
 
-/* Sprint 36.B.7 — PageHeader sticky avec double état visuel.
+/* Sprint 36.B.8 — PageHeader statique + container 1200px homogène.
+   sticky supprimé (Sprint 36.B.7 annulé).
    Architecture :
-     .cfs-page-header     — outer sticky bar, pleine largeur, porte le fond glass.
-     .cfs-page-header-inner — container 1200px centré, porte le contenu.
-   État repos  (data-scrolled=false) : transparent, sans border.
-   État scrollé (data-scrolled=true) : Liquid Glass niveau 3 + border hairline.
-   position:sticky crée un contexte de positionnement pour UserMenuBubble
-   (position:absolute top:76px right:24px) — ancrage sur .cfs-page-header-inner. */
+     .cfs-page-header      — wrapper sémantique <header>, transparent, statique.
+     .cfs-page-header-inner — container 1200px centré (= .cfs-page-container + flex-col).
+     .cfs-page-container   — utilitaire partagé toutes pages mères.
+   UserMenuBubble ancré sur .cfs-page-header-inner (position:relative). */
 
-/* — Outer sticky bar — */
+/* — Utilitaire container partagé (toutes les pages mères) — */
+.cfs-page-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .cfs-page-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* — Outer header wrapper — */
 .cfs-page-header {
   width: 100%;
-  position: sticky;
-  top: 0;
-  z-index: 50;
   background: transparent;
-  border-bottom: 1px solid transparent;
-  transition:
-    background-color 200ms ease-out,
-    backdrop-filter 200ms ease-out,
-    -webkit-backdrop-filter 200ms ease-out,
-    border-color 200ms ease-out;
+  border: none;
+  box-shadow: none;
+  position: static;
 }
 
-/* — État scrollé — */
-.cfs-page-header[data-scrolled="true"] {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-@supports not (backdrop-filter: blur(1px)) {
-  .cfs-page-header[data-scrolled="true"] {
-    background: rgba(255, 255, 255, 0.98);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cfs-page-header {
-    transition: none;
-  }
-}
-
-/* — Container 1200px centré (contenu) — */
+/* — Container 1200px centré du header — */
 .cfs-page-header-inner {
+  position: relative; /* ancrage UserMenuBubble position:absolute */
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding-top: 24px;
-  padding-right: 24px;
   padding-bottom: 24px;
   padding-left: 24px;
+  padding-right: 24px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  /* Ancrage pour UserMenuBubble (position:absolute top:76px right:24px). */
-  position: relative;
+}
+@media (max-width: 768px) {
+  .cfs-page-header-inner {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 
 /* — Ligne H1 + avatar — */
@@ -498,21 +494,15 @@ h1, h2, h3, h4, h5, h6 {
   flex: 1;
   min-width: 0;
 }
+@media (max-width: 768px) {
+  .cfs-page-header-title {
+    font-size: 24px;
+  }
+}
 .cfs-page-header-trailing {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-}
-@media (max-width: 768px) {
-  .cfs-page-header-inner {
-    padding-top: 16px;
-    padding-right: 16px;
-    padding-bottom: 16px;
-    padding-left: 16px;
-  }
-  .cfs-page-header-title {
-    font-size: 24px;
-  }
 }
 
 /* Sprint 36.B.4 — Patch 5.A : utilitaires typographiques canoniques.
