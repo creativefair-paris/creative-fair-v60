@@ -18,6 +18,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdmin } from '@/lib/supabase/admin'
 import type { MomentBusiness, Objectif, Ressources, CapaciteProduction } from '@/types/ma-marque'
+import type { PilierNarratif } from '@/types/programme'
 
 // ── Champs texte ─────────────────────────────────────────────────────────────
 
@@ -31,7 +32,12 @@ const TEXT_FIELDS = new Set(Object.keys(TEXT_FIELD_MAX_LENGTH))
 
 // ── Champs JSONB ─────────────────────────────────────────────────────────────
 
-const JSONB_FIELDS = new Set(['calendrier_business', 'objectifs', 'ressources'])
+const JSONB_FIELDS = new Set([
+  'calendrier_business',
+  'objectifs',
+  'ressources',
+  'piliers_narratifs',
+])
 
 const TYPES_MOMENT = new Set(['lancement', 'evenement', 'operation', 'saison'])
 const CAPACITES_PRODUCTION = new Set([
@@ -91,6 +97,26 @@ function validateObjectifs(value: unknown): Objectif[] | null {
   return out
 }
 
+function validatePiliersNarratifs(value: unknown): PilierNarratif[] | null {
+  if (!Array.isArray(value)) return null
+  if (value.length !== 3) return null
+  const out: PilierNarratif[] = []
+  for (const raw of value) {
+    if (!raw || typeof raw !== 'object') return null
+    const r = raw as Record<string, unknown>
+    if (typeof r.nom !== 'string' || r.nom.trim().length === 0) return null
+    if (typeof r.description !== 'string' || r.description.trim().length === 0) return null
+    if (typeof r.ratio_suggere !== 'number' || !Number.isFinite(r.ratio_suggere)) return null
+    if (r.ratio_suggere < 0 || r.ratio_suggere > 1) return null
+    out.push({
+      nom: r.nom.trim().slice(0, 60),
+      description: r.description.trim().slice(0, 200),
+      ratio_suggere: Number(r.ratio_suggere.toFixed(3)),
+    })
+  }
+  return out
+}
+
 function validateRessources(value: unknown): Ressources | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null
   const r = value as Record<string, unknown>
@@ -133,7 +159,12 @@ export async function PATCH(request: Request) {
   }
 
   // Validation typée par catégorie
-  let normalizedValue: string | MomentBusiness[] | Objectif[] | Ressources
+  let normalizedValue:
+    | string
+    | MomentBusiness[]
+    | Objectif[]
+    | Ressources
+    | PilierNarratif[]
 
   if (TEXT_FIELDS.has(field)) {
     if (typeof value !== 'string') {
@@ -180,12 +211,21 @@ export async function PATCH(request: Request) {
         )
       }
       normalizedValue = v
-    } else {
-      // ressources
+    } else if (field === 'ressources') {
       const v = validateRessources(value)
       if (!v) {
         return NextResponse.json(
           { error: 'invalid_structure', detail: 'Structure ressources invalide.' },
+          { status: 400 },
+        )
+      }
+      normalizedValue = v
+    } else {
+      // piliers_narratifs
+      const v = validatePiliersNarratifs(value)
+      if (!v) {
+        return NextResponse.json(
+          { error: 'invalid_structure', detail: 'Structure piliers_narratifs invalide (3 items, nom/description/ratio_suggere).' },
           { status: 400 },
         )
       }
@@ -257,7 +297,7 @@ export async function PATCH(request: Request) {
     .from('brands')
     .update(updatePayload)
     .eq('id', brandId)
-    .select('id, name, secteur, ton, singularite, calendrier_business, objectifs, ressources')
+    .select('id, name, secteur, ton, singularite, calendrier_business, objectifs, ressources, piliers_narratifs')
     .maybeSingle()
 
   if (updateErr) {

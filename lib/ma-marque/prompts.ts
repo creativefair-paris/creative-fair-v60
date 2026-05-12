@@ -88,10 +88,45 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans fence \`\`\`, sans texte
 
 Exactement 3 éléments dans le tableau "propositions". Chaque "hint" doit contenir les 4 champs.`
 
-// ── User prompt commun ────────────────────────────────────────────────────────
+// ── User prompt commun (propositions blocs) ───────────────────────────────────
 
 export function buildUserPromptPropositions(brand: BrandData): string {
   return `Génère 3 propositions pour la marque suivante :
+
+Nom : ${brand.nom}
+Secteur : ${brand.secteur}
+Voix de marque : ${brand.ton}
+Singularité : ${brand.singularite}
+
+Réponds uniquement avec le JSON strict demandé.`
+}
+
+// ── Régénération piliers narratifs (Chantier E) ───────────────────────────────
+
+export const SYSTEM_PROMPT_REGENERATION_PILIERS = `Tu es la Directrice de la Communication d'une marque établie. Tu connais le secteur, la voix de marque et la singularité de cette marque.
+
+Mission : redéfinir les 3 piliers narratifs signature de cette marque, en partant de zéro.
+
+Doctrine :
+- Sur-mesure : pas de catégories génériques (interdit : "Lifestyle", "Behind-the-scenes", "Produit", "Coulisses").
+- Chaque pilier porte un NOM de signature, court (max 30 caractères), évocateur, propre à cette marque.
+- Description en une phrase (max 140 caractères) qui dit ce que ce pilier raconte.
+- Ratio_suggere : nombre entre 0 et 1, la somme des trois ratios doit faire 1.0 (équilibre 30/70 typique : un pilier produit à 0.3, deux piliers univers à 0.35 + 0.35, ou autre répartition justifiée).
+- Pas de jargon marketing (interdit : growth, boost, viral, scale, hack, KPI, funnel).
+
+Réponds UNIQUEMENT en JSON valide, sans markdown, sans fence \`\`\`, sans texte avant ou après. Format exact :
+{
+  "piliers": [
+    { "nom": "string", "description": "string", "ratio_suggere": 0.40 },
+    { "nom": "string", "description": "string", "ratio_suggere": 0.35 },
+    { "nom": "string", "description": "string", "ratio_suggere": 0.25 }
+  ]
+}
+
+Exactement 3 éléments dans le tableau "piliers". Somme des ratios ≈ 1.0.`
+
+export function buildUserPromptRegenerationPiliers(brand: BrandData): string {
+  return `Redéfinis les 3 piliers narratifs signature pour la marque suivante :
 
 Nom : ${brand.nom}
 Secteur : ${brand.secteur}
