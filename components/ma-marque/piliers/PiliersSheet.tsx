@@ -11,6 +11,7 @@ import { useCallback, useRef, useState } from 'react'
 import { SheetMaMarque } from '@/components/ma-marque/SheetMaMarque'
 import { PiliersContext } from './PiliersContext'
 import { PiliersPreview } from './PiliersPreview'
+import { SubSheetPilier } from './SubSheetPilier'
 import { PASTELS_DEFAUT, type BrandBook, type PilierEditable } from '@/types/ma-marque'
 import type { PilierNarratif } from '@/types/programme'
 import type { BlocId } from '@/lib/ma-marque/completude'
@@ -33,20 +34,30 @@ function nouvelId(): string {
 }
 
 function avecIds(piliers: PilierNarratif[]): PilierEditable[] {
-  return piliers.map((p) => ({
-    id: nouvelId(),
-    nom: p.nom,
-    description: p.description,
-    ratio_suggere: p.ratio_suggere,
-  }))
+  return piliers.map((p) => {
+    const editable: PilierEditable = {
+      id: nouvelId(),
+      nom: p.nom,
+      description: p.description,
+      ratio_suggere: p.ratio_suggere,
+    }
+    if (p.mots_cles && p.mots_cles.length > 0) editable.mots_cles = [...p.mots_cles]
+    if (p.couleur) editable.couleur = p.couleur
+    return editable
+  })
 }
 
 function sansIds(piliers: PilierEditable[]): PilierNarratif[] {
-  return piliers.map((p) => ({
-    nom: p.nom,
-    description: p.description,
-    ratio_suggere: p.ratio_suggere,
-  }))
+  return piliers.map((p) => {
+    const out: PilierNarratif = {
+      nom: p.nom,
+      description: p.description,
+      ratio_suggere: p.ratio_suggere,
+    }
+    if (p.mots_cles && p.mots_cles.length > 0) out.mots_cles = [...p.mots_cles]
+    if (p.couleur) out.couleur = p.couleur
+    return out
+  })
 }
 
 // Sprint 36.B.3 — palette héritée du brand_book ou pastels par défaut.
@@ -61,6 +72,8 @@ export function PiliersSheet({ initialPiliers, brandBook, onClose, onAllerVers }
   const [piliers, setPiliers] = useState<PilierEditable[]>(avecIds(initialPiliers))
   const [regenerationEnCours, setRegenerationEnCours] = useState(false)
   const [erreurRegeneration, setErreurRegeneration] = useState<string | null>(null)
+  // Sprint 36.C — id du pilier ouvert dans la sub-sheet d'affinage (null = aucune).
+  const [pilierAffineId, setPilierAffineId] = useState<string | null>(null)
   const persistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const couleurs = paletteHeritee(brandBook)
@@ -118,25 +131,64 @@ export function PiliersSheet({ initialPiliers, brandBook, onClose, onAllerVers }
     }
   }, [regenerationEnCours])
 
+  // Sprint 36.C — Gestion sub-sheet d'affinage individuel.
+  const handleAffiner = useCallback((id: string) => {
+    setPilierAffineId(id)
+  }, [])
+
+  const handleSubSheetSave = useCallback(
+    (updated: PilierEditable) => {
+      setPiliers((prev) => {
+        const next = prev.map((p) => (p.id === updated.id ? { ...updated } : p))
+        const valide = next.length === 3 && next.every((q) => q.nom.trim().length > 0)
+        if (valide) persister(next)
+        return next
+      })
+    },
+    [persister],
+  )
+
+  const pilierAffine = pilierAffineId
+    ? piliers.find((p) => p.id === pilierAffineId) ?? null
+    : null
+  const pilierAffineIndex = pilierAffine
+    ? piliers.findIndex((p) => p.id === pilierAffine.id)
+    : -1
+  const couleurAffine =
+    pilierAffineIndex >= 0
+      ? (couleurs[pilierAffineIndex] ?? couleurs[0] ?? '#007AFF')
+      : '#007AFF'
+
   return (
-    <SheetMaMarque
-      layout="split"
-      title="Piliers narratifs"
-      bloc="piliers"
-      intro={INTRO}
-      onClose={onClose}
-      {...(onAllerVers ? { onAllerVers } : {})}
-      context={
-        <PiliersContext
-          piliers={piliers}
-          onUpdate={handleUpdate}
-          onRegenerer={handleRegenerer}
-          regenerationEnCours={regenerationEnCours}
-          erreurRegeneration={erreurRegeneration}
-          couleurs={couleurs}
+    <>
+      <SheetMaMarque
+        layout="split"
+        title="Piliers narratifs"
+        bloc="piliers"
+        intro={INTRO}
+        onClose={onClose}
+        {...(onAllerVers ? { onAllerVers } : {})}
+        context={
+          <PiliersContext
+            piliers={piliers}
+            onUpdate={handleUpdate}
+            onRegenerer={handleRegenerer}
+            regenerationEnCours={regenerationEnCours}
+            erreurRegeneration={erreurRegeneration}
+            couleurs={couleurs}
+            onAffiner={handleAffiner}
+          />
+        }
+        preview={<PiliersPreview piliers={piliers} couleurs={couleurs} />}
+      />
+      {pilierAffine ? (
+        <SubSheetPilier
+          pilier={pilierAffine}
+          couleur={couleurAffine}
+          onSave={handleSubSheetSave}
+          onClose={() => setPilierAffineId(null)}
         />
-      }
-      preview={<PiliersPreview piliers={piliers} couleurs={couleurs} />}
-    />
+      ) : null}
+    </>
   )
 }

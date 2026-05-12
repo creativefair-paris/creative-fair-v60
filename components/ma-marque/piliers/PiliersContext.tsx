@@ -16,6 +16,8 @@ type Props = {
   erreurRegeneration: string | null
   // Sprint 36.B.3 — palette injectée par le wrapper (brand_book ou pastels).
   couleurs?: readonly string[]
+  // Sprint 36.C — clic sur "Affiner" ouvre la sub-sheet d'édition individuelle.
+  onAffiner?: (id: string) => void
 }
 
 const PILIER_COULEURS_DEFAUT = ['#007AFF', '#AF52DE', '#FF9500'] as const
@@ -27,6 +29,7 @@ export function PiliersContext({
   regenerationEnCours,
   erreurRegeneration,
   couleurs = PILIER_COULEURS_DEFAUT,
+  onAffiner,
 }: Props) {
   const palette = couleurs.length >= 1 ? couleurs : PILIER_COULEURS_DEFAUT
   const [confirmationOuverte, setConfirmationOuverte] = useState(false)
@@ -163,6 +166,31 @@ export function PiliersContext({
                   {Math.round(p.ratio_suggere * 100)}%
                 </span>
               </div>
+              {/* Sprint 36.C — Lien "Affiner" pour ouvrir la sub-sheet d'édition. */}
+              {onAffiner ? (
+                <button
+                  type="button"
+                  onClick={() => onAffiner(p.id)}
+                  style={{
+                    alignSelf: 'flex-start',
+                    marginTop: 4,
+                    padding: '4px 0',
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'rgba(0,0,0,0.55)',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-system)',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    textDecoration: 'underline',
+                    textDecorationColor: 'rgba(0,0,0,0.25)',
+                    textUnderlineOffset: 3,
+                  }}
+                  aria-label={`Affiner le pilier ${p.nom || i + 1}`}
+                >
+                  Affiner ce pilier
+                </button>
+              ) : null}
             </li>
           ))}
         </ul>

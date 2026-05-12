@@ -113,9 +113,12 @@ function validateObjectifs(value: unknown): Objectif[] | null {
   return out
 }
 
+// Sprint 36.C — accepte aussi mots_cles (max 5 chaînes ≤ 30 chars) et couleur
+// (hex #RRGGBB) en optionnels rétro-compatibles. Les champs inconnus sont ignorés.
 function validatePiliersNarratifs(value: unknown): PilierNarratif[] | null {
   if (!Array.isArray(value)) return null
   if (value.length !== 3) return null
+  const HEX = /^#[0-9a-fA-F]{6}$/
   const out: PilierNarratif[] = []
   for (const raw of value) {
     if (!raw || typeof raw !== 'object') return null
@@ -124,11 +127,30 @@ function validatePiliersNarratifs(value: unknown): PilierNarratif[] | null {
     if (typeof r.description !== 'string' || r.description.trim().length === 0) return null
     if (typeof r.ratio_suggere !== 'number' || !Number.isFinite(r.ratio_suggere)) return null
     if (r.ratio_suggere < 0 || r.ratio_suggere > 1) return null
-    out.push({
+
+    let motsCles: string[] | undefined
+    if (Array.isArray(r.mots_cles)) {
+      const filtered = r.mots_cles
+        .filter((m): m is string => typeof m === 'string' && m.trim().length > 0)
+        .map((m) => m.trim().slice(0, 30))
+        .slice(0, 5)
+      motsCles = filtered.length > 0 ? filtered : undefined
+    }
+
+    let couleur: string | undefined
+    if (typeof r.couleur === 'string' && HEX.test(r.couleur.trim())) {
+      couleur = r.couleur.trim()
+    }
+
+    const pilier: PilierNarratif = {
       nom: r.nom.trim().slice(0, 60),
       description: r.description.trim().slice(0, 200),
       ratio_suggere: Number(r.ratio_suggere.toFixed(3)),
-    })
+    }
+    if (motsCles) pilier.mots_cles = motsCles
+    if (couleur) pilier.couleur = couleur
+
+    out.push(pilier)
   }
   return out
 }

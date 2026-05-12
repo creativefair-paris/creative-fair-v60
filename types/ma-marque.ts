@@ -37,6 +37,9 @@ export type PilierEditable = {
   nom: string
   description: string
   ratio_suggere: number // 0 à 1
+  // Sprint 36.C — extensions JSONB optionnelles, rétro-compatibles.
+  mots_cles?: string[]
+  couleur?: string
 }
 
 // Propositions retournées par /api/ma-marque/propositions

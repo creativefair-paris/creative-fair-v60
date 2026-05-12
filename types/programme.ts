@@ -32,6 +32,9 @@ export interface PilierNarratif {
   nom: string
   description: string
   ratio_suggere: number
+  // Sprint 36.C — JSONB optionnels (édition individuelle, rétro-compatibilité).
+  mots_cles?: string[]
+  couleur?: string
 }
 
 export interface BrandData {
