@@ -10,6 +10,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdmin } from '@/lib/supabase/admin'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
+import { ensureProfile } from '@/app/_actions/ensure-profile'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 import { computeSemainesTenues, computeProgrammeTenuCetteSemaine, compterPiliersDistincts } from './compute-stats'
 import { etatDuBloc, BLOCS_ORDRE, BLOCS_PRIORITAIRES, BLOCS_LABELS, type BrandSnapshot14, type BlocId } from '@/lib/ma-marque/completude'
@@ -112,9 +113,20 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
     .eq('id', user.id)
     .maybeSingle()
   const profile = rawProfile as { tenant_id?: string | null; prenom?: string | null } | null
-  const tenantId = profile?.tenant_id ?? null
+  let tenantId = profile?.tenant_id ?? null
+
+  // Sprint 36.C.2 — filet de sécurité : si le trigger PG handle_new_user
+  // n'a pas tiré (régression rare ou user orphelin pré-restauration),
+  // on auto-provisionne avant tout redirect onboarding. Évite la boucle
+  // signup → /aujourd-hui → /onboarding → /aujourd-hui sans profile.
   if (!tenantId) {
-    return { authenticated: true, redirect: '/onboarding/analyse-marque' }
+    const provision = await ensureProfile()
+    if (provision.ok) {
+      tenantId = provision.tenantId
+    } else {
+      console.warn(`[load-data] ensureProfile failed for ${user.id}: ${provision.reason}`)
+      return { authenticated: true, redirect: '/onboarding/analyse-marque' }
+    }
   }
 
   const brand = await getBrandByTenantId(supabase, tenantId)
