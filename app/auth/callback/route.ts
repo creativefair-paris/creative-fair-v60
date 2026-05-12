@@ -50,5 +50,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(new URL('/aujourdhui', origin))
+  // Sprint 36.C — /aujourd-hui (avec hyphen) est la home.
+  return NextResponse.redirect(new URL('/aujourd-hui', origin))
 }

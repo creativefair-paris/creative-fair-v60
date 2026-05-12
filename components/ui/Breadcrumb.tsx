@@ -6,9 +6,8 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 
-// Pour l'instant, /aujourd-hui n'existe pas — on pointe vers /programme.
-// Quand la home /aujourd-hui sera créée, basculer ici.
-const HOME_HREF = '/programme'
+// Sprint 36.C — /aujourd-hui est désormais la home.
+const HOME_HREF = '/aujourd-hui'
 
 type Crumb = { label: string; href?: string }
 
