@@ -39,7 +39,10 @@ function asArray<T>(v: unknown): T[] {
 
 function asRessources(v: unknown): Ressources | null {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return null
-  return v as Ressources
+  const r = v as Record<string, unknown>
+  // Rejette les objets incomplets — ex: brands legacy avec default '{}'
+  if (typeof r.photo !== 'string' || typeof r.video !== 'string') return null
+  return r as unknown as Ressources
 }
 
 export default async function MaMarquePage() {

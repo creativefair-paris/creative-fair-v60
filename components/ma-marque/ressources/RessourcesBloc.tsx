@@ -43,18 +43,32 @@ const NIVEAU_LABEL: Record<CapaciteProduction, string> = {
   soutenue: 'Soutenue',
 }
 
+// Normalise les valeurs manquantes — garde-fou pour brands legacy (default '{}').
+function normaliserRessources(r: Ressources): Ressources {
+  return {
+    photo: r.photo ?? 'aucune',
+    video: r.video ?? 'aucune',
+    terrain: r.terrain ?? false,
+    studio: r.studio ?? false,
+  }
+}
+
 function resume(r: Ressources): string {
+  const photo = r.photo ?? 'aucune'
+  const video = r.video ?? 'aucune'
+  const terrain = r.terrain ?? false
+  const studio = r.studio ?? false
   const bits: string[] = []
-  if (r.photo !== 'aucune') bits.push(`Photo ${NIVEAU_LABEL[r.photo].toLowerCase()}`)
-  if (r.video !== 'aucune') bits.push(`Vidéo ${NIVEAU_LABEL[r.video].toLowerCase()}`)
-  if (r.terrain) bits.push('Terrain')
-  if (r.studio) bits.push('Studio')
+  if (photo !== 'aucune') bits.push(`Photo ${NIVEAU_LABEL[photo].toLowerCase()}`)
+  if (video !== 'aucune') bits.push(`Vidéo ${NIVEAU_LABEL[video].toLowerCase()}`)
+  if (terrain) bits.push('Terrain')
+  if (studio) bits.push('Studio')
   return bits.join(' · ')
 }
 
 export function RessourcesBloc({ initialRessources }: Props) {
   const [ressources, setRessources] = useState<Ressources>(
-    initialRessources ?? RESSOURCES_VIDES,
+    normaliserRessources(initialRessources ?? RESSOURCES_VIDES),
   )
   const [open, setOpen] = useState(false)
   const [propositions, setPropositions] =

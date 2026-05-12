@@ -64,9 +64,10 @@ export const RESSOURCES_VIDES: Ressources = {
 
 export function ressourcesEstVide(r: Ressources | null | undefined): boolean {
   if (!r) return true
+  // Défense en profondeur : brands legacy avec default '{}' ont des champs undefined.
   return (
-    r.photo === 'aucune' &&
-    r.video === 'aucune' &&
+    (r.photo === 'aucune' || r.photo == null) &&
+    (r.video === 'aucune' || r.video == null) &&
     !r.terrain &&
     !r.studio
   )
