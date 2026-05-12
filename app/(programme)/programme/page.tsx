@@ -110,8 +110,15 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
 
   const hasProgramme = programme != null && posts.length > 0
 
+  // Sprint 36.B.7 — Patch 1 : alignement DOM identique à /ma-marque.
+  // La page /programme utilisait <main> comme racine alors que le layout.tsx
+  // fournit déjà un <main class="flex-1"> — deux <main> imbriqués cassaient
+  // le rendu flex et décalaient le PageHeader de ~56px vers la droite.
+  // Fix : <div> racine + PageHeader sibling du contenu (même profondeur DOM
+  // que /ma-marque). La classe `programme-wrapper` descend sur le seul
+  // conteneur de contenu (pour l'animation is-welcome).
   return (
-    <main
+    <div
       className="min-h-screen"
       style={{ position: 'relative', background: 'var(--color-background)' }}
     >
@@ -122,82 +129,93 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
       <div className="bg-halo bg-halo-5" aria-hidden="true" />
       <div className="bg-halo bg-halo-6" aria-hidden="true" />
 
+      {isWelcome ? <WelcomeURLCleaner /> : null}
+
+      {/* Conteneur principal — pattern identique à /ma-marque */}
       <div
-        className={`programme-wrapper${isWelcome ? ' is-welcome' : ''}`}
         style={{
           position: 'relative',
           zIndex: 1,
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          paddingBottom: 'var(--space-6)',
         }}
       >
-        {isWelcome ? <WelcomeURLCleaner /> : null}
-        {/* Sprint 36.B.5 — PageHeader unifié : breadcrumb + H1 + avatar même ligne. */}
+        {/* Sprint 36.B.5/7 — PageHeader unifié : breadcrumb + H1 + avatar même ligne. */}
         <PageHeader title="Mon Programme" />
 
-        {hasProgramme ? (
-          <ProgrammeDashboard
-            posts={posts}
-            piliers={piliers}
-            arcNarratif={arcNarratif}
-            brandBook={brandBook}
-          />
-        ) : (
-          <section
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 'var(--space-6)',
-              gap: 'var(--space-5)',
-              textAlign: 'center',
-            }}
-          >
-            <div
+        {/* Contenu de page — programme-wrapper reste ici pour l'animation is-welcome */}
+        <div
+          className={isWelcome ? 'programme-wrapper is-welcome' : undefined}
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            paddingBottom: 'var(--space-6)',
+          }}
+        >
+          {hasProgramme ? (
+            <ProgrammeDashboard
+              posts={posts}
+              piliers={piliers}
+              arcNarratif={arcNarratif}
+              brandBook={brandBook}
+            />
+          ) : (
+            <section
               style={{
+                flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                justifyContent: 'center',
+                padding: 'var(--space-6)',
                 gap: 'var(--space-5)',
-                maxWidth: 560,
-                width: '100%',
+                textAlign: 'center',
               }}
             >
-              <h1
+              <div
                 style={{
-                  fontSize: 'var(--text-title-1-size)',
-                  fontWeight: 700,
-                  letterSpacing: '-0.022em',
-                  color: 'var(--color-label)',
-                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 'var(--space-5)',
+                  maxWidth: 560,
+                  width: '100%',
                 }}
               >
-                Ton programme éditorial n&apos;existe pas encore.
-              </h1>
-              <p
-                className="text-body"
-                style={{
-                  color: 'var(--color-secondary-label)',
-                  margin: 0,
-                }}
-              >
-                Creative Fair analyse ta marque et structure ton plan éditorial.
-              </p>
-              <Button
-                disabled
-                aria-disabled="true"
-                title="Génération en préparation"
-              >
-                Générer mon programme
-              </Button>
-            </div>
-          </section>
-        )}
+                <h1
+                  style={{
+                    fontSize: 'var(--text-title-1-size)',
+                    fontWeight: 700,
+                    letterSpacing: '-0.022em',
+                    color: 'var(--color-label)',
+                    margin: 0,
+                  }}
+                >
+                  Ton programme éditorial n&apos;existe pas encore.
+                </h1>
+                <p
+                  className="text-body"
+                  style={{
+                    color: 'var(--color-secondary-label)',
+                    margin: 0,
+                  }}
+                >
+                  Creative Fair analyse ta marque et structure ton plan éditorial.
+                </p>
+                <Button
+                  disabled
+                  aria-disabled="true"
+                  title="Génération en préparation"
+                >
+                  Générer mon programme
+                </Button>
+              </div>
+            </section>
+          )}
+        </div>
       </div>
-    </main>
+    </div>
   )
 }

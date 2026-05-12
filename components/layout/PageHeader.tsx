@@ -1,4 +1,4 @@
-// Sprint 36.B.5 — Header unifié des pages mères.
+// Sprint 36.B.5/7 — Header unifié des pages mères.
 //
 // Layout :
 //   Aujourd'hui › Page                                      [Avatar]
@@ -9,11 +9,16 @@
 //
 // Server Component — récupère le user via le même pattern que NavigationBar
 // pour fournir UserMenuTrigger en zone trailing.
+//
+// Sprint 36.B.7 : le <header> est désormais rendu par PageHeaderStickyWrapper
+// (Client Component) qui gère scroll → data-scrolled pour l'état Liquid Glass.
+// Le Server Component reste server pour le chargement async de user meta.
 
 import type { ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { UserMenuTrigger } from './UserMenuTrigger'
+import { PageHeaderStickyWrapper } from './PageHeaderStickyWrapper'
 
 type Props = {
   title: string
@@ -112,7 +117,7 @@ export async function PageHeader({ title, breadcrumb, trailing }: Props) {
   }
 
   return (
-    <header className="cfs-page-header">
+    <PageHeaderStickyWrapper>
       <Breadcrumb items={items} />
       <div className="cfs-page-header-row">
         <h1 className="cfs-page-header-title">{title}</h1>
@@ -120,6 +125,6 @@ export async function PageHeader({ title, breadcrumb, trailing }: Props) {
           <div className="cfs-page-header-trailing">{trailingNode}</div>
         ) : null}
       </div>
-    </header>
+    </PageHeaderStickyWrapper>
   )
 }
