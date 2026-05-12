@@ -1,15 +1,20 @@
-// Sprint 36.A — Endpoint onboarding flux inversé Marcus (Chantier C.1)
+// Sprint 36.A → 36.C.2 — Endpoint onboarding flux inversé Marcus (Chantier C.1)
 // POST { nom, secteur, ton, singularite }
-// → upsert brand + génération initiale Claude Opus → { brandId, programmeId }
+// → upsert brand + génération initiale Creative Fair → { brandId, programmeId }
 //
 // Toute autre méthode HTTP renvoie 405.
 // Auth obligatoire (cookies session). Sans auth → 401.
 // Payload invalide → 400. Erreur génération → 502 (avec code détaillé).
+//
+// Sprint 36.C.2 : le tenant_id provient TOUJOURS de profiles.tenant_id du
+// user. Plus de création de tenant à la volée dans ce handler — délégué à
+// ensureProfile() qui partage la logique avec le trigger PG handle_new_user.
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdmin } from '@/lib/supabase/admin'
 import { generateProgrammeInitial, GenerationError } from '@/lib/programme/generation'
+import { ensureProfile } from '@/app/_actions/ensure-profile'
 import type { BrandData } from '@/types/programme'
 
 type CompleteBody = {
@@ -26,100 +31,13 @@ const LIMITS: Record<keyof CompleteBody, number> = {
   singularite: 400,
 }
 
-// Helper Sprint 36.A patch — auto-création tenant + profile au signup standard.
-// Plan 'b2c' = mode personnel (un user = un tenant). Les tenants B2B
-// (Angelina Paris, Tous en Tête, Comptoir Général) sont gérés via seed séparé.
-type AdminLike = ReturnType<typeof createAdmin>
-
-async function ensureTenantForUser(
-  admin: AdminLike,
-  args: { userId: string; userEmail: string | null; fallbackName: string },
-): Promise<string | null> {
-  const adminTyped = admin as unknown as {
-    from: (t: 'profiles' | 'tenants') => {
-      select: (cols: string) => {
-        eq: (col: string, val: string) => {
-          maybeSingle: () => Promise<{
-            data: { tenant_id?: string; id?: string } | null
-            error: { message: string } | null
-          }>
-        }
-      }
-      insert: (row: Record<string, unknown>) => {
-        select: (cols: string) => {
-          single: () => Promise<{
-            data: { id?: string; tenant_id?: string } | null
-            error: { message: string } | null
-          }>
-        }
-      }
-    }
-  }
-
-  // 1. Profile déjà présent ?
-  const { data: existingProfile } = await adminTyped
-    .from('profiles')
-    .select('tenant_id')
-    .eq('id', args.userId)
-    .maybeSingle()
-  if (existingProfile?.tenant_id) {
-    return existingProfile.tenant_id
-  }
-
-  // 2. Pas de profile → provisioning tenant + profile (plan b2c, role admin)
-  const slug = `personnel-${args.userId.slice(0, 8)}`
-  const tenantName =
-    args.fallbackName.trim().length > 0
-      ? args.fallbackName.trim()
-      : `Tenant ${args.userEmail ?? args.userId}`
-
-  // Retry-safe : si une tentative précédente a créé le tenant puis échoué sur
-  // le profile, on le retrouve par slug au lieu de buter sur la contrainte unique.
-  const { data: existingTenantBySlug } = await adminTyped
-    .from('tenants')
-    .select('id')
-    .eq('slug', slug)
-    .maybeSingle()
-
-  let newTenantId: string | undefined = existingTenantBySlug?.id
-  if (!newTenantId) {
-    const { data: tenantInserted, error: tenantErr } = await adminTyped
-      .from('tenants')
-      .insert({
-        slug,
-        name: tenantName,
-        plan: 'b2c',
-        theme: {},
-        enabled_channels: ['instagram'],
-      })
-      .select('id')
-      .single()
-    if (tenantErr || !tenantInserted?.id) {
-      return null
-    }
-    newTenantId = tenantInserted.id
-  }
-  const email = args.userEmail ?? `${args.userId}@local.unknown`
-
-  const { error: profileErr } = await adminTyped
-    .from('profiles')
-    .insert({
-      id: args.userId,
-      tenant_id: newTenantId,
-      email,
-      role: 'admin',
-    })
-    .select('id')
-    .single()
-  if (profileErr) {
-    // Pas de rollback automatique : la prochaine tentative trouvera le tenant
-    // orphelin via slug et le profile pourra être recréé. Mieux que de laisser
-    // un user sans accès. Le slug unique évite les duplicates futurs.
-    return null
-  }
-
-  return newTenantId
-}
+// Sprint 36.C.2 — ensureTenantForUser legacy supprimé. La logique de
+// provisioning profile + tenant est consolidée dans :
+//   * le trigger PG handle_new_user (chemin nominal — déclenché à signup)
+//   * ensureProfile() server action (filet de sécurité)
+// Le handler appelle ensureProfile() ci-dessous au lieu d'avoir sa propre
+// copie divergente (plan='b2c', role='admin', slug 'personnel-<8>') qui
+// contredisait la doctrine V1 (plan='b2b_custom', role='owner').
 
 function validateBody(value: unknown): CompleteBody | string {
   if (!value || typeof value !== 'object') return 'invalid payload'
@@ -156,19 +74,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: validated }, { status: 400 })
   }
 
-  // 3. Tenant + profile (auto-création si premier onboarding standard)
+  // 3. Tenant + profile via ensureProfile().
+  // Le tenant_id retourné vient TOUJOURS de profiles.tenant_id du user
+  // (Sprint 36.C.2 — pas de création de tenant à la volée dans ce handler).
+  // ensureProfile gère la création si nécessaire avec les valeurs canoniques
+  // (plan='b2b_custom', role='owner') partagées avec le trigger PG.
   const admin = createAdmin()
-  const tenantId = await ensureTenantForUser(admin, {
-    userId: user.id,
-    userEmail: user.email ?? null,
-    fallbackName: validated.nom,
-  })
-  if (!tenantId) {
+  const provision = await ensureProfile()
+  if (!provision.ok) {
     return NextResponse.json(
-      { error: 'tenant provisioning failed' },
+      { error: 'tenant provisioning failed', detail: provision.reason },
       { status: 500 },
     )
   }
+  const tenantId = provision.tenantId
 
   // 4. Upsert brand via admin (bypass RLS pour init brand_book_status)
   // Cast lâche : le stub types/database.ts est volontairement minimaliste, on
