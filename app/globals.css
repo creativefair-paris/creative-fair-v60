@@ -417,23 +417,34 @@ h1, h2, h3, h4, h5, h6 {
   color: rgba(0,0,0,0.7) !important;
 }
 
-/* Sprint 36.B.5 — Patch 3 : PageHeader unifié pour toutes les pages mères.
-   Breadcrumb sur sa ligne, H1 + avatar sur la même ligne en dessous. */
+/* Sprint 36.B.6 — Fix alignement PageHeader sur container 1200 px.
+   Padding explicite (évite l'écrasement par le shorthand),
+   position:relative pour ancrer UserMenuBubble (position:absolute top:76px right:24px),
+   margin:0 sur h1 neutralise les marges bloc par défaut du navigateur
+   qui déplacaient l'avatar sous le H1 en contexte flex. */
 .cfs-page-header {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding-top: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
+  padding-left: 24px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  position: relative;
 }
 .cfs-page-header-row {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
   margin-top: 4px;
+}
+.cfs-page-header-row h1 {
+  margin: 0;
 }
 .cfs-page-header-title {
   font-family: var(--font-system);
@@ -453,7 +464,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 @media (max-width: 768px) {
   .cfs-page-header {
-    padding: 16px;
+    padding-top: 16px;
+    padding-right: 16px;
+    padding-bottom: 16px;
+    padding-left: 16px;
   }
   .cfs-page-header-title {
     font-size: 24px;
