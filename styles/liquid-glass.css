@@ -1,11 +1,21 @@
 /*
- * Sprint 33 — Liquid Glass iOS 26 strict (§7.6).
+ * Sprint 33 → 36.B.4 — Liquid Glass iOS 26 strict (§7.6).
  *
  * Doctrine : le Liquid Glass est utilisé seulement pour les éléments qui se
  * superposent au contenu. Pas de glass partout. Surfaces de contenu = solides.
  *
- * Aucun halo coloré, aucun mesh gradient, aucun blob animé.
- * Le Liquid Glass fonctionne par contraste avec contenu riche dessous.
+ * 3 niveaux canoniques (Patch Sprint 36.B.4) :
+ *   Niveau 1 — fond de page : gradient crème/rose/bleu (halos), pas de blur.
+ *   Niveau 2 — cards, rangs, groupes : .glass-thin / .cfs-card
+ *              background 0.65-0.72, blur 12-20, saturate 160-180.
+ *   Niveau 3 — sheets, menus, modals : .glass-thick + équivalents inline
+ *              background 0.88-0.92, blur 20-50, saturate 180.
+ *
+ * Règle : jamais de Liquid Glass sur du Liquid Glass sans changer de niveau.
+ * Un menu (niveau 3) sur une card (niveau 2) → correct.
+ * Deux éléments niveau 2 superposés → incorrect, doit passer en niveau 3.
+ *
+ * Aucun halo coloré, aucun mesh gradient, aucun blob animé sur les surfaces.
  */
 
 :root {

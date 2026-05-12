@@ -1,19 +1,11 @@
-// Sprint 35 — Stub Conseiller (Pilier 6 strict : titre seul).
-// L'intégration v1 ou refonte Apple-strict est en attente Sprint 36.
+// Sprint 35 → 36.B.5 — Stub Conseiller (Pilier 6 strict : titre seul).
+// L'intégration v1 est en attente.
+import { PageHeader } from '@/components/layout/PageHeader'
+
 export default function ConseillerPage() {
   return (
-    <main style={{ minHeight: '100vh', padding: 'var(--space-12) var(--space-5)' }}>
-      <h1
-        style={{
-          fontSize: 'var(--text-large-title-size)',
-          fontWeight: 700,
-          letterSpacing: 'var(--text-large-title-tracking)',
-          color: 'var(--color-label)',
-          margin: 0,
-        }}
-      >
-        Conseiller
-      </h1>
+    <main style={{ minHeight: '100vh' }}>
+      <PageHeader title="Conseiller" />
     </main>
   )
 }

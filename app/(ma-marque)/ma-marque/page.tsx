@@ -1,12 +1,27 @@
-// Sprint 36.B — Page Ma Marque (lecture + édition des 4 champs principaux).
-// Sprint 36.B.1 — Boutons "Modifier" par bloc + Sheet d'édition.
-// Piliers narratifs restent en lecture seule (régénération Sprint 36.B.2).
+// Sprint 36.B.3 — Page Ma Marque : tableau de bord 14 rangs (pattern iOS Settings).
+//
+// Server Component. Lit la marque + les archives, construit le snapshot,
+// délègue toute l'interaction (sheets) au client MaMarqueDashboard.
+//
+// Phrase contextuelle dynamique en tête (Pilier 4 — aspirational storytelling).
+// Aucun pourcentage exposé. Compteur N/14 admissible (lisible, pas gamifié).
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdmin } from '@/lib/supabase/admin'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
-import { NavigationBar } from '@/components/layout/NavigationBar'
-import { MaMarqueFields } from '@/components/ma-marque/MaMarqueFields'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { MaMarqueDashboard } from '@/components/ma-marque/MaMarqueDashboard'
+import type { BrandSnapshot14 } from '@/lib/ma-marque/completude'
+import type {
+  MomentBusiness,
+  Objectif,
+  Ressources,
+  Benchmark,
+  Canaux,
+  BrandBook,
+  BrandArchive,
+} from '@/types/ma-marque'
 import type { PilierNarratif } from '@/types/programme'
 
 export const dynamic = 'force-dynamic'
@@ -17,10 +32,33 @@ type BrandRow = {
   secteur?: string | null
   ton?: string | null
   singularite?: string | null
+  cible?: string | null
+  univers_refuse?: string | null
   piliers_narratifs?: unknown
+  calendrier_business?: unknown
+  objectifs?: unknown
+  ressources?: unknown
+  benchmarks?: unknown
+  canaux?: unknown
+  brand_book?: unknown
 }
 
-const PILIER_COLOR_VARS = ['var(--pilier-1)', 'var(--pilier-2)', 'var(--pilier-3)'] as const
+function asArray<T>(v: unknown): T[] {
+  return Array.isArray(v) ? (v as T[]) : []
+}
+
+function asObjet<T>(v: unknown): T | null {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null
+  return v as T
+}
+
+// Ressources : reject incomplete `{}`.
+function asRessources(v: unknown): Ressources | null {
+  const o = asObjet<Record<string, unknown>>(v)
+  if (!o) return null
+  if (typeof o.photo !== 'string' || typeof o.video !== 'string') return null
+  return o as unknown as Ressources
+}
 
 export default async function MaMarquePage() {
   const supabase = await createClient()
@@ -42,20 +80,62 @@ export default async function MaMarquePage() {
     redirect('/onboarding/analyse-marque')
   }
 
+  // Sélectionne tous les champs (texte + JSONB nouveaux et anciens).
+  // Si la migration 009 n'est pas encore appliquée, les colonnes manquantes
+  // remontent en `null` et les helpers `??` / `asXxx` gèrent gracieusement.
   const { data: rawExtras } = await supabase
     .from('brands')
-    .select('id, name, secteur, ton, singularite, piliers_narratifs')
+    .select(
+      'id, name, secteur, ton, singularite, cible, univers_refuse, piliers_narratifs, calendrier_business, objectifs, ressources, benchmarks, canaux, brand_book',
+    )
     .eq('id', brand.id)
     .maybeSingle()
   const extras = rawExtras as BrandRow | null
 
-  const nom = extras?.name ?? brand.name ?? ''
-  const secteur = extras?.secteur ?? ''
-  const ton = extras?.ton ?? ''
-  const singularite = extras?.singularite ?? ''
-  const piliers: PilierNarratif[] = Array.isArray(extras?.piliers_narratifs)
-    ? (extras!.piliers_narratifs as PilierNarratif[])
-    : []
+  // ── Archives — lecture via admin (RLS gérée serveur)
+  let archives: BrandArchive[] = []
+  try {
+    const admin = createAdmin()
+    const adminTyped = admin as unknown as {
+      from: (t: string) => {
+        select: (cols: string) => {
+          eq: (col: string, val: string) => {
+            order: (col: string, opts: { ascending: boolean }) => Promise<{
+              data: BrandArchive[] | null
+              error: { message: string } | null
+            }>
+          }
+        }
+      }
+    }
+    const { data: arr } = await adminTyped
+      .from('brand_archives')
+      .select('id, type, titre, description, url, fichier_path, tags, created_at, updated_at')
+      .eq('brand_id', brand.id)
+      .order('created_at', { ascending: false })
+    if (Array.isArray(arr)) archives = arr
+  } catch {
+    // table absente → tableau vide, la sheet Archives reste utilisable.
+    archives = []
+  }
+
+  const snapshot: BrandSnapshot14 = {
+    nom: extras?.name ?? brand.name ?? '',
+    secteur: extras?.secteur ?? '',
+    ton: extras?.ton ?? '',
+    singularite: extras?.singularite ?? '',
+    cible: extras?.cible ?? '',
+    piliers: asArray<PilierNarratif>(extras?.piliers_narratifs),
+    capSaison: '',
+    objectifs: asArray<Objectif>(extras?.objectifs),
+    universRefuse: extras?.univers_refuse ?? '',
+    benchmarks: asArray<Benchmark>(extras?.benchmarks),
+    calendrierBusiness: asArray<MomentBusiness>(extras?.calendrier_business),
+    ressources: asRessources(extras?.ressources),
+    canaux: asObjet<Canaux>(extras?.canaux),
+    brandBook: asObjet<BrandBook>(extras?.brand_book),
+    archivesCount: archives.length,
+  }
 
   return (
     <div
@@ -78,99 +158,22 @@ export default async function MaMarquePage() {
           flexDirection: 'column',
         }}
       >
-        <NavigationBar title="Ma Marque" />
+        {/* Sprint 36.B.5 — PageHeader unifié au-dessus de la grille 2 colonnes. */}
+        <PageHeader title="Ma Marque" />
 
         <div
           style={{
             width: '100%',
-            maxWidth: 680,
-            margin: '0 auto',
-            padding: 'var(--space-5)',
+            padding: '24px 0',
             display: 'flex',
             flexDirection: 'column',
-            gap: 'var(--space-5)',
           }}
         >
-          <MaMarqueFields
-            initialValues={{
-              name: nom,
-              secteur,
-              ton,
-              singularite,
-            }}
+          <MaMarqueDashboard
+            snapshot={snapshot}
+            archives={archives}
+            {...(user.email ? { userEmail: user.email } : {})}
           />
-
-          {piliers.length > 0 ? (
-            <section
-              className="glass-regular"
-              style={{
-                padding: 'var(--space-5)',
-                borderRadius: 24,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--space-4)',
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: 'var(--font-system)',
-                  fontSize: 20,
-                  fontWeight: 600,
-                  letterSpacing: '-0.015em',
-                  color: 'var(--color-label)',
-                  margin: 0,
-                }}
-              >
-                Tes 3 piliers narratifs
-              </h2>
-              <ul
-                style={{
-                  listStyle: 'none',
-                  padding: 0,
-                  margin: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 'var(--space-3)',
-                }}
-              >
-                {piliers.map((pilier, i) => (
-                  <li
-                    key={pilier.nom}
-                    className="glass-thin"
-                    style={{
-                      padding: 'var(--space-4)',
-                      borderRadius: 20,
-                      borderLeft: `4px solid ${PILIER_COLOR_VARS[i] ?? PILIER_COLOR_VARS[0]}`,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 'var(--space-2)',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-system)',
-                        fontSize: 17,
-                        fontWeight: 600,
-                        color: 'var(--color-label)',
-                      }}
-                    >
-                      {pilier.nom}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-system)',
-                        fontSize: 15,
-                        lineHeight: 1.4,
-                        color: 'var(--color-secondary-label)',
-                      }}
-                    >
-                      {pilier.description}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
-import { NavigationBar } from '@/components/layout/NavigationBar'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { CatalogueOutils } from '@/components/outils/CatalogueOutils'
 
 export default async function OutilsPage() {
@@ -49,14 +49,17 @@ export default async function OutilsPage() {
           flexDirection: 'column',
         }}
       >
-        <NavigationBar title="Mes Outils" />
+        {/* Sprint 36.B.5 — PageHeader unifié. */}
+        <PageHeader title="Mes Outils" />
 
+        {/* Sprint 36.B.8 — cfs-page-container aligne sur 1200px/24px comme les autres pages. */}
         <section
+          className="cfs-page-container"
           style={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            padding: 'var(--space-6) var(--space-5) var(--space-12)',
+            paddingBottom: 'var(--space-12)',
           }}
         >
           <CatalogueOutils />

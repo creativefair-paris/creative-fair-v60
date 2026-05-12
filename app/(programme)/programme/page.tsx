@@ -1,23 +1,25 @@
-// Sprint 36.A — Page Programme : timeline verticale ou état vide (Chantier D.3).
-// Server Component. Auth chain identique Sprint 35.
-// Si programme actif présent : timeline 3 cards.
-// Sinon : empty state Sprint 35 (bouton désactivé).
+// Sprint 36.B.3 — Page Programme refondue en Split Brief 40/60.
+//
+// Server Component. Lit programme + posts + piliers + brand_book.
+// Délègue l'orchestration (vue/semaine, sheet détail) au client
+// ProgrammeDashboard.
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
-import { NavigationBar } from '@/components/layout/NavigationBar'
-import { ChipAction } from '@/components/ui/ChipAction'
-import { Timeline } from '@/components/programme/Timeline'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import type { PilierNarratif, PostRow } from '@/types/programme'
+import type { BrandBook } from '@/types/ma-marque'
 
 export const dynamic = 'force-dynamic'
 
 type BrandRowWithExtras = {
   id: string
   piliers_narratifs?: unknown
+  brand_book?: unknown
 }
 
 type ProgrammeRow = {
@@ -27,6 +29,11 @@ type ProgrammeRow = {
 
 type ProgrammePageProps = {
   searchParams?: Promise<{ welcome?: string }>
+}
+
+function asObjet<T>(v: unknown): T | null {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null
+  return v as T
 }
 
 export default async function ProgrammePage({ searchParams }: ProgrammePageProps) {
@@ -44,7 +51,6 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
     .select('tenant_id')
     .eq('id', user.id)
     .maybeSingle()
-
   const tenantId = (rawProfile as { tenant_id?: string } | null)?.tenant_id ?? null
   if (!tenantId) redirect('/onboarding/analyse-marque')
 
@@ -53,19 +59,23 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
     redirect('/onboarding/analyse-marque')
   }
 
-  // Récupération piliers (colonne brands.piliers_narratifs, Sprint 36.A)
+  // Récupère piliers + brand_book (palette utilisée pour les chips).
   let piliers: PilierNarratif[] = []
+  let brandBook: BrandBook | null = null
   const { data: rawBrandExtras } = await supabase
     .from('brands')
-    .select('id, piliers_narratifs')
+    .select('id, piliers_narratifs, brand_book')
     .eq('id', brand.id)
     .maybeSingle()
   const extras = rawBrandExtras as BrandRowWithExtras | null
   if (extras && Array.isArray(extras.piliers_narratifs)) {
     piliers = extras.piliers_narratifs as PilierNarratif[]
   }
+  if (extras) {
+    brandBook = asObjet<BrandBook>(extras.brand_book)
+  }
 
-  // Récupération programme actif le plus récent
+  // Programme actif le plus récent
   const { data: rawProgramme } = await supabase
     .from('programmes')
     .select('id, arc_narratif')
@@ -80,7 +90,6 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
   let arcNarratif = ''
 
   if (programme) {
-    // Extraction du thème depuis arc_narratif (forme { semaines: [{ theme }] })
     const arc = programme.arc_narratif as
       | { semaines?: Array<{ theme?: string }> }
       | null
@@ -101,8 +110,15 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
 
   const hasProgramme = programme != null && posts.length > 0
 
+  // Sprint 36.B.7 — Patch 1 : alignement DOM identique à /ma-marque.
+  // La page /programme utilisait <main> comme racine alors que le layout.tsx
+  // fournit déjà un <main class="flex-1"> — deux <main> imbriqués cassaient
+  // le rendu flex et décalaient le PageHeader de ~56px vers la droite.
+  // Fix : <div> racine + PageHeader sibling du contenu (même profondeur DOM
+  // que /ma-marque). La classe `programme-wrapper` descend sur le seul
+  // conteneur de contenu (pour l'animation is-welcome).
   return (
-    <main
+    <div
       className="min-h-screen"
       style={{ position: 'relative', background: 'var(--color-background)' }}
     >
@@ -113,8 +129,10 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
       <div className="bg-halo bg-halo-5" aria-hidden="true" />
       <div className="bg-halo bg-halo-6" aria-hidden="true" />
 
+      {isWelcome ? <WelcomeURLCleaner /> : null}
+
+      {/* Conteneur principal — pattern identique à /ma-marque */}
       <div
-        className={`programme-wrapper${isWelcome ? ' is-welcome' : ''}`}
         style={{
           position: 'relative',
           zIndex: 1,
@@ -123,84 +141,82 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
           flexDirection: 'column',
         }}
       >
-        {isWelcome ? <WelcomeURLCleaner /> : null}
-        <NavigationBar title="Mon Programme" />
+        {/* Sprint 36.B.5/7 — PageHeader unifié : breadcrumb + H1 + avatar même ligne. */}
+        <PageHeader title="Mon Programme" />
 
-        {hasProgramme ? (
-          <>
-            <div
-              className="cfs-page-actions"
+        {/* Contenu de page — cfs-page-container homogénéise l'alignement 1200px/24px.
+             programme-wrapper only classe les animations is-welcome (Sprint 36.B). */}
+        <div
+          className={`cfs-page-container${isWelcome ? ' programme-wrapper is-welcome' : ''}`}
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            paddingBottom: 'var(--space-6)',
+          }}
+        >
+          {hasProgramme ? (
+            <ProgrammeDashboard
+              posts={posts}
+              piliers={piliers}
+              arcNarratif={arcNarratif}
+              brandBook={brandBook}
+            />
+          ) : (
+            <section
               style={{
-                width: '100%',
-                maxWidth: 680,
-                margin: '0 auto',
-                padding: '0 var(--space-5)',
-                marginTop: 16,
-                marginBottom: 32,
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 12,
-              }}
-            >
-              <ChipAction label="Voir un post" href="#timeline-start" />
-              <ChipAction label="Enrichir ma marque" href="/ma-marque" />
-            </div>
-            <Timeline posts={posts} piliers={piliers} arcNarratif={arcNarratif} />
-          </>
-        ) : (
-          <section
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 'var(--space-6)',
-              gap: 'var(--space-5)',
-              textAlign: 'center',
-            }}
-          >
-            <div
-              style={{
+                flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                justifyContent: 'center',
+                padding: 'var(--space-6)',
                 gap: 'var(--space-5)',
-                maxWidth: 560,
-                width: '100%',
+                textAlign: 'center',
               }}
             >
-              <h1
+              <div
                 style={{
-                  fontSize: 'var(--text-title-1-size)',
-                  fontWeight: 700,
-                  letterSpacing: '-0.022em',
-                  color: 'var(--color-label)',
-                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 'var(--space-5)',
+                  maxWidth: 560,
+                  width: '100%',
                 }}
               >
-                Ton programme éditorial n&apos;existe pas encore.
-              </h1>
-              <p
-                className="text-body"
-                style={{
-                  color: 'var(--color-secondary-label)',
-                  margin: 0,
-                }}
-              >
-                Creative Fair analyse ta marque et structure ton plan éditorial.
-              </p>
-              <Button
-                disabled
-                aria-disabled="true"
-                title="Génération en préparation"
-              >
-                Générer mon programme
-              </Button>
-            </div>
-          </section>
-        )}
+                <h1
+                  style={{
+                    fontSize: 'var(--text-title-1-size)',
+                    fontWeight: 700,
+                    letterSpacing: '-0.022em',
+                    color: 'var(--color-label)',
+                    margin: 0,
+                  }}
+                >
+                  Ton programme éditorial n&apos;existe pas encore.
+                </h1>
+                <p
+                  className="text-body"
+                  style={{
+                    color: 'var(--color-secondary-label)',
+                    margin: 0,
+                  }}
+                >
+                  Creative Fair analyse ta marque et structure ton plan éditorial.
+                </p>
+                <Button
+                  disabled
+                  aria-disabled="true"
+                  title="Génération en préparation"
+                >
+                  Générer mon programme
+                </Button>
+              </div>
+            </section>
+          )}
+        </div>
       </div>
-    </main>
+    </div>
   )
 }
