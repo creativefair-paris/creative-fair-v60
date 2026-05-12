@@ -239,7 +239,10 @@ export function SheetMaMarque(props: Props) {
                 display: 'grid',
                 gridTemplateColumns: '40% 60%',
                 gap: 40,
-                padding: '32px 60px 32px 60px',
+                // Sprint 36.C.1 — padding-bottom étendu pour éviter que le
+                // dernier rang de contenu (ex. bouton "Régénérer") soit
+                // visuellement masqué par le blur du footer Liquid Glass.
+                padding: '32px 60px 96px 60px',
                 minHeight: '100%',
                 boxSizing: 'border-box',
               }}
@@ -284,7 +287,8 @@ export function SheetMaMarque(props: Props) {
               style={{
                 maxWidth: 680,
                 margin: '0 auto',
-                padding: '32px 32px 32px 32px',
+                // Sprint 36.C.1 — padding-bottom étendu (cf. layout split).
+                padding: '32px 32px 96px 32px',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 'var(--space-4)',
@@ -335,18 +339,23 @@ export function SheetMaMarque(props: Props) {
         </div>
       </div>
 
-      {/* Footer fixe : Retour + Continuer / Terminé */}
+      {/* Footer fixe : Retour + Continuer / Terminé.
+          Sprint 36.C.1 — opacité augmentée 0.6 → 0.88 pour éviter que le
+          contenu du body transparaisse sous le footer (effet de masquage
+          observé sur Piliers narratifs). z-index 3 pour passer au-dessus
+          du body (zIndex 1) et du header (zIndex 2). */}
       <footer
         style={{
           position: 'relative',
-          zIndex: 2,
+          zIndex: 3,
+          flexShrink: 0,
           borderTop: '1px solid rgba(0,0,0,0.06)',
           padding: '16px 60px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 16,
-          background: 'rgba(255,255,255,0.6)',
+          background: 'rgba(255,255,255,0.88)',
           backdropFilter: 'saturate(180%) blur(20px)',
           WebkitBackdropFilter: 'saturate(180%) blur(20px)',
         }}

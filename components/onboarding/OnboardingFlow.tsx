@@ -107,10 +107,10 @@ export function OnboardingFlow() {
         const data = (await res.json().catch(() => ({}))) as { error?: string }
         throw new Error(data.error ?? `Erreur ${res.status}`)
       }
-      // Succès : redirect direct vers /programme avec flag welcome.
-      // Le composant WelcomeURLCleaner retire le param après animation pour
-      // qu'un refresh ultérieur ne rejoue pas la séquence d'arrivée.
-      router.push('/programme?welcome=true')
+      // Sprint 36.C.1 — Succès : redirect direct vers /aujourd-hui (nouvelle home).
+      // Auparavant /programme?welcome=true ; le flag welcome n'a pas d'animation
+      // sur la home V1 (sera réactivé Sprint 37 si une welcome scene est ajoutée).
+      router.push('/aujourd-hui')
       router.refresh()
     } catch (err) {
       setStatus('error')

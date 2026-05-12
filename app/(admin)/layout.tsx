@@ -13,7 +13,8 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
-  if (!isAdmin(user.email)) redirect('/aujourdhui')
+  // Sprint 36.C.1 — /aujourdhui (sans hyphen, dangling) → /aujourd-hui (home).
+  if (!isAdmin(user.email)) redirect('/aujourd-hui')
 
   return (
     <div

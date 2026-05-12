@@ -1,7 +1,8 @@
-// Sprint 36.A — Point d'entrée post-onboarding (Chantier D.1).
+// Sprint 36.A → 36.C.1 — Point d'entrée post-onboarding (Chantier D.1).
 // Server Component. Vérifie auth + présence d'un programme actif.
-// Redirige vers /programme si OK, sinon vers /onboarding/analyse-marque.
-// L'écran d'attente narratif est géré côté client dans OnboardingFlow.
+// Redirige vers /aujourd-hui (home Sprint 36.C) si OK, sinon vers
+// /onboarding/analyse-marque. L'écran d'attente narratif est géré
+// côté client dans OnboardingFlow.
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -39,5 +40,5 @@ export default async function BienvenuePage() {
     redirect('/onboarding/analyse-marque')
   }
 
-  redirect('/programme')
+  redirect('/aujourd-hui')
 }
