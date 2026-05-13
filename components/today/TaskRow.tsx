@@ -160,7 +160,7 @@ export function TaskRow({ post, variant = 'today', today }: Props) {
           // Empêche la navigation parent vers /programme/post/<id>.
           e.stopPropagation()
         }}
-        aria-label="Demander au Conseiller à propos de ce post"
+        aria-label="Affiner ce post avec le Conseiller"
         style={{
           fontFamily: 'var(--font-system)',
           fontSize: 13,
@@ -173,7 +173,7 @@ export function TaskRow({ post, variant = 'today', today }: Props) {
           transition: 'opacity 200ms ease-out',
         }}
       >
-        Demander →
+        Affiner avec le Conseiller →
       </a>
     </div>
   )
