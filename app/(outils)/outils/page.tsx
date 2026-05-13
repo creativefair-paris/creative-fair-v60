@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { OutilsSettings } from '@/components/outils/OutilsSettings'
+import { OutilsCatalog } from '@/components/outils/OutilsCatalog'
 
 export default async function OutilsPage() {
   const supabase = await createClient()
@@ -62,7 +62,7 @@ export default async function OutilsPage() {
             paddingBottom: 'var(--space-12)',
           }}
         >
-          <OutilsSettings />
+          <OutilsCatalog />
         </section>
       </div>
     </main>
