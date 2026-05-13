@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/Button'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
+import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
+import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
 import type { PilierNarratif, PostRow } from '@/types/programme'
 import type { BrandBook } from '@/types/ma-marque'
 
@@ -25,10 +27,12 @@ type BrandRowWithExtras = {
 type ProgrammeRow = {
   id: string
   arc_narratif: unknown
+  // Sprint 37 Lot 4 : fin du programme pour calcul bannière régénération.
+  date_fin?: string | null
 }
 
 type ProgrammePageProps = {
-  searchParams?: Promise<{ welcome?: string }>
+  searchParams?: Promise<{ welcome?: string; action?: string }>
 }
 
 function asObjet<T>(v: unknown): T | null {
@@ -39,6 +43,9 @@ function asObjet<T>(v: unknown): T | null {
 export default async function ProgrammePage({ searchParams }: ProgrammePageProps) {
   const resolvedSearch = (await searchParams) ?? {}
   const isWelcome = resolvedSearch.welcome === 'true'
+  // Sprint 37 Lot 4 — viens du mini-onboarding du conseiller, on auto-ouvre
+  // la PeriodSelectionSheet au mount (côté client via ConseillerAccess).
+  const autoOpenCreatePlan = resolvedSearch.action === 'create-plan'
 
   const supabase = await createClient()
   const {
@@ -78,13 +85,24 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
   // Programme actif le plus récent
   const { data: rawProgramme } = await supabase
     .from('programmes')
-    .select('id, arc_narratif')
+    .select('id, arc_narratif, date_fin')
     .eq('tenant_id', tenantId)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
   const programme = rawProgramme as ProgrammeRow | null
+
+  // Sprint 37 Lot 4 — récupère publication_frequency du pilote pour l'estim
+  // de posts dans la PeriodSelectionSheet.
+  const { data: rawProfileFreq } = await supabase
+    .from('profiles')
+    .select('publication_frequency')
+    .eq('id', user.id)
+    .maybeSingle()
+  const publicationFrequency =
+    (rawProfileFreq as { publication_frequency?: PublicationFrequency | null } | null)
+      ?.publication_frequency ?? null
 
   let posts: PostRow[] = []
   let arcNarratif = ''
@@ -155,6 +173,15 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             paddingBottom: 'var(--space-6)',
           }}
         >
+          {/* Sprint 37 Lot 4 — Voies d'accès au conseiller (1 CTA primaire +
+              2 secondaires + bannière régénération <14j). Affiché au-dessus
+              du dashboard ou de l'empty state. */}
+          <ConseillerAccess
+            currentProgrammeEnd={programme?.date_fin ?? null}
+            publicationFrequency={publicationFrequency}
+            autoOpenCreatePlan={autoOpenCreatePlan}
+          />
+
           {hasProgramme ? (
             <ProgrammeDashboard
               posts={posts}
