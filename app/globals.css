@@ -1392,3 +1392,17 @@ h1, h2, h3, h4, h5, h6 {
    StateCircle, SplitBrief avec styles inline. Pattern A gros chiffres
    migré vers /mon-programme (sprint séparé). */
 
+/* Sprint 36.H Finding 6 — lien latent Conseiller sur TaskRow.
+   Hover ligne révèle l'opacité ; sur touch (mobile), toujours visible. */
+.cfs-task-row:hover .cfs-task-conseiller-link {
+  opacity: 0.8;
+}
+.cfs-task-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+@media (hover: none) {
+  .cfs-task-conseiller-link {
+    opacity: 0.7 !important;
+  }
+}
+

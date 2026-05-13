@@ -1,99 +1,71 @@
-// Sprint 36.G — Cercle d'état pour les tâches /aujourd-hui (pattern Things 3).
+// Sprint 36.G → 36.H — Pastille de statut (Things 3 simplifié).
 //
-// 4 états visuels canoniques :
-//   * todo      : cercle vide, contour gris iOS
-//   * ready     : cercle plein bleu iOS
-//   * published : cercle plein bleu iOS avec check blanc inscrit
-//   * alert     : cercle plein orange iOS avec '!' blanc
+// Sprint 36.G v1 utilisait des cercles 20px qui ressemblaient à des
+// cases à cocher (suggérant à tort une action user). Sprint 36.H
+// redesign : petits points 8×8 px non-interactifs, position à gauche
+// du titre comme indicateur d'état (pas une cible cliquable).
+//
+// 4 états :
+//   * todo      : point gris clair #C7C7CC
+//   * ready     : point bleu iOS #007AFF
+//   * published : icône check ✓ (la ligne entière reçoit opacity 0.5
+//                 + strikethrough — géré dans TaskRow)
+//   * alert     : point orange iOS #FF9500
 
 import type { PostState } from '@/lib/types/post'
 
 type Props = {
   state: PostState
-  size?: number // px, défaut 20
+  size?: number // diamètre point en px, défaut 8
 }
 
-const COLOR_BORDER_TODO = '#C7C7CC' // gris iOS séparateur
-const COLOR_FILL_READY = '#007AFF' // bleu iOS accent
-const COLOR_FILL_ALERT = '#FF9500' // orange iOS warning
+const COLOR_TODO = '#C7C7CC'
+const COLOR_READY = '#007AFF'
+const COLOR_ALERT = '#FF9500'
+const COLOR_PUBLISHED = 'rgba(0,0,0,0.45)'
 
-export function StateCircle({ state, size = 20 }: Props) {
-  const stroke = size * 0.075
-
-  if (state === 'todo') {
-    return (
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 20 20"
-        aria-hidden="true"
-        style={{ flexShrink: 0, transition: 'all 250ms ease-out' }}
-      >
-        <circle
-          cx="10"
-          cy="10"
-          r="9"
-          fill="none"
-          stroke={COLOR_BORDER_TODO}
-          strokeWidth={stroke * 10}
-        />
-      </svg>
-    )
-  }
-
-  if (state === 'ready') {
-    return (
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 20 20"
-        aria-hidden="true"
-        style={{ flexShrink: 0, transition: 'all 250ms ease-out' }}
-      >
-        <circle cx="10" cy="10" r="10" fill={COLOR_FILL_READY} />
-      </svg>
-    )
-  }
-
+export function StateCircle({ state, size = 8 }: Props) {
   if (state === 'published') {
+    // Check ✓ inline, taille proportionnée au reste du contenu.
     return (
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 20 20"
+      <span
         aria-hidden="true"
-        style={{ flexShrink: 0, transition: 'all 250ms ease-out' }}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 14,
+          height: 14,
+          flexShrink: 0,
+          color: COLOR_PUBLISHED,
+          fontSize: 13,
+          fontWeight: 700,
+          lineHeight: 1,
+          transition: 'color 250ms ease-out',
+        }}
       >
-        <circle cx="10" cy="10" r="10" fill={COLOR_FILL_READY} />
-        <path
-          d="M5.5 10.2 L8.6 13.2 L14.5 7"
-          fill="none"
-          stroke="#FFFFFF"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+        ✓
+      </span>
     )
   }
 
-  // alert
+  const color =
+    state === 'ready' ? COLOR_READY
+      : state === 'alert' ? COLOR_ALERT
+      : COLOR_TODO
+
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 20 20"
+    <span
       aria-hidden="true"
-      style={{ flexShrink: 0, transition: 'all 250ms ease-out' }}
-    >
-      <circle cx="10" cy="10" r="10" fill={COLOR_FILL_ALERT} />
-      <path
-        d="M10 5 L10 11"
-        stroke="#FFFFFF"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle cx="10" cy="14" r="1" fill="#FFFFFF" />
-    </svg>
+      style={{
+        display: 'inline-block',
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        background: color,
+        flexShrink: 0,
+        transition: 'background 250ms ease-out',
+      }}
+    />
   )
 }

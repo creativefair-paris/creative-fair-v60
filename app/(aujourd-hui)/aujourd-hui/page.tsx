@@ -323,7 +323,7 @@ export default async function AujourdhuiPage() {
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                       {data.postsToday.map((post) => (
-                        <TaskRow key={post.id} post={post} variant="today" />
+                        <TaskRow key={post.id} post={post} variant="today" today={now} />
                       ))}
                     </div>
                   )}
@@ -334,6 +334,7 @@ export default async function AujourdhuiPage() {
                   posts={data.postsWeek}
                   initialOpen={isMondayMorning}
                   showWeekendCta={isFridayLate}
+                  todayISO={data.todayISO}
                 />
 
                 {/* ── Bloc C — Suggéré pour toi (mocké V1) ── */}
