@@ -19,6 +19,7 @@ import { CriticalBanner } from '@/components/today/CriticalBanner'
 import { TaskRow } from '@/components/today/TaskRow'
 import { BlocCetteSemaine } from '@/components/today/BlocCetteSemaine'
 import { AFaireCetteSemaine } from '@/components/today/AFaireCetteSemaine'
+import { DemarrerCard, type DemarrerStep } from '@/components/today/DemarrerCard'
 import { loadAujourdhuiData } from '@/lib/aujourd-hui/load-data'
 import { computeSuggestions } from '@/lib/aujourd-hui/suggestions'
 import { mapStatutToState } from '@/lib/types/post'
@@ -93,6 +94,53 @@ export default async function AujourdhuiPage() {
     now,
   })
 
+  // Sprint 37.A F10 — Carte "Démarrer cette semaine" affichée pendant
+  // les 7 premiers jours du tenant. Au 8e jour, la card disparaît
+  // automatiquement (anti-friction Apple, pas de bouton "Ignorer").
+  const { data: rawTenantCreatedAt } = await supabaseSuggestions
+    .from('tenants')
+    .select('created_at')
+    .limit(1)
+    .maybeSingle()
+  const tenantCreatedAt =
+    (rawTenantCreatedAt as { created_at?: string | null } | null)?.created_at ?? null
+  let tenantAgeDays = Number.POSITIVE_INFINITY
+  if (tenantCreatedAt) {
+    const created = new Date(tenantCreatedAt)
+    if (!Number.isNaN(created.getTime())) {
+      tenantAgeDays = Math.floor(
+        (now.getTime() - created.getTime()) / 86400000,
+      )
+    }
+  }
+  const showDemarrerCard = tenantAgeDays < 7
+  const demarrerSteps: DemarrerStep[] = []
+  if (showDemarrerCard) {
+    const brandIncomplete = data.questionsAnswered < 14
+    const noActiveProgramme = currentProgrammeEnd === null
+    if (brandIncomplete) {
+      demarrerSteps.push({
+        label: 'Vérifier ta marque',
+        href: '/ma-marque',
+        description: 'Tes piliers narratifs ne sont pas posés.',
+      })
+    }
+    if (noActiveProgramme) {
+      demarrerSteps.push({
+        label: 'Créer ton premier plan',
+        href: '/programme?action=create-plan',
+        description:
+          'Le conseiller construit avec toi un plan éditorial sur la période de ton choix.',
+      })
+    }
+    demarrerSteps.push({
+      label: 'Pose une question au conseiller',
+      href: '/outils/conseiller',
+      description:
+        'Test sur un sujet réel. Une opportunité, un bad buzz, une idée de la direction.',
+    })
+  }
+
   return (
     <div
       className="min-h-screen"
@@ -133,6 +181,16 @@ export default async function AujourdhuiPage() {
           <SplitBrief
             leftColumn={
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {/* Sprint 37.A F10 — Carte "Démarrer cette semaine"
+                    affichée pendant les 7 premiers jours du tenant
+                    (au-dessus de Prochaine action). Effacée auto au 8e
+                    jour, pas de bouton "Ignorer" — anti-friction Apple. */}
+                {showDemarrerCard && demarrerSteps.length > 0 ? (
+                  <div className="cfs-stagger cfs-stagger-1">
+                    <DemarrerCard steps={demarrerSteps} />
+                  </div>
+                ) : null}
+
                 {/* ── Bloc 1 — Prochaine action (Liquid Glass niveau 2) ── */}
                 <section
                   className="glass-regular cfs-bloc-prochaine cfs-stagger cfs-stagger-2"
