@@ -1,18 +1,14 @@
-// Sprint 35 → 37 Lot 5 — Interface modération minimale.
+// Sprint 37.A (F8) — /outils/reviews refondu en fact-check + crédits.
 //
-// Doc 09 §5 groupe B / scénario B5 — modération quotidienne. V1 mocké
-// (pas encore d'API Meta intégrée). Liste de DM/commentaires reçus
-// avec bouton "Affiner avec le conseiller" qui ouvre la
-// ConseillerSheet scénario B5 préchargée du contexte (auteur + texte).
-//
-// Sprint 38 branchera l'API Meta. Le mock est en lib/conseiller/
-// moderation-mock.ts pour être supprimable d'un seul fichier.
+// Doc 09 §11 — TF Éditorial Magazine (Albane R.) + Archives & Mémoire
+// (Élise M.). L'ancien mock modération B5 (Sprint 37 Lot 5) a été
+// déplacé en placeholder /outils/messages (F8-bis).
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { ModerationList } from '@/components/conseiller/ModerationList'
-import { MODERATION_MOCK_ITEMS } from '@/lib/conseiller/moderation-mock'
+import { ReviewsHistory } from '@/components/reviews/ReviewsHistory'
+import { listReviews } from '@/lib/reviews/queries'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,8 +19,7 @@ export default async function ReviewsPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // V1 : mock. Sprint 38 : fetch depuis l'API Meta avec persistence DB.
-  const items = MODERATION_MOCK_ITEMS
+  const reviews = await listReviews(supabase)
 
   return (
     <main
@@ -47,9 +42,9 @@ export default async function ReviewsPage() {
         }}
       >
         <PageHeader
-          title="Modération"
-          subtitle="Messages reçus en DM et commentaires"
-          breadcrumb={["Aujourd'hui", { label: 'Outils', href: '/outils' }, 'Modération']}
+          title="Reviews"
+          subtitle="Fact-check texte et crédits visuel avant publication"
+          breadcrumb={["Aujourd'hui", { label: 'Outils', href: '/outils' }, 'Reviews']}
         />
 
         <section
@@ -59,27 +54,9 @@ export default async function ReviewsPage() {
             display: 'flex',
             flexDirection: 'column',
             paddingBottom: 'var(--space-12)',
-            gap: 20,
           }}
         >
-          <p
-            style={{
-              fontFamily: 'var(--font-system)',
-              fontSize: 13,
-              lineHeight: 1.55,
-              color: 'var(--color-secondary-label)',
-              margin: 0,
-              padding: '12px 14px',
-              borderRadius: 10,
-              background: 'rgba(0,0,0,0.03)',
-              maxWidth: 640,
-            }}
-          >
-            V1 — Aperçu mocké pour tester le flux conseiller. Sprint 38
-            branchera l'API Meta (DM + commentaires en temps réel).
-          </p>
-
-          <ModerationList items={items} />
+          <ReviewsHistory reviews={reviews} />
         </section>
       </div>
     </main>
