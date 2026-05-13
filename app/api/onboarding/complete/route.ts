@@ -17,19 +17,34 @@ import { generateProgrammeInitial, GenerationError } from '@/lib/programme/gener
 import { ensureProfile } from '@/app/_actions/ensure-profile'
 import type { BrandData } from '@/types/programme'
 
+type PilotRole = 'pilots' | 'owns'
+type PublicationFrequency = 'discreet' | 'balanced' | 'dense'
+
 type CompleteBody = {
   nom: string
   secteur: string
   ton: string
   singularite: string
+  // Sprint 37 Lot 1 — questions doctrinales onboarding (doc 09 §2-3).
+  // Nullable côté wire pour rester rétro-compatible avec d'éventuels
+  // appels existants (ex. seeds anciens). Si null, la colonne reste NULL.
+  pilot_role?: PilotRole | null
+  publication_frequency?: PublicationFrequency | null
 }
 
-const LIMITS: Record<keyof CompleteBody, number> = {
+const LIMITS: Record<'nom' | 'secteur' | 'ton' | 'singularite', number> = {
   nom: 80,
   secteur: 120,
   ton: 280,
   singularite: 400,
 }
+
+const PILOT_ROLES: ReadonlySet<PilotRole> = new Set(['pilots', 'owns'])
+const FREQUENCIES: ReadonlySet<PublicationFrequency> = new Set([
+  'discreet',
+  'balanced',
+  'dense',
+])
 
 // Sprint 36.C.2 — ensureTenantForUser legacy supprimé. La logique de
 // provisioning profile + tenant est consolidée dans :
@@ -42,18 +57,41 @@ const LIMITS: Record<keyof CompleteBody, number> = {
 function validateBody(value: unknown): CompleteBody | string {
   if (!value || typeof value !== 'object') return 'invalid payload'
   const v = value as Record<string, unknown>
-  for (const key of Object.keys(LIMITS) as Array<keyof CompleteBody>) {
+  for (const key of Object.keys(LIMITS) as Array<keyof typeof LIMITS>) {
     const raw = v[key]
     if (typeof raw !== 'string') return `${key} missing or not string`
     const trimmed = raw.trim()
     if (trimmed.length === 0) return `${key} empty`
     if (trimmed.length > LIMITS[key]) return `${key} exceeds max ${LIMITS[key]}`
   }
+
+  // Sprint 37 — validation des 2 nouveaux champs doctrinaux. Tolérants à
+  // l'absence (null / undefined) ; rejet seulement si valeur fournie hors enum.
+  let pilotRole: PilotRole | null = null
+  if (v.pilot_role !== undefined && v.pilot_role !== null) {
+    if (typeof v.pilot_role !== 'string' || !PILOT_ROLES.has(v.pilot_role as PilotRole)) {
+      return 'pilot_role invalid'
+    }
+    pilotRole = v.pilot_role as PilotRole
+  }
+  let frequency: PublicationFrequency | null = null
+  if (v.publication_frequency !== undefined && v.publication_frequency !== null) {
+    if (
+      typeof v.publication_frequency !== 'string' ||
+      !FREQUENCIES.has(v.publication_frequency as PublicationFrequency)
+    ) {
+      return 'publication_frequency invalid'
+    }
+    frequency = v.publication_frequency as PublicationFrequency
+  }
+
   return {
     nom: (v.nom as string).trim(),
     secteur: (v.secteur as string).trim(),
     ton: (v.ton as string).trim(),
     singularite: (v.singularite as string).trim(),
+    pilot_role: pilotRole,
+    publication_frequency: frequency,
   }
 }
 
@@ -166,6 +204,37 @@ export async function POST(req: NextRequest) {
       )
     }
     brandId = inserted.id
+  }
+
+  // 4bis. Persistance des 2 réponses doctrinales sur profiles (Sprint 37 Lot 1).
+  // Update silencieux : si l'un des champs est null on n'écrase pas (et NULL
+  // côté DB reste un état valide "non répondu"). Bypass RLS via admin pour
+  // rester cohérent avec l'upsert brand ci-dessus.
+  if (validated.pilot_role !== null || validated.publication_frequency !== null) {
+    const profileUpdate: Record<string, unknown> = {}
+    if (validated.pilot_role !== null) profileUpdate.pilot_role = validated.pilot_role
+    if (validated.publication_frequency !== null) {
+      profileUpdate.publication_frequency = validated.publication_frequency
+    }
+    const adminProfiles = admin as unknown as {
+      from: (t: 'profiles') => {
+        update: (row: Record<string, unknown>) => {
+          eq: (col: string, val: string) => Promise<{
+            error: { message: string } | null
+          }>
+        }
+      }
+    }
+    const { error: profErr } = await adminProfiles
+      .from('profiles')
+      .update(profileUpdate)
+      .eq('id', user.id)
+    if (profErr) {
+      // Échec non bloquant : la génération brand+programme peut continuer.
+      // Le pilote conserve son onboarding même si la persona/fréquence
+      // n'a pas pu être enregistrée — corrigeable depuis /compte plus tard.
+      console.warn(`[onboarding/complete] profile update failed: ${profErr.message}`)
+    }
   }
 
   // 5. Génération Creative Fair
