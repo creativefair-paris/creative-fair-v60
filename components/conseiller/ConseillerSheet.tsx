@@ -34,6 +34,7 @@ import {
 import { ConseillerBubble, ConseillerBubblesFromText } from './ConseillerBubble'
 import { PiloteBubble } from './PiloteBubble'
 import { StreamingReasoning, type ReasoningStep } from './StreamingReasoning'
+import { WaitingState } from './WaitingState'
 import {
   detectsFormalAddress,
   isTerminal,
@@ -43,6 +44,8 @@ import {
   type ScenarioType,
 } from '@/lib/conseiller/types'
 import { scenarioVisual } from '@/lib/conseiller/scenario-palette'
+import { WAITING_TIMEOUT_MS } from '@/lib/conseiller/waiting-states'
+import { markConseillerTimeout } from '@/app/_actions/mark-conseiller-timeout'
 
 // Réponse renvoyée par la server action (ou son stub côté Lot 2). Le
 // streaming est simulé côté client via reasoningSteps que la server
@@ -131,6 +134,10 @@ export function ConseillerSheet({
   //     (anti-double-clic + anti-double-Enter).
   const inflightTokenRef = useRef<number>(0)
   const lastSubmitAtRef = useRef<number>(0)
+  // F12 — Sprint 37.B : timer-guard 15s pour bascule ERROR_TIMEOUT.
+  const timeoutGuardRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Mémorise le dernier message envoyé pour permettre "Réessayer".
+  const lastMessageRef = useRef<string | null>(null)
 
   // Ouverture initiale : charge contexte via server action (state passe
   // en CONTEXT_LOAD → THINKING_1 → TURN_1).
@@ -169,9 +176,27 @@ export function ConseillerSheet({
       const token = inflightTokenRef.current + 1
       inflightTokenRef.current = token
 
+      lastMessageRef.current = message
       setPending(true)
       setError(null)
       setCurrentChoices([])
+
+      // F12 — Timer-guard 15s : si pas de réponse après le délai,
+      // bascule ERROR_TIMEOUT côté client. Le retry réutilisera le
+      // dernier message via lastMessageRef.
+      if (timeoutGuardRef.current) clearTimeout(timeoutGuardRef.current)
+      timeoutGuardRef.current = setTimeout(() => {
+        if (inflightTokenRef.current === token) {
+          setState('ERROR_TIMEOUT')
+          setPending(false)
+          // Persiste l'état timeout côté DB (best-effort).
+          if (conversationId) {
+            void markConseillerTimeout(conversationId).catch(() => {
+              // pas bloquant : l'UI reflète l'état même si la DB ne suit pas
+            })
+          }
+        }
+      }, WAITING_TIMEOUT_MS)
       // Bascule visuelle THINKING immédiate.
       setState((prev) =>
         prev === 'IDLE' || prev === 'CONTEXT_LOAD'
@@ -194,6 +219,12 @@ export function ConseillerSheet({
         // Tour stale ? (une nouvelle requête a été lancée entre temps)
         if (inflightTokenRef.current !== token) {
           return
+        }
+
+        // F12 — réponse arrivée à temps, on annule le timer-guard.
+        if (timeoutGuardRef.current) {
+          clearTimeout(timeoutGuardRef.current)
+          timeoutGuardRef.current = null
         }
 
         setConversationId(newConvId)
@@ -241,6 +272,10 @@ export function ConseillerSheet({
         setState('ERROR_FALLBACK')
       } finally {
         if (inflightTokenRef.current === token) {
+          if (timeoutGuardRef.current) {
+            clearTimeout(timeoutGuardRef.current)
+            timeoutGuardRef.current = null
+          }
           setPending(false)
         }
       }
@@ -428,15 +463,22 @@ export function ConseillerSheet({
             )
           })}
 
-          {isThinkingNow && currentSteps.length > 0 ? (
+          {isThinkingNow ? (
             <ConseillerBubble pulsing>
-              <StreamingReasoning
-                steps={currentSteps}
-                running={pending}
-                {...(state === 'THINKING_1'
-                  ? { mobileVerboseTitle: 'Je consulte ton contexte avant de te répondre.' }
-                  : {})}
-              />
+              {currentSteps.length > 0 ? (
+                <StreamingReasoning
+                  steps={currentSteps}
+                  running={pending}
+                  {...(state === 'THINKING_1'
+                    ? { mobileVerboseTitle: 'Je consulte ton contexte avant de te répondre.' }
+                    : {})}
+                />
+              ) : (
+                // F12 — État d'attente verbalisé tant qu'aucun reasoning step
+                // n'a encore été reçu. Cycle bouclant à travers les phrases
+                // du scénario + pulse opacité 0.5 → 1.
+                <WaitingState scenarioType={scenarioType} visible={pending} />
+              )}
             </ConseillerBubble>
           ) : null}
 
@@ -447,6 +489,27 @@ export function ConseillerSheet({
                 manque une info que je n'ai pas. Continue à m'écrire ce qui
                 ne va pas.
               </p>
+            </ConseillerBubble>
+          ) : null}
+
+          {state === 'ERROR_TIMEOUT' ? (
+            <ConseillerBubble>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <p style={{ margin: 0, fontSize: 14, color: 'var(--color-label)' }}>
+                  Le conseiller met plus de temps que d'habitude.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setState('IDLE')
+                    void runTurn(lastMessageRef.current)
+                  }}
+                  className="btn-primary"
+                  style={{ alignSelf: 'flex-start' }}
+                >
+                  Réessayer
+                </button>
+              </div>
             </ConseillerBubble>
           ) : null}
 

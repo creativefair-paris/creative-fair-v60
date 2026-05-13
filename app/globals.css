@@ -1617,3 +1617,21 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Sprint 37.B (F12) — État d'attente verbalisé. */
+.waiting-state {
+  font: 400 14px/1.6 var(--font-system, system-ui);
+  color: rgba(0, 0, 0, 0.55);
+  font-style: italic;
+  animation: waiting-pulse 1.8s ease-in-out infinite;
+}
+@keyframes waiting-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1.0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .waiting-state {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
