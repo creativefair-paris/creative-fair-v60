@@ -259,9 +259,46 @@ function fallbackText(
       ? brandContext.split('\n')[0]?.replace('Marque : ', '') ?? 'ta marque'
       : 'ta marque'
   if (userMessage === null) {
-    return `Je charge le contexte de ${brand} et le scénario ${scenario}. La clé Anthropic n'est pas configurée localement, je travaille en mode hors-ligne. Dis-moi ce que tu veux préciser.`
+    // Sprint 37.A F3 — Fallback inclut un bloc CHOIX pour démontrer
+    // l'extraction côté serveur même hors-ligne.
+    return `Je charge le contexte de ${brand} et le scénario ${scenario}. La clé Anthropic n'est pas configurée, je travaille en mode hors-ligne pour cette session.
+
+CHOIX:
+1) Précise-moi le contexte business du moment
+2) Donne-moi une contrainte particulière à respecter
+3) Pose ta question directement`
   }
   return `(Mode hors-ligne — pas de clé Anthropic configurée) J'ai bien lu : "${userMessage}". Sur le scénario ${scenario}, je te propose de continuer la conversation une fois la clé branchée. En attendant, le squelette du flux (sheet, persistence, machine à états) est opérationnel.`
+}
+
+// ── Parsing CHOIX (Sprint 37.A F3) ────────────────────────────────────────
+// Extrait le bloc structuré "CHOIX:\n1) ...\n2) ...\n3) ..." en fin de
+// réponse Anthropic et renvoie { cleanText, choices }. Si pas de bloc,
+// renvoie { cleanText: response, choices: undefined }.
+export function parseChoixBlock(response: string): {
+  cleanText: string
+  choices: ReadonlyArray<{ id: string; label: string }> | undefined
+} {
+  // Regex tolérante : "CHOIX:" + une ou plusieurs lignes "N) texte".
+  const match = response.match(
+    /\n*CHOIX\s*:\s*\n((?:\s*\d+\)\s+.+\n?)+)\s*$/i,
+  )
+  if (!match || !match[1]) {
+    return { cleanText: response.trim(), choices: undefined }
+  }
+  const lines = match[1]
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => /^\d+\)/.test(l))
+  if (lines.length === 0) {
+    return { cleanText: response.trim(), choices: undefined }
+  }
+  const choices = lines.map((line, i) => ({
+    id: `choice-${i + 1}`,
+    label: line.replace(/^\d+\)\s*/, '').trim().slice(0, 120),
+  }))
+  const cleanText = response.replace(match[0], '').trim()
+  return { cleanText, choices }
 }
 
 // ── Action principale ─────────────────────────────────────────────────────
@@ -382,6 +419,13 @@ export async function runConseillerTurn(
     assistantReply = fallbackText(input.scenarioType, input.message, brandContext)
   }
 
+  // Sprint 37.A F3 — extraction du bloc CHOIX en fin de réponse, si
+  // présent. Le texte rendu en bulle = cleanText (sans le bloc),
+  // les choices sont rendus en boutons sous la bulle côté UI.
+  const parsed = parseChoixBlock(assistantReply)
+  const finalText = parsed.cleanText
+  const choices = parsed.choices
+
   // 9. Détermine l'état final
   let finalState: ConseillerState
   if (crisisDegraded) {
@@ -412,7 +456,7 @@ export async function runConseillerTurn(
   }
   newMessages.push({
     role: 'conseiller',
-    content: assistantReply,
+    content: finalText,
     created_at: new Date().toISOString(),
   })
 
@@ -431,7 +475,8 @@ export async function runConseillerTurn(
     result: {
       state: finalState,
       reasoningSteps: defaultReasoningSteps(input.scenarioType),
-      message: assistantReply,
+      message: finalText,
+      ...(choices ? { choices } : {}),
     },
   }
 }

@@ -196,6 +196,40 @@ Tour 4+ — Livraison forcée. Tu livres ce que tu as + phrase honnête : "Je te
 Tu ne mentionnes JAMAIS au pilote dans quel tour tu es ("Tour 2/3" est anxiogène).
 `.trim()
 
+// ── Format CHOIX (boutons-choix prédominants — Sprint 37.A F3) ───────────
+// Décision Apple Cupertino salve 4 : doc 09 §8 dit "boutons-choix
+// prédominants, champ texte secondaire". Le sub-prompt précédent
+// produisait du texte libre, le pilote devait écrire. Maintenant,
+// quand tu proposes des options, tu termines par un bloc structuré
+// que le rendu UI extrait pour faire 3 boutons cliquables.
+const FORMAT_CHOIX = `
+FORMAT DE RÉPONSE — BOUTONS-CHOIX :
+
+Quand tu proposes des options au pilote, termine ta réponse par un bloc structuré exactement comme ceci :
+
+CHOIX:
+1) [texte option 1 court, max 80 caractères]
+2) [texte option 2 court, max 80 caractères]
+3) [texte option 3 court, max 80 caractères]
+
+Ce bloc est OBLIGATOIRE pour les scénarios suivants :
+- B2 (3 angles éditoriaux à choisir)
+- D8 (3 pistes business à choisir)
+- C3a (3 versions de copy à choisir)
+- B5 (3 versions de réponse à choisir)
+- D9 (3 versions de réponse à choisir)
+
+Pour les autres scénarios, le bloc CHOIX est optionnel — utilise-le uniquement si tu poses une vraie question avec options claires (ex. "tu préfères qu'on commence par X ou par Y ?").
+
+RÈGLES STRICTES :
+- Le bloc CHOIX vient TOUJOURS à la fin de ta réponse, après ton rationnel.
+- Chaque ligne d'option commence par "N)" (numéro + parenthèse fermante + espace).
+- Le texte de chaque option fait moins de 80 caractères (le pilote doit pouvoir le lire d'un coup d'œil sur le bouton).
+- Pas d'emoji, pas d'exclamation, pas de tiret long dans les options.
+
+Si la réponse est très longue (livrable Tour 3 avec 3 sections : bilan + état + vision par exemple), tu peux séparer visuellement les blocs par une ligne "\\n\\n---\\n\\n" (3 tirets entourés de lignes vides). Le rendu UI splittera en bulles successives façon iOS Messages.
+`.trim()
+
 // ── Persona pilote (doc 09 §2) ───────────────────────────────────────────
 function personaBlock(role: PilotRole | null): string {
   if (role === 'pilots') {
@@ -257,6 +291,9 @@ export function buildConseillerSystemPrompt(opts: SystemPromptOptions): string {
     '# Workflow conversationnel',
     WORKFLOW_CONVERSATIONNEL,
     '',
+    '# Format de réponse (boutons-choix)',
+    FORMAT_CHOIX,
+    '',
     '# Pilote en face de toi',
     personaBlock(opts.pilotRole),
     '',
@@ -279,4 +316,5 @@ export const STABLE_PROMPT_BLOCKS = {
   reglesPhrasing: REGLES_PHRASING,
   scopeV1TF: SCOPE_V1_TF,
   workflowConversationnel: WORKFLOW_CONVERSATIONNEL,
+  formatChoix: FORMAT_CHOIX,
 }
