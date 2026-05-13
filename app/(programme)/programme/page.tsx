@@ -13,6 +13,7 @@ import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
+import { checkJalonStatus } from '@/lib/jalons/check-jalons'
 import type { BusinessCalendar } from '@/types/business-calendar'
 import type { PilierNarratif, PostRow } from '@/types/programme'
 import type { BrandBook } from '@/types/ma-marque'
@@ -104,6 +105,11 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
   const publicationFrequency =
     (rawProfileFreq as { publication_frequency?: PublicationFrequency | null } | null)
       ?.publication_frequency ?? null
+
+  // Sprint 37.C (F26) — vérifie le jalon courant avant d'autoriser le
+  // wizard A1. Si la marque n'est pas posée, un dialogue de friction
+  // s'ouvre côté client.
+  const jalonStatus = await checkJalonStatus(supabase, tenantId)
 
   // Sprint 37.C (F25) — bloc "Compléter mon calendrier business" déplacé
   // vers /aujourd-hui (F24). brandCalendar reste lu ci-dessous pour le
@@ -226,6 +232,7 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             autoOpenCreatePlan={autoOpenCreatePlan}
             pillarsCatalog={piliersForWizard}
             businessAnchorSuggestions={businessAnchorSuggestions}
+            marqueComplete={jalonStatus.marque.complete}
           />
 
           {/* Sprint 37.C (F25) — bloc Calendrier Business déplacé vers

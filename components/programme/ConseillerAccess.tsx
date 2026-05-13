@@ -28,6 +28,7 @@ import {
 } from '@/app/_actions/find-resumable-session'
 import { createProgrammeCreationSession } from '@/app/_actions/wizard-session'
 import { PeriodSelectionSheet, type PublicationFrequency } from './PeriodSelectionSheet'
+import { JalonGuardDialog } from '@/components/jalons/JalonGuardDialog'
 import type { ConseillerContext, ScenarioType } from '@/lib/conseiller/types'
 import { scenarioLabel } from '@/lib/conseiller/queries'
 import type {
@@ -48,6 +49,11 @@ type Props = {
   // (/programme/page.tsx) qui les fetch depuis brand_book.
   pillarsCatalog?: ReadonlyArray<PilierLite>
   businessAnchorSuggestions?: ReadonlyArray<WizardSuggestion>
+  // Sprint 37.C (F26) — guard de jalon : si false, le wizard A1 ne
+  // s'ouvre pas tant que les fondations critiques ne sont pas posées.
+  // Un dialogue de friction propose au pilote de poser sa marque
+  // d'abord, avec option "Continuer quand même".
+  marqueComplete?: boolean
 }
 
 type Phase =
@@ -89,20 +95,31 @@ export function ConseillerAccess({
   autoOpenCreatePlan = false,
   pillarsCatalog = [],
   businessAnchorSuggestions = [],
+  marqueComplete = true,
 }: Props) {
   const [phase, setPhase] = useState<Phase>({ kind: 'closed' })
+  // Sprint 37.C (F26) — dialogue de friction si jalon "marque" non-atteint.
+  const [jalonGuardOpen, setJalonGuardOpen] = useState(false)
 
   // Auto-ouverture depuis ?action=create-plan.
   useEffect(() => {
     if (!autoOpenCreatePlan) return
+    if (!marqueComplete) {
+      setJalonGuardOpen(true)
+      return
+    }
     setPhase({ kind: 'period', followScenario: 'A1' })
-  }, [autoOpenCreatePlan])
+  }, [autoOpenCreatePlan, marqueComplete])
 
   const daysLeft = currentProgrammeEnd ? daysUntil(currentProgrammeEnd) : null
   const showRegenerationBanner =
     daysLeft !== null && daysLeft > 0 && daysLeft < 14
 
   function openCreatePlan() {
+    if (!marqueComplete) {
+      setJalonGuardOpen(true)
+      return
+    }
     setPhase({ kind: 'period', followScenario: 'A1' })
   }
 
@@ -202,6 +219,17 @@ export function ConseillerAccess({
 
   return (
     <>
+      {/* Sprint 37.C (F26) — JalonGuardDialog (lazy-imported inline). */}
+      <JalonGuardDialog
+        open={jalonGuardOpen}
+        kind="marque"
+        primaryHref="/ma-marque?onboarding=true"
+        onDismiss={() => setJalonGuardOpen(false)}
+        onContinueAnyway={() => {
+          setJalonGuardOpen(false)
+          setPhase({ kind: 'period', followScenario: 'A1' })
+        }}
+      />
       <section
         aria-label="Voies d'accès au conseiller"
         style={{

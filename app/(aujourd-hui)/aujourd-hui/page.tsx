@@ -26,6 +26,8 @@ import { mapStatutToState } from '@/lib/types/post'
 import { jourCourantFr, nomDuJourFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
 import { startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 import { createClient } from '@/lib/supabase/server'
+import { checkJalonStatus } from '@/lib/jalons/check-jalons'
+import { JalonHero } from '@/components/jalons/JalonHero'
 import type { BusinessCalendar } from '@/types/business-calendar'
 
 export const dynamic = 'force-dynamic'
@@ -78,6 +80,21 @@ export default async function AujourdhuiPage() {
   // Sprint 37.A F7 — récupère la fin du programme actif pour le calcul
   // de la suggestion "Préparer ton prochain plan" (<14j de la fin).
   const supabaseSuggestions = await createClient()
+
+  // Sprint 37.C (F26) — jalon courant (marque/programme/production).
+  const { data: rawProfileTenant } = await supabaseSuggestions
+    .from('profiles')
+    .select('tenant_id')
+    .limit(1)
+    .maybeSingle()
+  const jalonTenantId =
+    (rawProfileTenant as { tenant_id?: string | null } | null)?.tenant_id ?? null
+  const jalonStatus = jalonTenantId
+    ? await checkJalonStatus(supabaseSuggestions, jalonTenantId)
+    : null
+  const showJalonHero =
+    jalonStatus !== null && jalonStatus.current !== 'production'
+
   const { data: rawSugProgramme } = await supabaseSuggestions
     .from('programmes')
     .select('date_fin')
@@ -204,6 +221,15 @@ export default async function AujourdhuiPage() {
           {/* Zone Critique conditionnelle (full-width, au-dessus du Split Brief). */}
           <CriticalBanner alerts={data.alerts} />
 
+          {/* Sprint 37.C (F26) — Hero jalon. Affiché quand le pilote
+              n'a pas encore atteint le jalon "production". Remplace le
+              dashboard split-brief tant que les fondations critiques
+              ne sont pas posées. */}
+          {showJalonHero && jalonStatus !== null ? (
+            <JalonHero jalon={jalonStatus.current as 'marque' | 'programme'} />
+          ) : null}
+
+          {!showJalonHero ? (
           <SplitBrief
             leftColumn={
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -538,6 +564,7 @@ export default async function AujourdhuiPage() {
               </div>
             }
           />
+          ) : null}
         </div>
       </div>
     </div>
