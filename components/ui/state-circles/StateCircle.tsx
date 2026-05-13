@@ -63,6 +63,10 @@ export function StateCircle({ state, size = 8 }: Props) {
         height: size,
         borderRadius: size / 2,
         background: color,
+        // Sprint 36.I Finding 2 — léger anneau pour augmenter la
+        // visibilité de la pastille sur fond clair (surtout l'état todo
+        // gris #C7C7CC qui se perdait).
+        boxShadow: '0 0 0 1px rgba(0,0,0,0.10)',
         flexShrink: 0,
         transition: 'background 250ms ease-out',
       }}

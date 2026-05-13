@@ -9,6 +9,7 @@
 
 import { useCallback, useRef, useState } from 'react'
 import { SheetMaMarque } from '@/components/ma-marque/SheetMaMarque'
+import { PiliersBanner } from './PiliersBanner'
 import { PiliersContext } from './PiliersContext'
 import { PiliersPreview } from './PiliersPreview'
 import { SubSheetPilier } from './SubSheetPilier'
@@ -169,15 +170,18 @@ export function PiliersSheet({ initialPiliers, brandBook, onClose, onAllerVers }
         onClose={onClose}
         {...(onAllerVers ? { onAllerVers } : {})}
         context={
-          <PiliersContext
-            piliers={piliers}
-            onUpdate={handleUpdate}
-            onRegenerer={handleRegenerer}
-            regenerationEnCours={regenerationEnCours}
-            erreurRegeneration={erreurRegeneration}
-            couleurs={couleurs}
-            onAffiner={handleAffiner}
-          />
+          <>
+            <PiliersBanner />
+            <PiliersContext
+              piliers={piliers}
+              onUpdate={handleUpdate}
+              onRegenerer={handleRegenerer}
+              regenerationEnCours={regenerationEnCours}
+              erreurRegeneration={erreurRegeneration}
+              couleurs={couleurs}
+              onAffiner={handleAffiner}
+            />
+          </>
         }
         preview={<PiliersPreview piliers={piliers} couleurs={couleurs} />}
       />

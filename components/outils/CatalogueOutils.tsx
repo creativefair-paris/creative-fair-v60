@@ -1,15 +1,22 @@
-// Sprint 35 — Catalogue Outils (cahier §5.1 réinterprété en liste iOS native).
-// Server Component. Pas de state ni d'interaction au-delà de la navigation.
+// Sprint 35 → 36.I — Catalogue Outils.
+//
+// Sprint 36.I Finding 8 : refonte en 40/60 (liste à gauche, fiche à
+// droite). Pattern aligné sur le reste de l'app (Split Brief
+// canonique). Le clic sur un item met à jour la fiche, la navigation
+// se fait via le CTA "Ouvrir [Nom]" de la fiche.
+
+'use client'
 
 import Link from 'next/link'
-import type { ReactNode } from 'react'
-import { ListCell } from '@/components/ui/ListCell'
+import { useState, type ReactNode } from 'react'
+import { SplitBrief } from '@/components/layouts/SplitBrief'
 
 type Outil = {
   id: string
   title: string
   description: string
   href: string
+  ctaLabel: string
   icon: ReactNode
 }
 
@@ -99,94 +106,200 @@ const OUTILS: readonly Outil[] = [
   {
     id: 'post-creator',
     title: 'Post Creator',
-    description: 'Rédige et programme tes publications Instagram.',
+    description:
+      'Rédige et programme tes publications Instagram. Chaque post part d’un de tes piliers narratifs.',
     href: '/outils/post-creator',
+    ctaLabel: 'Ouvrir Post Creator',
     icon: <PencilIcon />,
   },
   {
     id: 'moodboard',
     title: 'Moodboard',
-    description: 'Génère des images d\u2019ambiance pour ta marque.',
+    description:
+      'Génère des images d’ambiance qui collent à l’univers visuel de ta marque.',
     href: '/outils/moodboard',
+    ctaLabel: 'Ouvrir Moodboard',
     icon: <ImageStackIcon />,
   },
   {
     id: 'variations',
     title: 'Variations',
-    description: 'Décline une image en 6 angles différents.',
+    description:
+      'Décline une image en 6 angles différents — utile pour tester des variantes avant publication.',
     href: '/outils/variations',
+    ctaLabel: 'Ouvrir Variations',
     icon: <GridIcon />,
   },
   {
     id: 'reviews',
     title: 'Reviews',
-    description: 'Analyse et répond à tes avis clients.',
+    description:
+      'Analyse les avis clients et prépare des réponses alignées sur le ton de ta marque.',
     href: '/outils/reviews',
+    ctaLabel: 'Ouvrir Reviews',
     icon: <StarIcon />,
   },
   {
     id: 'conseiller',
     title: 'Conseiller',
-    description: 'Ton assistant éditorial disponible 24h/24.',
+    description:
+      'Ton assistant éditorial disponible en continu. Pour affiner un pilier, recadrer un post, ou ajuster ton programme.',
     href: '/outils/conseiller',
+    ctaLabel: 'Ouvrir le Conseiller',
     icon: <BubbleIcon />,
   },
 ] as const
 
 export function CatalogueOutils() {
+  const [selectedId, setSelectedId] = useState<string>(OUTILS[0]!.id)
+  const selected = OUTILS.find((o) => o.id === selectedId) ?? OUTILS[0]!
+
   return (
-    <div
-      role="list"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        maxWidth: 640,
-        margin: '0 auto',
-      }}
-    >
-      {OUTILS.map((outil) => (
-        <Link
-          key={outil.id}
-          href={outil.href}
-          className="cfs-outil-link"
+    <SplitBrief
+      mobileOrder="left-first"
+      leftColumn={
+        <ul
+          role="list"
           style={{
-            textDecoration: 'none',
-            color: 'inherit',
-            display: 'block',
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
           }}
         >
-          <ListCell
-            leading={
-              <div
-                className="glass-thin"
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--color-system-blue)',
-                  border: '1px solid var(--color-separator)',
-                }}
-              >
-                {outil.icon}
-              </div>
+          {OUTILS.map((outil) => {
+            const isSelected = outil.id === selectedId
+            return (
+              <li key={outil.id}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(outil.id)}
+                  aria-pressed={isSelected}
+                  className={isSelected ? 'glass-thin cfs-outil-row cfs-outil-row-selected' : 'cfs-outil-row'}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '12px 14px',
+                    borderRadius: 12,
+                    border: 'none',
+                    background: isSelected ? undefined : 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    color: 'inherit',
+                    fontFamily: 'var(--font-system)',
+                    transition: 'background-color 200ms ease-out',
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 9,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      color: 'var(--color-system-blue)',
+                      border: '1px solid var(--color-separator)',
+                      background: 'rgba(255,255,255,0.6)',
+                    }}
+                  >
+                    {outil.icon}
+                  </span>
+                  <span
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      fontSize: 15,
+                      fontWeight: 500,
+                      color: 'var(--color-label)',
+                    }}
+                  >
+                    {outil.title}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      color: 'var(--color-tertiary-label)',
+                      display: 'flex',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <ChevronRight />
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+
+          <style>{`
+            .cfs-outil-row:hover:not(.cfs-outil-row-selected) {
+              background-color: rgba(0,0,0,0.03);
             }
-            title={outil.title}
-            description={outil.description}
-            trailing={
-              <span
-                aria-hidden="true"
-                style={{ color: 'var(--color-tertiary-label)', display: 'flex' }}
-              >
-                <ChevronRight />
-              </span>
+            @media (prefers-reduced-motion: reduce) {
+              .cfs-outil-row { transition: none !important; }
             }
-          />
-        </Link>
-      ))}
-    </div>
+          `}</style>
+        </ul>
+      }
+      rightColumn={
+        <article
+          className="glass-thin"
+          style={{
+            borderRadius: 16,
+            padding: '24px 26px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: 'var(--font-system)',
+              fontSize: 22,
+              fontWeight: 600,
+              letterSpacing: '-0.01em',
+              color: 'var(--color-label)',
+              margin: 0,
+            }}
+          >
+            {selected.title}
+          </h2>
+          <p
+            style={{
+              fontFamily: 'var(--font-system)',
+              fontSize: 15,
+              lineHeight: 1.55,
+              color: 'var(--color-secondary-label)',
+              margin: 0,
+            }}
+          >
+            {selected.description}
+          </p>
+          <Link
+            href={selected.href}
+            style={{
+              alignSelf: 'flex-start',
+              marginTop: 4,
+              padding: '10px 20px',
+              borderRadius: 22,
+              background: 'var(--color-label)',
+              color: 'var(--color-background)',
+              textDecoration: 'none',
+              fontFamily: 'var(--font-system)',
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            {selected.ctaLabel}
+          </Link>
+        </article>
+      }
+    />
   )
 }

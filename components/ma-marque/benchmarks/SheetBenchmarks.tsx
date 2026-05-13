@@ -232,12 +232,12 @@ export function SheetBenchmarks({ initialValue, onClose, onAllerVers }: Props) {
                 fontFamily: 'var(--font-system)',
                 fontSize: 15,
                 lineHeight: 1.5,
-                color: 'var(--color-tertiary-label)',
+                color: 'var(--color-secondary-label)',
                 margin: 0,
-                fontStyle: 'italic',
               }}
             >
-              Aucune marque citée pour l&apos;instant.
+              Ajoute 3 marques qui t&apos;inspirent. Creative Fair s&apos;en servira pour
+              repérer les bons signaux culturels pour toi.
             </p>
           ) : (
             <ul
