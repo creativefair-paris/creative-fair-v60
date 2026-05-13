@@ -15,6 +15,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { RichMarkdown } from './RichMarkdown'
 
 type Props = {
   children: ReactNode
@@ -84,7 +85,10 @@ export function ConseillerBubble({ children, pulsing = false }: Props) {
 
 // ── Helper : split visuel d'une bulle longue ─────────────────────────────
 // Si le texte contient des "\n\n---\n\n", on rend plusieurs
-// ConseillerBubble successives. Pattern Apple Messages.
+// ConseillerBubble successives (pattern Apple Messages). Sprint 37.B
+// F11.2 : à l'intérieur de chaque bulle, le contenu est rendu via
+// <RichMarkdown /> qui détecte les blocs :::callout-xxx, :::documentary,
+// :::timeline, les tables markdown, les headings, les listes, etc.
 export function ConseillerBubblesFromText({
   text,
   trailing,
@@ -92,6 +96,8 @@ export function ConseillerBubblesFromText({
   text: string
   trailing?: ReactNode
 }) {
+  // Détection séparateur de bulles. On évite de matcher les `---`
+  // utilisés comme dividers de tables markdown (entourés de |).
   const parts = text
     .split(/\n\n-{3,}\n\n/g)
     .map((p) => p.trim())
@@ -103,7 +109,7 @@ export function ConseillerBubblesFromText({
         const isLast = i === parts.length - 1
         return (
           <ConseillerBubble key={i}>
-            {renderParagraphs(part)}
+            <RichMarkdown text={part} />
             {isLast && trailing ? trailing : null}
           </ConseillerBubble>
         )
@@ -113,6 +119,7 @@ export function ConseillerBubblesFromText({
 }
 
 // Convertit "para1\n\npara2\n\npara3" en <p>para1</p><p>para2</p>...
+// Conservé pour rétrocompat éventuel (non utilisé Sprint 37.B+).
 function renderParagraphs(text: string): ReactNode {
   const paragraphs = text.split(/\n{2,}/g).map((p) => p.trim()).filter(Boolean)
   if (paragraphs.length === 1) {
