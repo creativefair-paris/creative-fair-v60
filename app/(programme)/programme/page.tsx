@@ -221,7 +221,7 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
                     margin: 0,
                   }}
                 >
-                  Ton programme éditorial n&apos;existe pas encore.
+                  Tu n&apos;as pas encore de plan en cours.
                 </h1>
                 <p
                   className="text-body"

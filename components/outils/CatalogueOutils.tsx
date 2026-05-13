@@ -1,15 +1,17 @@
-// Sprint 35 → 36.I — Catalogue Outils.
+// Sprint 35 → 36.I → 37.A — Catalogue Outils.
 //
-// Sprint 36.I Finding 8 : refonte en 40/60 (liste à gauche, fiche à
-// droite). Pattern aligné sur le reste de l'app (Split Brief
-// canonique). Le clic sur un item met à jour la fiche, la navigation
-// se fait via le CTA "Ouvrir [Nom]" de la fiche.
-
-'use client'
+// Sprint 37.A (décision Apple Cupertino salve 4 — Marcus) : hiérarchie
+// "Conseiller héros". Refonte en CSS Grid 2 colonnes. Conseiller occupe
+// les 2 colonnes en première ligne (carte plus généreuse, Liquid Glass
+// niveau 2). Les autres outils tiennent en 1 colonne chacun (Liquid
+// Glass niveau 1).
+//
+// Plus de preview au clic : chaque carte est un lien direct vers la
+// page de l'outil (simplification + alignement avec décision Marcus
+// "le Conseiller est le héros V1").
 
 import Link from 'next/link'
-import { useState, type ReactNode } from 'react'
-import { SplitBrief } from '@/components/layouts/SplitBrief'
+import type { ReactNode } from 'react'
 
 type Outil = {
   id: string
@@ -88,21 +90,63 @@ function BubbleIcon() {
   )
 }
 
-function ChevronRight() {
+function BookIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M9 6L15 12L9 18"
+        d="M4 4 L4 20 L8 18 L12 20 L16 18 L20 20 L20 4 L16 6 L12 4 L8 6 L4 4 Z"
         stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
+        strokeWidth="1.5"
         strokeLinejoin="round"
+      />
+      <path
+        d="M12 4 L12 20"
+        stroke="currentColor"
+        strokeWidth="1.2"
       />
     </svg>
   )
 }
 
+// Conseiller = héros V1 (décision Marcus salve 4). Toujours en tête.
+const HERO: Outil = {
+  id: 'conseiller',
+  title: 'Conseiller',
+  description:
+    "Ton assistant éditorial disponible en continu. Pour affiner un pilier, recadrer un post, trancher une opportunité, ou préparer ta réunion.",
+  href: '/outils/conseiller',
+  ctaLabel: 'Ouvrir le Conseiller',
+  icon: <BubbleIcon />,
+}
+
 const OUTILS: readonly Outil[] = [
+  {
+    id: 'bibliotheque',
+    title: 'Bibliothèque',
+    description:
+      'Tout ce que tu as, en un seul endroit. Brand book, posts publiés, conversations, reviews, programmes.',
+    href: '/outils/bibliotheque',
+    ctaLabel: 'Ouvrir la Bibliothèque',
+    icon: <BookIcon />,
+  },
+  {
+    id: 'reviews',
+    title: 'Reviews',
+    description:
+      'Vérifie un post avant publication. Fact-check du texte, crédits du visuel.',
+    href: '/outils/reviews',
+    ctaLabel: 'Ouvrir Reviews',
+    icon: <StarIcon />,
+  },
+  {
+    id: 'messages',
+    title: 'Messages',
+    description:
+      'Gère tes DM clients et commentaires Instagram avec le conseiller. Cet outil arrive bientôt.',
+    href: '/outils/messages',
+    ctaLabel: 'Ouvrir Messages',
+    icon: <BubbleIcon />,
+  },
   {
     id: 'post-creator',
     title: 'Post Creator',
@@ -125,190 +169,128 @@ const OUTILS: readonly Outil[] = [
     id: 'variations',
     title: 'Variations',
     description:
-      'Décline une image en 6 angles différents — utile pour tester des variantes avant publication.',
+      'Décline une image en 6 angles différents pour tester des variantes avant publication.',
     href: '/outils/variations',
     ctaLabel: 'Ouvrir Variations',
     icon: <GridIcon />,
   },
-  {
-    id: 'reviews',
-    title: 'Reviews',
-    description:
-      'Vérifie un post avant publication. Fact-check du texte, crédits du visuel.',
-    href: '/outils/reviews',
-    ctaLabel: 'Ouvrir Reviews',
-    icon: <StarIcon />,
-  },
-  {
-    id: 'messages',
-    title: 'Messages',
-    description:
-      'Gère tes DM clients et commentaires Instagram avec le conseiller. Cet outil arrive bientôt.',
-    href: '/outils/messages',
-    ctaLabel: 'Ouvrir Messages',
-    icon: <BubbleIcon />,
-  },
-  {
-    id: 'conseiller',
-    title: 'Conseiller',
-    description:
-      'Ton assistant éditorial disponible en continu. Pour affiner un pilier, recadrer un post, ou ajuster ton programme.',
-    href: '/outils/conseiller',
-    ctaLabel: 'Ouvrir le Conseiller',
-    icon: <BubbleIcon />,
-  },
 ] as const
 
 export function CatalogueOutils() {
-  const [selectedId, setSelectedId] = useState<string>(OUTILS[0]!.id)
-  const selected = OUTILS.find((o) => o.id === selectedId) ?? OUTILS[0]!
-
   return (
-    <SplitBrief
-      mobileOrder="left-first"
-      leftColumn={
-        <ul
-          role="list"
-          style={{
-            listStyle: 'none',
-            padding: 0,
-            margin: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-          }}
-        >
-          {OUTILS.map((outil) => {
-            const isSelected = outil.id === selectedId
-            return (
-              <li key={outil.id}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(outil.id)}
-                  aria-pressed={isSelected}
-                  className={isSelected ? 'glass-thin cfs-outil-row cfs-outil-row-selected' : 'cfs-outil-row'}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '12px 14px',
-                    borderRadius: 12,
-                    border: 'none',
-                    background: isSelected ? undefined : 'transparent',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    color: 'inherit',
-                    fontFamily: 'var(--font-system)',
-                    transition: 'background-color 200ms ease-out',
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 9,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      color: 'var(--color-system-blue)',
-                      border: '1px solid var(--color-separator)',
-                      background: 'rgba(255,255,255,0.6)',
-                    }}
-                  >
-                    {outil.icon}
-                  </span>
-                  <span
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      fontSize: 15,
-                      fontWeight: 500,
-                      color: 'var(--color-label)',
-                    }}
-                  >
-                    {outil.title}
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      color: 'var(--color-tertiary-label)',
-                      display: 'flex',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <ChevronRight />
-                  </span>
-                </button>
-              </li>
-            )
-          })}
+    <div className="cfs-outils-grid">
+      {/* Carte héros — Conseiller (occupe les 2 colonnes en ligne 1). */}
+      <Link
+        href={HERO.href}
+        className="glass-regular cfs-outils-card cfs-outils-card-hero"
+      >
+        <span aria-hidden="true" className="cfs-outils-icon cfs-outils-icon-hero">
+          {HERO.icon}
+        </span>
+        <span className="cfs-outils-card-body">
+          <span className="cfs-outils-title cfs-outils-title-hero">{HERO.title}</span>
+          <span className="cfs-outils-description">{HERO.description}</span>
+        </span>
+      </Link>
 
-          <style>{`
-            .cfs-outil-row:hover:not(.cfs-outil-row-selected) {
-              background-color: rgba(0,0,0,0.03);
-            }
-            @media (prefers-reduced-motion: reduce) {
-              .cfs-outil-row { transition: none !important; }
-            }
-          `}</style>
-        </ul>
-      }
-      rightColumn={
-        <article
-          className="glass-thin"
-          style={{
-            borderRadius: 16,
-            padding: '24px 26px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
-          }}
+      {/* Cartes 1-col pour les autres outils. */}
+      {OUTILS.map((outil) => (
+        <Link
+          key={outil.id}
+          href={outil.href}
+          className="glass-thin cfs-outils-card"
         >
-          <h2
-            style={{
-              fontFamily: 'var(--font-system)',
-              fontSize: 22,
-              fontWeight: 600,
-              letterSpacing: '-0.01em',
-              color: 'var(--color-label)',
-              margin: 0,
-            }}
-          >
-            {selected.title}
-          </h2>
-          <p
-            style={{
-              fontFamily: 'var(--font-system)',
-              fontSize: 15,
-              lineHeight: 1.55,
-              color: 'var(--color-secondary-label)',
-              margin: 0,
-            }}
-          >
-            {selected.description}
-          </p>
-          <Link
-            href={selected.href}
-            style={{
-              alignSelf: 'flex-start',
-              marginTop: 4,
-              padding: '10px 20px',
-              borderRadius: 22,
-              background: 'var(--color-label)',
-              color: 'var(--color-background)',
-              textDecoration: 'none',
-              fontFamily: 'var(--font-system)',
-              fontSize: 14,
-              fontWeight: 600,
-            }}
-          >
-            {selected.ctaLabel}
-          </Link>
-        </article>
-      }
-    />
+          <span aria-hidden="true" className="cfs-outils-icon">
+            {outil.icon}
+          </span>
+          <span className="cfs-outils-card-body">
+            <span className="cfs-outils-title">{outil.title}</span>
+            <span className="cfs-outils-description">{outil.description}</span>
+          </span>
+        </Link>
+      ))}
+
+      <style>{`
+        .cfs-outils-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+          width: 100%;
+        }
+        .cfs-outils-card {
+          display: flex;
+          gap: 14px;
+          padding: 16px;
+          border-radius: 14px;
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          text-decoration: none;
+          color: inherit;
+          transition: background-color 180ms ease-out, transform 180ms ease-out;
+        }
+        .cfs-outils-card:hover {
+          transform: translateY(-1px);
+        }
+        .cfs-outils-card-hero {
+          grid-column: 1 / -1;
+          padding: 24px;
+          gap: 18px;
+          border-radius: 16px;
+          border-color: rgba(0, 122, 255, 0.18);
+        }
+        .cfs-outils-icon {
+          flex-shrink: 0;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: #007AFF;
+          border: 1px solid var(--color-separator);
+          background: rgba(255, 255, 255, 0.6);
+        }
+        .cfs-outils-icon-hero {
+          width: 52px;
+          height: 52px;
+          border-radius: 14px;
+          background: rgba(0, 122, 255, 0.08);
+          border-color: rgba(0, 122, 255, 0.2);
+        }
+        .cfs-outils-card-body {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          flex: 1;
+          min-width: 0;
+        }
+        .cfs-outils-title {
+          font-family: var(--font-system);
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--color-label);
+          line-height: 1.3;
+        }
+        .cfs-outils-title-hero {
+          font-size: 20px;
+        }
+        .cfs-outils-description {
+          font-family: var(--font-system);
+          font-size: 13px;
+          line-height: 1.5;
+          color: var(--color-secondary-label);
+        }
+        @media (max-width: 768px) {
+          .cfs-outils-grid {
+            grid-template-columns: 1fr;
+          }
+          .cfs-outils-card-hero {
+            grid-column: 1 / -1;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .cfs-outils-card { transition: none !important; transform: none !important; }
+        }
+      `}</style>
+    </div>
   )
 }
