@@ -3,6 +3,11 @@
 // Sprint 36.H Finding 8 : le CTA est désormais spécifique au signal
 // (ctaLabel + ctaContext sur le type DailySignal). Le composant reste
 // agnostique du backend — il consomme ce qu'on lui passe.
+//
+// Sprint 36.I Finding 3 — DEPRECATED en V1 : plus rendu nulle part.
+// Le mock daily-signal a été supprimé car il mentait à toutes les
+// marques. Le composant est conservé tel quel — il sera réutilisé
+// Sprint 37 quand les Task Forces produiront de vrais signaux.
 
 'use client'
 

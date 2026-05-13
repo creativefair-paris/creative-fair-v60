@@ -16,9 +16,11 @@ import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 import { ensureProfile } from '@/app/_actions/ensure-profile'
 import { catchUpOverduePosts } from '@/app/_actions/catch-up-overdue-posts'
-import { SUGGESTED_SIGNAL_MOCK } from '@/lib/mocks/daily-signal'
 import type { TaskPost, PostStatutDB } from '@/lib/types/post'
 import type { Alert } from '@/components/today/CriticalBanner'
+// Sprint 36.I Finding 3 — mock daily-signal supprimé. Slot
+// "SIGNAL DE VEILLE" retiré de l'UI tant qu'il n'y a pas de vraie
+// donnée derrière (réintroduit Sprint 37 via Task Forces).
 import type { DailySignal } from '@/components/today/SuggestedSignal'
 
 export type WeekStats = {
@@ -189,6 +191,6 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
     postsWeek,
     weekStats,
     questionsAnswered,
-    dailySignal: SUGGESTED_SIGNAL_MOCK,
+    dailySignal: null,
   }
 }

@@ -18,7 +18,6 @@ import { SplitBrief } from '@/components/layouts/SplitBrief'
 import { CriticalBanner } from '@/components/today/CriticalBanner'
 import { TaskRow } from '@/components/today/TaskRow'
 import { BlocCetteSemaine } from '@/components/today/BlocCetteSemaine'
-import { SuggestedSignal } from '@/components/today/SuggestedSignal'
 import { loadAujourdhuiData } from '@/lib/aujourd-hui/load-data'
 import { mapStatutToState } from '@/lib/types/post'
 import { jourCourantFr, nomDuJourFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
@@ -353,10 +352,10 @@ export default async function AujourdhuiPage() {
                   />
                 </div>
 
-                {/* ── Bloc C — Suggéré pour toi (mocké V1) ── */}
-                <div className="cfs-stagger cfs-stagger-9">
-                  <SuggestedSignal signal={data.dailySignal} />
-                </div>
+                {/* Sprint 36.I Finding 3 — Slot "Suggéré pour toi" retiré.
+                    Le mock SUGGESTED_SIGNAL_MOCK affichait "Ami Paris..."
+                    pour toutes les marques, ce qui mentait. Le slot
+                    revient Sprint 37 avec une vraie source (Task Forces). */}
               </div>
             }
           />
