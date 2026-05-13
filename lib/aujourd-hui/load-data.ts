@@ -1,68 +1,29 @@
-// Sprint 36.C — Loader server-side de la home /aujourd-hui.
+// Sprint 36.G — Loader server-side de /aujourd-hui (refonte V3 "tranquillité du pilote").
 //
-// Charge les 4 sections en un passage : posts du jour, posts semaine,
-// stats Pattern A (cette semaine / depuis le début), blocs Ma Marque
-// prioritaires non remplis, brouillons (stub V1).
+// Charge :
+//   * Profile + tenant + brand (auth + filet ensureProfile)
+//   * Alertes actives du tenant (Zone Critique)
+//   * Posts du jour (Bloc A "Aujourd'hui")
+//   * Posts du reste de la semaine (Bloc B "Cette semaine")
+//   * Stats semaine (Bloc 2 État Programme)
+//   * brand.questions_answered (Bloc 3 État Ma Marque)
+//   * Daily signal mock (Bloc C)
 //
-// Tous les chiffres viennent de la DB réelle. Pas de placeholder.
-// Si Floriane vient d'arriver : 0 partout, c'est honnête.
+// Pas de pourcentage chiffré. Pas de gamification. Chiffres bruts.
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdmin } from '@/lib/supabase/admin'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
-import { ensureProfile } from '@/app/_actions/ensure-profile'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from '@/lib/calendar/dates'
-import { computeSemainesTenues, computeProgrammeTenuCetteSemaine, compterPiliersDistincts } from './compute-stats'
-import { etatDuBloc, BLOCS_ORDRE, BLOCS_PRIORITAIRES, BLOCS_LABELS, type BrandSnapshot14, type BlocId } from '@/lib/ma-marque/completude'
-import type {
-  MomentBusiness,
-  Objectif,
-  Ressources,
-  Benchmark,
-  Canaux,
-  BrandBook,
-} from '@/types/ma-marque'
-import type { PilierNarratif } from '@/types/programme'
+import { ensureProfile } from '@/app/_actions/ensure-profile'
+import { SUGGESTED_SIGNAL_MOCK } from '@/lib/mocks/daily-signal'
+import type { TaskPost, PostStatutDB } from '@/lib/types/post'
+import type { Alert } from '@/components/today/CriticalBanner'
+import type { DailySignal } from '@/components/today/SuggestedSignal'
 
-// ── Types renvoyés au front ──────────────────────────────────────────────────
-
-export type PostTodayItem = {
-  id: string
-  titre: string
-  heure_prevue: string
-  type_contenu: string
-  pilier_nom: string
-}
-
-export type PostWeekItem = {
-  id: string
-  date_prevue: string
-  titre: string
-  type_contenu: string
-  pilier_nom: string
-}
-
-export type BlocPrioritaire = {
-  id: BlocId
-  actionLabel: string
-  contextLabel: string
-}
-
-export type StatsWeek = {
-  postsPublies: number
-  piliersTravailles: number
-  programmeTenu: boolean
-}
-
-export type StatsTotal = {
-  postsTotal: number
-  semainesTenues: number
-  fondations: number // sur 14
-}
-
-export type ProgressionSemaine = {
-  total: number
-  complets: number
+export type WeekStats = {
+  total: number  // posts cette semaine, tous statuts confondus
+  ready: number  // statut 'genere'
+  todo: number   // statut 'planifie'
 }
 
 export type AujourdhuiData =
@@ -72,33 +33,14 @@ export type AujourdhuiData =
       authenticated: true
       redirect?: undefined
       prenom: string
-      todayDate: string // ISO du jour (UTC, calculé serveur Paris)
-      postsToday: PostTodayItem[]
-      postsWeek: PostWeekItem[]
-      blocsPrioritaires: BlocPrioritaire[]
-      statsWeek: StatsWeek
-      statsTotal: StatsTotal
-      progressionSemaine: ProgressionSemaine
-      drafts: never[] // stub V1, sera typé Sprint 37
+      todayISO: string  // ISO datetime du jour Paris
+      alerts: Alert[]
+      postsToday: TaskPost[]
+      postsWeek: TaskPost[]  // hors today, ordonnés par date_prevue, heure_prevue
+      weekStats: WeekStats
+      questionsAnswered: number  // brands.questions_answered (0..14)
+      dailySignal: DailySignal | null
     }
-
-// ── asXxx helpers (rétro-compat lecture brand) ───────────────────────────────
-
-function asArray<T>(v: unknown): T[] {
-  return Array.isArray(v) ? (v as T[]) : []
-}
-function asObjet<T>(v: unknown): T | null {
-  if (!v || typeof v !== 'object' || Array.isArray(v)) return null
-  return v as T
-}
-function asRessources(v: unknown): Ressources | null {
-  const o = asObjet<Record<string, unknown>>(v)
-  if (!o) return null
-  if (typeof o.photo !== 'string' || typeof o.video !== 'string') return null
-  return o as unknown as Ressources
-}
-
-// ── Loader principal ─────────────────────────────────────────────────────────
 
 export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
   const supabase = await createClient()
@@ -115,10 +57,7 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
   const profile = rawProfile as { tenant_id?: string | null; prenom?: string | null } | null
   let tenantId = profile?.tenant_id ?? null
 
-  // Sprint 36.C.2 — filet de sécurité : si le trigger PG handle_new_user
-  // n'a pas tiré (régression rare ou user orphelin pré-restauration),
-  // on auto-provisionne avant tout redirect onboarding. Évite la boucle
-  // signup → /aujourd-hui → /onboarding → /aujourd-hui sans profile.
+  // Filet ensureProfile (cf. Sprint 36.C.2).
   if (!tenantId) {
     const provision = await ensureProfile()
     if (provision.ok) {
@@ -134,194 +73,99 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
     return { authenticated: true, redirect: '/onboarding/analyse-marque' }
   }
 
-  // Lecture brand étendue pour le snapshot 14 blocs.
-  const { data: rawExtras } = await supabase
-    .from('brands')
-    .select(
-      'id, name, secteur, ton, singularite, cible, univers_refuse, piliers_narratifs, calendrier_business, objectifs, ressources, benchmarks, canaux, brand_book',
-    )
-    .eq('id', brand.id)
-    .maybeSingle()
-  const extras = rawExtras as
-    | {
-        id: string
-        name?: string | null
-        secteur?: string | null
-        ton?: string | null
-        singularite?: string | null
-        cible?: string | null
-        univers_refuse?: string | null
-        piliers_narratifs?: unknown
-        calendrier_business?: unknown
-        objectifs?: unknown
-        ressources?: unknown
-        benchmarks?: unknown
-        canaux?: unknown
-        brand_book?: unknown
-      }
-    | null
-
-  // Archives count via admin (RLS gérée serveur). Best-effort.
-  let archivesCount = 0
-  try {
-    const admin = createAdmin()
-    const adminTyped = admin as unknown as {
-      from: (t: string) => {
-        select: (cols: string, opts?: { count?: 'exact'; head?: boolean }) => {
-          eq: (col: string, val: string) => Promise<{ count: number | null }>
-        }
-      }
-    }
-    const { count } = await adminTyped
-      .from('brand_archives')
-      .select('*', { count: 'exact', head: true })
-      .eq('brand_id', brand.id)
-    archivesCount = count ?? 0
-  } catch {
-    archivesCount = 0
-  }
-
-  const snapshot: BrandSnapshot14 = {
-    nom: extras?.name ?? brand.name ?? '',
-    secteur: extras?.secteur ?? '',
-    ton: extras?.ton ?? '',
-    singularite: extras?.singularite ?? '',
-    cible: extras?.cible ?? '',
-    piliers: asArray<PilierNarratif>(extras?.piliers_narratifs),
-    capSaison: '',
-    objectifs: asArray<Objectif>(extras?.objectifs),
-    universRefuse: extras?.univers_refuse ?? '',
-    benchmarks: asArray<Benchmark>(extras?.benchmarks),
-    calendrierBusiness: asArray<MomentBusiness>(extras?.calendrier_business),
-    ressources: asRessources(extras?.ressources),
-    canaux: asObjet<Canaux>(extras?.canaux),
-    brandBook: asObjet<BrandBook>(extras?.brand_book),
-    archivesCount,
-  }
-
-  // ── Posts d'aujourd'hui ────────────────────────────────────────────────────
-  // statut='planifie' = "à préparer". date_prevue dans la journée.
+  // ── Bornes temporelles ───────────────────────────────────────────────────
   const today = new Date()
   const dayStart = startOfDay(today)
   const dayEnd = endOfDay(today)
   const weekStart = startOfWeek(today)
   const weekEnd = endOfWeek(today)
 
+  // ── Posts d'aujourd'hui ─────────────────────────────────────────────────
   const { data: rawPostsToday } = await supabase
     .from('posts')
     .select('id, titre, heure_prevue, type_contenu, pilier_nom, date_prevue, statut')
     .eq('brand_id', brand.id)
-    .eq('statut', 'planifie')
-    .gte('date_prevue', dayStart.toISOString())
-    .lte('date_prevue', dayEnd.toISOString())
+    .gte('date_prevue', dayStart.toISOString().slice(0, 10))
+    .lte('date_prevue', dayEnd.toISOString().slice(0, 10))
     .order('heure_prevue', { ascending: true })
 
-  const postsToday: PostTodayItem[] = ((rawPostsToday as unknown as Array<{
-    id: string
-    titre: string
-    heure_prevue: string
-    type_contenu: string
-    pilier_nom: string
-  }> | null) ?? []).map((p) => ({
+  const postsToday: TaskPost[] = ((rawPostsToday as unknown as TaskPost[] | null) ?? []).map((p) => ({
     id: p.id,
     titre: p.titre ?? '',
-    heure_prevue: p.heure_prevue ?? '',
+    heure_prevue: p.heure_prevue ?? '09:00:00',
     type_contenu: p.type_contenu ?? '',
     pilier_nom: p.pilier_nom ?? '',
+    date_prevue: p.date_prevue ?? '',
+    statut: (p.statut as PostStatutDB) ?? 'planifie',
   }))
 
-  // ── Posts de la semaine (hors today) ──────────────────────────────────────
+  // ── Posts du reste de la semaine (hors today) ────────────────────────────
+  const tomorrowISO = new Date(dayEnd.getTime() + 1000).toISOString().slice(0, 10)
   const { data: rawPostsWeek } = await supabase
     .from('posts')
     .select('id, titre, date_prevue, type_contenu, pilier_nom, statut, heure_prevue')
     .eq('brand_id', brand.id)
-    .eq('statut', 'planifie')
-    .gt('date_prevue', dayEnd.toISOString())
-    .lte('date_prevue', weekEnd.toISOString())
+    .gte('date_prevue', tomorrowISO)
+    .lte('date_prevue', weekEnd.toISOString().slice(0, 10))
     .order('date_prevue', { ascending: true })
+    .order('heure_prevue', { ascending: true })
 
-  const postsWeek: PostWeekItem[] = ((rawPostsWeek as unknown as Array<{
-    id: string
-    titre: string
-    date_prevue: string
-    type_contenu: string
-    pilier_nom: string
-  }> | null) ?? []).map((p) => ({
+  const postsWeek: TaskPost[] = ((rawPostsWeek as unknown as TaskPost[] | null) ?? []).map((p) => ({
     id: p.id,
     titre: p.titre ?? '',
-    date_prevue: p.date_prevue ?? '',
+    heure_prevue: p.heure_prevue ?? '09:00:00',
     type_contenu: p.type_contenu ?? '',
     pilier_nom: p.pilier_nom ?? '',
+    date_prevue: p.date_prevue ?? '',
+    statut: (p.statut as PostStatutDB) ?? 'planifie',
   }))
 
-  // ── Blocs Ma Marque prioritaires non remplis ──────────────────────────────
-  const blocsPrioritaires: BlocPrioritaire[] = []
-  for (const blocId of BLOCS_ORDRE) {
-    if (!BLOCS_PRIORITAIRES.includes(blocId)) continue
-    const etat = etatDuBloc(blocId, snapshot)
-    if (etat === 'complete') continue
-    blocsPrioritaires.push({
-      id: blocId,
-      actionLabel: `Compléter « ${BLOCS_LABELS[blocId]} »`,
-      contextLabel: 'Bloc prioritaire de Ma Marque',
-    })
-    if (blocsPrioritaires.length >= 3) break
+  // ── Stats semaine (Bloc 2 — chiffres bruts, pas de %) ──────────────────
+  // Comptage tous statuts sur la semaine entière.
+  const { data: rawPostsAllWeek } = await supabase
+    .from('posts')
+    .select('statut')
+    .eq('brand_id', brand.id)
+    .gte('date_prevue', weekStart.toISOString().slice(0, 10))
+    .lte('date_prevue', weekEnd.toISOString().slice(0, 10))
+  const allWeek = (rawPostsAllWeek as Array<{ statut: string | null }> | null) ?? []
+
+  const weekStats: WeekStats = {
+    total: allWeek.length,
+    ready: allWeek.filter((p) => p.statut === 'genere').length,
+    todo: allWeek.filter((p) => p.statut === 'planifie').length,
   }
 
-  // ── Stats cette semaine ───────────────────────────────────────────────────
-  const { data: rawPostsWeekPublished } = await supabase
-    .from('posts')
-    .select('id, pilier_nom, date_prevue, statut')
-    .eq('brand_id', brand.id)
-    .eq('statut', 'publie')
-    .gte('date_prevue', weekStart.toISOString())
-    .lte('date_prevue', weekEnd.toISOString())
+  // ── Alertes actives (Zone Critique) ──────────────────────────────────────
+  const { data: rawAlerts } = await supabase
+    .from('alerts')
+    .select('id, severity, message, source, resolved_at, created_at')
+    .is('resolved_at', null)
+    .order('created_at', { ascending: false })
+  const alerts: Alert[] = ((rawAlerts as Array<{
+    id: string
+    severity: string
+    message: string
+    source: string
+  }> | null) ?? [])
+    .filter((a) => a.severity === 'critical' || a.severity === 'warning')
+    .map((a) => ({
+      id: a.id,
+      severity: a.severity as 'critical' | 'warning',
+      message: a.message,
+      source: a.source,
+    }))
 
-  const weekPublished = (rawPostsWeekPublished as Array<{ pilier_nom: string | null; date_prevue: string | null; statut: string }> | null) ?? []
+  // ── brand.questions_answered (Bloc 3 — affiché si < 14) ──────────────────
+  const { data: rawQA } = await supabase
+    .from('brands')
+    .select('questions_answered')
+    .eq('id', brand.id)
+    .maybeSingle()
+  const questionsAnswered =
+    (rawQA as { questions_answered?: number | null } | null)?.questions_answered ?? 0
 
-  const { data: rawPostsWeekAll } = await supabase
-    .from('posts')
-    .select('statut, date_prevue')
-    .eq('brand_id', brand.id)
-    .gte('date_prevue', weekStart.toISOString())
-    .lte('date_prevue', weekEnd.toISOString())
-  const weekAll = (rawPostsWeekAll as Array<{ statut: string; date_prevue: string | null }> | null) ?? []
-
-  const statsWeek: StatsWeek = {
-    postsPublies: weekPublished.length,
-    piliersTravailles: compterPiliersDistincts(weekPublished),
-    programmeTenu: computeProgrammeTenuCetteSemaine(weekAll, today),
-  }
-
-  // ── Stats depuis le début ─────────────────────────────────────────────────
-  const { count: countTotal } = await supabase
-    .from('posts')
-    .select('*', { count: 'exact', head: true })
-    .eq('brand_id', brand.id)
-    .eq('statut', 'publie')
-
-  const { data: rawAllPublished } = await supabase
-    .from('posts')
-    .select('date_prevue')
-    .eq('brand_id', brand.id)
-    .eq('statut', 'publie')
-  const allPublished = (rawAllPublished as Array<{ date_prevue: string | null }> | null) ?? []
-
-  const fondationsCount = BLOCS_ORDRE.filter((id) => etatDuBloc(id, snapshot) === 'complete').length
-
-  const statsTotal: StatsTotal = {
-    postsTotal: countTotal ?? 0,
-    semainesTenues: computeSemainesTenues(allPublished),
-    fondations: fondationsCount,
-  }
-
-  // ── Progression semaine (pour la barre) ──────────────────────────────────
-  const progressionSemaine: ProgressionSemaine = {
-    total: postsToday.length + postsWeek.length + blocsPrioritaires.length,
-    complets: weekPublished.length,
-  }
-
-  // ── Prénom pour l'affichage (futur usage : "Bonjour, Floriane") ───────────
+  // ── Prénom ───────────────────────────────────────────────────────────────
   const prenom =
     profile?.prenom && profile.prenom.trim().length > 0
       ? profile.prenom
@@ -330,13 +174,12 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
   return {
     authenticated: true,
     prenom,
-    todayDate: today.toISOString(),
+    todayISO: today.toISOString(),
+    alerts,
     postsToday,
     postsWeek,
-    blocsPrioritaires,
-    statsWeek,
-    statsTotal,
-    progressionSemaine,
-    drafts: [],
+    weekStats,
+    questionsAnswered,
+    dailySignal: SUGGESTED_SIGNAL_MOCK,
   }
 }
