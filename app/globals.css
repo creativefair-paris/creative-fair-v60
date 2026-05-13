@@ -483,6 +483,13 @@ h1, h2, h3, h4, h5, h6 {
 .cfs-page-header-row h1 {
   margin: 0;
 }
+.cfs-page-header-title-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
 .cfs-page-header-title {
   font-family: var(--font-system);
   font-size: 28px;
@@ -491,12 +498,24 @@ h1, h2, h3, h4, h5, h6 {
   color: #1C1C1E;
   line-height: 1.2;
   margin: 0;
-  flex: 1;
-  min-width: 0;
+}
+/* Sprint 36.H Finding 1 — sous-titre H2 sous le H1, opacité 0.6,
+   taille intermédiaire entre H1 (28px) et corps (15px). */
+.cfs-page-header-subtitle {
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: 1.3;
+  margin: 0;
 }
 @media (max-width: 768px) {
   .cfs-page-header-title {
     font-size: 24px;
+  }
+  .cfs-page-header-subtitle {
+    font-size: 15px;
   }
 }
 .cfs-page-header-trailing {

@@ -45,6 +45,64 @@ export function nomDuJourFr(d: Date): string {
   }).format(d)
 }
 
+// Sprint 36.H Finding 1 — Sous-titre "Semaine du 11 au 17 mai".
+// Si le mois est le même : "DD au DD mois" (un seul mois affiché).
+// Si chevauchement de mois : "DD mois au DD mois".
+// Pas d'année (V1 — la date est implicitement l'année courante).
+const MOIS_FR = [
+  'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+]
+
+export function semaineRangeFr(weekStart: Date, weekEnd: Date): string {
+  const dStart = weekStart.getDate()
+  const dEnd = weekEnd.getDate()
+  const mStart = weekStart.getMonth()
+  const mEnd = weekEnd.getMonth()
+  if (mStart === mEnd) {
+    return `Semaine du ${dStart} au ${dEnd} ${MOIS_FR[mStart]}`
+  }
+  return `Semaine du ${dStart} ${MOIS_FR[mStart]} au ${dEnd} ${MOIS_FR[mEnd]}`
+}
+
+// Sprint 36.H Finding 2 — Titre Bloc A "Aujourd'hui, 13 mai".
+// Pas d'année, mois en minuscule.
+export function jourCourantFr(d: Date): string {
+  return `${d.getDate()} ${MOIS_FR[d.getMonth()]}`
+}
+
+// Sprint 36.H Finding 7 — "Reporté de N jours" sous le titre TaskRow.
+// reportedFromISO = timestamp du moment où le catch-up a déplacé le post.
+// today = jour courant.
+// date_prevue = nouvelle date du post (après report).
+// Retourne null si pas de report ou si pas de label à afficher.
+export function reportedLabel(
+  reportedFromISO: string | null | undefined,
+  datePrevueISO: string,
+  today: Date,
+): string | null {
+  if (!reportedFromISO) return null
+  const dPrevue = new Date(`${datePrevueISO}T00:00:00`)
+  const dToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  if (Number.isNaN(dPrevue.getTime())) return null
+
+  // Cas 1 : date_prevue = today (le post a été reporté à aujourd'hui).
+  if (dPrevue.getTime() === dToday.getTime()) {
+    return 'Reporté de hier'
+  }
+  // Cas 2 : date_prevue > today + 1 (reporté dans le futur).
+  const tomorrow = new Date(dToday)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  if (dPrevue.getTime() > tomorrow.getTime()) {
+    const reported = new Date(reportedFromISO)
+    if (Number.isNaN(reported.getTime())) return null
+    const reportedDay = new Date(reported.getFullYear(), reported.getMonth(), reported.getDate())
+    const diffDays = Math.max(1, Math.round((dToday.getTime() - reportedDay.getTime()) / 86400000))
+    return `Reporté de ${diffDays} jours`
+  }
+  return null
+}
+
 // Heure courte "9h30" / "14h" depuis "HH:MM:SS" ou "HH:MM".
 export function heureLisible(heurePrevue: string | null | undefined): string {
   if (!heurePrevue) return ''

@@ -21,7 +21,8 @@ import { BlocCetteSemaine } from '@/components/today/BlocCetteSemaine'
 import { SuggestedSignal } from '@/components/today/SuggestedSignal'
 import { loadAujourdhuiData } from '@/lib/aujourd-hui/load-data'
 import { mapStatutToState } from '@/lib/types/post'
-import { capitalize, formatDateHeaderFr, getISOWeek } from '@/lib/aujourd-hui/dates-fr'
+import { jourCourantFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
+import { startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,9 +51,14 @@ export default async function AujourdhuiPage() {
   // ── Bloc 3 — Affiché uniquement si fondations < 14 ─────────────────────
   const showMaMarqueBloc = data.questionsAnswered < 14
 
-  // ── Header text ────────────────────────────────────────────────────────
-  const dateFr = capitalize(formatDateHeaderFr(now))
-  const headerLabel = `Aujourd'hui · ${dateFr} · Semaine ${getISOWeek(now)}`
+  // ── Header text (Sprint 36.H Findings 1+2) ─────────────────────────────
+  // H1 = "Aujourd'hui" (breadcrumb supprimée — doublon).
+  // Sous-titre = "Semaine du 11 au 17 mai" (range dynamique, sans année).
+  // Bloc A titre = "Aujourd'hui, 13 mai".
+  const weekStart = startOfWeek(now)
+  const weekEnd = endOfWeek(now)
+  const semaineLabel = semaineRangeFr(weekStart, weekEnd)
+  const blocATitre = `Aujourd'hui, ${jourCourantFr(now)}`
 
   return (
     <div
@@ -75,8 +81,8 @@ export default async function AujourdhuiPage() {
           flexDirection: 'column',
         }}
       >
-        {/* Header full-width — date à gauche, avatar à droite (PageHeader réutilisé). */}
-        <PageHeader title={headerLabel} breadcrumb={[headerLabel]} />
+        {/* Header full-width — H1 "Aujourd'hui" + sous-titre Semaine, avatar à droite. */}
+        <PageHeader title="Aujourd'hui" subtitle={semaineLabel} hideBreadcrumb />
 
         <div
           className="cfs-page-container"
@@ -286,7 +292,7 @@ export default async function AujourdhuiPage() {
             }
             rightColumn={
               <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-                {/* ── Bloc A — Aujourd'hui ── */}
+                {/* ── Bloc A — Aujourd'hui (Sprint 36.H Finding 2) ── */}
                 <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <h2
                     style={{
@@ -299,7 +305,7 @@ export default async function AujourdhuiPage() {
                       padding: '6px 0',
                     }}
                   >
-                    Aujourd&apos;hui
+                    {blocATitre}
                   </h2>
                   {data.postsToday.length === 0 ? (
                     <p
