@@ -18,10 +18,13 @@ import { SplitBrief } from '@/components/layouts/SplitBrief'
 import { CriticalBanner } from '@/components/today/CriticalBanner'
 import { TaskRow } from '@/components/today/TaskRow'
 import { BlocCetteSemaine } from '@/components/today/BlocCetteSemaine'
+import { AFaireCetteSemaine } from '@/components/today/AFaireCetteSemaine'
 import { loadAujourdhuiData } from '@/lib/aujourd-hui/load-data'
+import { computeSuggestions } from '@/lib/aujourd-hui/suggestions'
 import { mapStatutToState } from '@/lib/types/post'
 import { jourCourantFr, nomDuJourFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
 import { startOfWeek, endOfWeek } from '@/lib/calendar/dates'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,6 +72,26 @@ export default async function AujourdhuiPage() {
   const todayEmptyMessage = firstUpcomingJour
     ? `Pas de post aujourd'hui. Ton premier post arrive ${firstUpcomingJour}.`
     : "Rien à préparer aujourd'hui."
+
+  // Sprint 37.A F7 — récupère la fin du programme actif pour le calcul
+  // de la suggestion "Préparer ton prochain plan" (<14j de la fin).
+  const supabaseSuggestions = await createClient()
+  const { data: rawSugProgramme } = await supabaseSuggestions
+    .from('programmes')
+    .select('date_fin')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const currentProgrammeEnd =
+    (rawSugProgramme as { date_fin?: string | null } | null)?.date_fin ?? null
+
+  const suggestions = computeSuggestions({
+    currentProgrammeEnd,
+    postsWeek: data.postsWeek,
+    brandQuestionsAnswered: data.questionsAnswered,
+    now,
+  })
 
   return (
     <div
@@ -352,61 +375,14 @@ export default async function AujourdhuiPage() {
                   />
                 </div>
 
-                {/* Sprint 37 Lot 5 — CTA "Préparer le week-end" (scénario B4).
-                    Visible uniquement vendredi 16h+ (réutilise isFridayLate
-                    pour éviter une 2e fenêtre temporelle séparée — doctrine
-                    doc 09 §4 mentionne vendredi 18h, brief Lot 5 dit 17h+,
-                    on prend le plus précoce pratique). */}
-                {isFridayLate ? (
+                {/* Sprint 37.A F7 — Bloc "À faire cette semaine".
+                    Remplace le CTA standalone "Préparer le week-end"
+                    livré Sprint 37 Lot 5 (intégré ici comme l'une des
+                    3 suggestions dynamiques possibles). Si zéro
+                    suggestion calculée, le bloc ne rend rien. */}
+                {suggestions.length > 0 ? (
                   <div className="cfs-stagger cfs-stagger-9">
-                    <a
-                      href="/outils/conseiller?scenario=B4"
-                      className="glass-thin"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 4,
-                        padding: '14px 18px',
-                        borderRadius: 14,
-                        border: '1px solid rgba(0, 122, 255, 0.4)',
-                        textDecoration: 'none',
-                        color: 'inherit',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-system)',
-                          fontSize: 11,
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                          color: '#007AFF',
-                        }}
-                      >
-                        Avec le conseiller
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-system)',
-                          fontSize: 15,
-                          fontWeight: 600,
-                          color: '#1C1C1E',
-                          lineHeight: 1.3,
-                        }}
-                      >
-                        Préparer le week-end
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-system)',
-                          fontSize: 13,
-                          color: 'rgba(0,0,0,0.55)',
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        Un post, pas deux. Le week-end appelle la respiration.
-                      </span>
-                    </a>
+                    <AFaireCetteSemaine suggestions={suggestions} />
                   </div>
                 ) : null}
               </div>
