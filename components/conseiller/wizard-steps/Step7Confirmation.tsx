@@ -46,7 +46,9 @@ export function Step7Confirmation({
   const sensitive = responses['2']?.sensitive_topics ?? ''
   const pillars = responses['3']?.pillars ?? {}
   const risk = responses['4']?.risk_cursor
-  const format = responses['5']?.format
+  // Sprint 37.C (F19) — réponse étape 5 = objectifs ; format passe à idx 6.
+  const objectifs = responses['5']?.objectifs_editoriaux ?? []
+  const format = responses['6']?.format
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -81,6 +83,14 @@ export function Step7Confirmation({
           }
         />
         <RecapRow label="Curseur de risque" value={risk ? RISK_LABEL[risk] : '—'} />
+        <RecapRow
+          label="Objectifs éditoriaux"
+          value={
+            objectifs.length > 0
+              ? objectifs.map((o) => o.value).join(' · ')
+              : 'Aucun objectif renseigné'
+          }
+        />
         <RecapRow label="Format dominant" value={format ? FORMAT_LABEL[format] : '—'} />
       </dl>
 

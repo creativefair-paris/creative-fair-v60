@@ -20,6 +20,7 @@ import { Step2BusinessAnchors } from './wizard-steps/Step2BusinessAnchors'
 import { Step3SensitiveTopics } from './wizard-steps/Step3SensitiveTopics'
 import { Step4Pillars } from './wizard-steps/Step4Pillars'
 import { Step5RiskCursor } from './wizard-steps/Step5RiskCursor'
+import { Step6Objectifs } from './wizard-steps/Step6Objectifs'
 import { Step6Format } from './wizard-steps/Step6Format'
 import { Step7Confirmation } from './wizard-steps/Step7Confirmation'
 import {
@@ -29,6 +30,7 @@ import {
 import {
   WIZARD_TOTAL_STEPS,
   type DominantFormat,
+  type ObjectifEditorial,
   type RiskCursor,
   type WizardResponses,
   type WizardSessionRow,
@@ -44,6 +46,8 @@ type Props = {
   pillarsCatalog: ReadonlyArray<PilierLite>
   // Suggestions pré-remplies pour Step 2 (ancres business).
   businessAnchorSuggestions: ReadonlyArray<WizardSuggestion>
+  // Sprint 37.C (F19) — suggestions pour l'étape 6 Objectifs éditoriaux.
+  objectifsSuggestions?: ReadonlyArray<ObjectifEditorial>
   onClose: () => void
 }
 
@@ -51,6 +55,7 @@ export function WizardImmersiveSheet({
   session: initialSession,
   pillarsCatalog,
   businessAnchorSuggestions,
+  objectifsSuggestions = [],
   onClose,
 }: Props) {
   const router = useRouter()
@@ -286,6 +291,7 @@ export function WizardImmersiveSheet({
             session,
             pillarsCatalog,
             businessAnchorSuggestions,
+            objectifsSuggestions,
             currentStep,
             saving,
             generating,
@@ -296,7 +302,11 @@ export function WizardImmersiveSheet({
             onSaveSensitive: (topics) => saveStep(2, '2', { sensitive_topics: topics }),
             onSavePillars: (pillars) => saveStep(3, '3', { pillars }),
             onSaveRisk: (cursor) => saveStep(4, '4', { risk_cursor: cursor }),
-            onSaveFormat: (format) => saveStep(5, '5', { format }),
+            // Sprint 37.C (F19) — Étape 5 = Objectifs éditoriaux.
+            onSaveObjectifs: (objectifs) =>
+              saveStep(5, '5', { objectifs_editoriaux: objectifs }),
+            // Format passe de l'index 5 à l'index 6.
+            onSaveFormat: (format) => saveStep(6, '6', { format }),
             onGenerate: handleGenerate,
           })}
         </div>
@@ -330,6 +340,7 @@ type RenderStepArgs = {
   session: WizardSessionRow
   pillarsCatalog: ReadonlyArray<PilierLite>
   businessAnchorSuggestions: ReadonlyArray<WizardSuggestion>
+  objectifsSuggestions: ReadonlyArray<ObjectifEditorial>
   currentStep: WizardStepIndex
   saving: boolean
   generating: boolean
@@ -339,6 +350,7 @@ type RenderStepArgs = {
   onSaveSensitive: (topics: string) => void
   onSavePillars: (pillars: Record<string, number>) => void
   onSaveRisk: (cursor: RiskCursor) => void
+  onSaveObjectifs: (objectifs: ReadonlyArray<ObjectifEditorial>) => void
   onSaveFormat: (format: DominantFormat) => void
   onGenerate: () => void
 }
@@ -394,15 +406,26 @@ function renderStep(args: RenderStepArgs) {
         />
       )
     case 5:
+      // Sprint 37.C (F19) — nouvelle étape Objectifs éditoriaux.
+      return (
+        <Step6Objectifs
+          initial={r['5']?.objectifs_editoriaux ?? []}
+          suggestions={args.objectifsSuggestions}
+          onBack={args.onBack}
+          onSave={args.onSaveObjectifs}
+          saving={args.saving}
+        />
+      )
+    case 6:
       return (
         <Step6Format
-          initial={r['5']?.format ?? null}
+          initial={r['6']?.format ?? null}
           onBack={args.onBack}
           onSave={args.onSaveFormat}
           saving={args.saving}
         />
       )
-    case 6:
+    case 7:
       return (
         <Step7Confirmation
           responses={r}

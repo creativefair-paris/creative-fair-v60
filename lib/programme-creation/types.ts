@@ -1,6 +1,8 @@
 // Sprint 37.B (F16) — Types partagés pour le wizard immersif A1.
 
-export type WizardStepIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6
+// Sprint 37.C (F19) — passage à 8 étapes : ajout d'une étape Objectifs
+// éditoriaux entre Curseur de risque (idx 4) et Format préféré.
+export type WizardStepIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 export type WizardState =
   | 'IN_PROGRESS'
@@ -11,6 +13,13 @@ export type WizardState =
 export type RiskCursor = 'safe' | 'moderate' | 'risky'
 export type DominantFormat = 'carousel' | 'reel' | 'post' | 'mix'
 
+// Sprint 37.C (F19) — type des objectifs éditoriaux (multi-select 1-2).
+export type ObjectifEditorial = {
+  value: string
+  type: 'qualitatif' | 'quantitatif'
+  source: 'pilier_principal' | 'calendar' | 'current_rhythm' | 'current_metrics' | 'custom'
+}
+
 // Réponses indexées par stepIndex (string pour la sérialisation JSONB).
 // Schéma libre côté DB, typage côté UI pour valider à l'écriture.
 export type WizardResponses = {
@@ -19,7 +28,9 @@ export type WizardResponses = {
   '2'?: { sensitive_topics: string }
   '3'?: { pillars: Record<string, number> }
   '4'?: { risk_cursor: RiskCursor }
-  '5'?: { format: DominantFormat }
+  // Sprint 37.C (F19) — nouvelle étape Objectifs éditoriaux.
+  '5'?: { objectifs_editoriaux: ReadonlyArray<ObjectifEditorial> }
+  '6'?: { format: DominantFormat }
 }
 
 export type WizardSessionRow = {
@@ -53,6 +64,7 @@ export const WIZARD_STEP_LABELS = [
   'Sujets sensibles',
   'Piliers à mobiliser',
   'Curseur de risque',
+  'Objectifs éditoriaux',
   'Format préféré',
   'Confirmation',
 ] as const
