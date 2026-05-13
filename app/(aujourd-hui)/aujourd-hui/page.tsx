@@ -21,7 +21,7 @@ import { BlocCetteSemaine } from '@/components/today/BlocCetteSemaine'
 import { SuggestedSignal } from '@/components/today/SuggestedSignal'
 import { loadAujourdhuiData } from '@/lib/aujourd-hui/load-data'
 import { mapStatutToState } from '@/lib/types/post'
-import { jourCourantFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
+import { jourCourantFr, nomDuJourFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
 import { startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 
 export const dynamic = 'force-dynamic'
@@ -59,6 +59,17 @@ export default async function AujourdhuiPage() {
   const weekEnd = endOfWeek(now)
   const semaineLabel = semaineRangeFr(weekStart, weekEnd)
   const blocATitre = `Aujourd'hui, ${jourCourantFr(now)}`
+
+  // Sprint 36.I Finding 1 — Fallback narratif si rien aujourd'hui mais
+  // un post arrive plus tard cette semaine. data.postsWeek est déjà
+  // ordonné par date_prevue ASC, donc [0] = premier post à venir.
+  const firstUpcoming = data.postsWeek[0]
+  const firstUpcomingJour = firstUpcoming
+    ? nomDuJourFr(new Date(`${firstUpcoming.date_prevue}T00:00:00`))
+    : null
+  const todayEmptyMessage = firstUpcomingJour
+    ? `Pas de post aujourd'hui. Ton premier post arrive ${firstUpcomingJour}.`
+    : "Rien à préparer aujourd'hui."
 
   return (
     <div
@@ -190,7 +201,7 @@ export default async function AujourdhuiPage() {
                         lineHeight: 1.5,
                       }}
                     >
-                      Rien à préparer aujourd&apos;hui.
+                      {todayEmptyMessage}
                     </p>
                   )}
                 </section>
@@ -321,7 +332,7 @@ export default async function AujourdhuiPage() {
                         margin: '4px 0 0 8px',
                       }}
                     >
-                      Rien à préparer aujourd&apos;hui.
+                      {todayEmptyMessage}
                     </p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
