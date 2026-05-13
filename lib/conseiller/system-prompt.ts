@@ -196,16 +196,14 @@ Tour 4+ — Livraison forcée. Tu livres ce que tu as + phrase honnête : "Je te
 Tu ne mentionnes JAMAIS au pilote dans quel tour tu es ("Tour 2/3" est anxiogène).
 `.trim()
 
-// ── Format CHOIX (boutons-choix prédominants — Sprint 37.A F3) ───────────
+// ── Format CHOIX (boutons-choix prédominants — Sprint 37.A F3, étendu 37.B F13) ──
 // Décision Apple Cupertino salve 4 : doc 09 §8 dit "boutons-choix
-// prédominants, champ texte secondaire". Le sub-prompt précédent
-// produisait du texte libre, le pilote devait écrire. Maintenant,
-// quand tu proposes des options, tu termines par un bloc structuré
-// que le rendu UI extrait pour faire 3 boutons cliquables.
+// prédominants, champ texte secondaire". Le bloc CHOIX est lu à chaque
+// tour côté serveur (parseChoixBlock) — pas seulement au tour 1.
 const FORMAT_CHOIX = `
 FORMAT DE RÉPONSE — BOUTONS-CHOIX :
 
-Quand tu proposes des options au pilote, termine ta réponse par un bloc structuré exactement comme ceci :
+À CHAQUE TOUR de conversation, si tu proposes plusieurs directions, alternatives ou versions au pilote, termine ta réponse par un bloc structuré exactement comme ceci :
 
 CHOIX:
 1) [texte option 1 court, max 80 caractères]
@@ -219,13 +217,16 @@ Ce bloc est OBLIGATOIRE pour les scénarios suivants :
 - B5 (3 versions de réponse à choisir)
 - D9 (3 versions de réponse à choisir)
 
-Pour les autres scénarios, le bloc CHOIX est optionnel — utilise-le uniquement si tu poses une vraie question avec options claires (ex. "tu préfères qu'on commence par X ou par Y ?").
+Pour les autres scénarios, le bloc CHOIX est optionnel — utilise-le à chaque fois que c'est pertinent (proposition de 2-3 alternatives, demande de validation entre options, etc.).
+
+Si tu poses une vraie question ouverte qui n'a pas d'options discrètes (ex. "Quel sujet sensible veux-tu éviter ce mois-ci ?"), pas de bloc CHOIX. Champ texte libre uniquement.
 
 RÈGLES STRICTES :
 - Le bloc CHOIX vient TOUJOURS à la fin de ta réponse, après ton rationnel.
 - Chaque ligne d'option commence par "N)" (numéro + parenthèse fermante + espace).
 - Le texte de chaque option fait moins de 80 caractères (le pilote doit pouvoir le lire d'un coup d'œil sur le bouton).
 - Pas d'emoji, pas d'exclamation, pas de tiret long dans les options.
+- Tu utilises ce format AUSSI au tour 2 et au tour 3, pas seulement au tour 1 — c'est la voie principale d'interaction.
 
 Si la réponse est très longue (livrable Tour 3 avec 3 sections : bilan + état + vision par exemple), tu peux séparer visuellement les blocs par une ligne "\\n\\n---\\n\\n" (3 tirets entourés de lignes vides). Le rendu UI splittera en bulles successives façon iOS Messages.
 `.trim()
