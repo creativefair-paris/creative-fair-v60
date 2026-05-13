@@ -13,7 +13,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SplitBrief } from '@/components/layouts/SplitBrief'
 import { ConseillerBubble } from './ConseillerBubble'
 import { PiloteBubble } from './PiloteBubble'
@@ -24,10 +24,30 @@ import {
   groupConversationsByDate,
   type ConversationGroup,
 } from '@/lib/conseiller/queries'
-import type { ConseillerConversation } from '@/lib/conseiller/types'
+import type {
+  ConseillerContext,
+  ConseillerConversation,
+  ScenarioType,
+} from '@/lib/conseiller/types'
+
+// Sprint 37 (Lot 5) — initialSheet permet d'auto-ouvrir la sheet
+// contextuelle au mount, alimenté par les paramètres URL de la page
+// /outils/conseiller (cas : TaskRow /aujourd-hui, "Préparer le week-end",
+// modération, voies 5-7). C'est le canal "route → sheet" pour les voies
+// d'accès qui partent d'un Server Component (impossible d'ouvrir une
+// sheet client inline sans lifting state à la racine).
+export type InitialSheet = {
+  scenarioType: ScenarioType
+  headerLabel: string
+  context: ConseillerContext
+}
 
 type Props = {
   conversations: ReadonlyArray<ConseillerConversation>
+  // Si fourni, la sheet s'ouvre automatiquement au mount avec ces
+  // paramètres. L'URL est ensuite nettoyée par le composant pour
+  // éviter qu'un reload ne ré-ouvre la sheet.
+  initialSheet?: InitialSheet | null
 }
 
 function formatTimeShort(iso: string): string {
@@ -40,17 +60,36 @@ function formatTimeShort(iso: string): string {
   }).format(d)
 }
 
-export function ConseillerHistory({ conversations }: Props) {
+export function ConseillerHistory({ conversations, initialSheet = null }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(
     conversations[0]?.id ?? null,
   )
-  const [sheetOpen, setSheetOpen] = useState(false)
+  // Sheet ouvrable depuis l'URL (Lot 5 — voies d'accès TaskRow / week-end /
+  // modération) ou depuis le bouton "Nouvelle question".
+  const [sheetConfig, setSheetConfig] = useState<InitialSheet | null>(initialSheet)
 
   const groups: ConversationGroup[] = groupConversationsByDate(conversations)
   const selected = conversations.find((c) => c.id === selectedId) ?? null
 
+  // Nettoyage de l'URL après ouverture initiale pour éviter un re-trigger
+  // sur reload accidentel. On garde le pathname, on supprime les
+  // searchParams (Lot 5).
+  useEffect(() => {
+    if (!initialSheet) return
+    if (typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    if (url.searchParams.size > 0) {
+      url.search = ''
+      window.history.replaceState(null, '', url.toString())
+    }
+  }, [initialSheet])
+
   function handleNewQuestion() {
-    setSheetOpen(true)
+    setSheetConfig({
+      scenarioType: 'E-divers',
+      headerLabel: 'Nouvelle question',
+      context: {},
+    })
   }
 
   return (
@@ -182,13 +221,16 @@ export function ConseillerHistory({ conversations }: Props) {
         }
       />
 
-      <ConseillerSheet
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        scenarioType="E-divers"
-        headerLabel="Nouvelle question"
-        onSendMessage={createStubSendMessage()}
-      />
+      {sheetConfig ? (
+        <ConseillerSheet
+          open
+          onClose={() => setSheetConfig(null)}
+          scenarioType={sheetConfig.scenarioType}
+          headerLabel={sheetConfig.headerLabel}
+          initialContext={sheetConfig.context}
+          onSendMessage={createStubSendMessage()}
+        />
+      ) : null}
     </>
   )
 }

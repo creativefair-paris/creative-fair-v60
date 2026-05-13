@@ -352,10 +352,63 @@ export default async function AujourdhuiPage() {
                   />
                 </div>
 
-                {/* Sprint 36.I Finding 3 — Slot "Suggéré pour toi" retiré.
-                    Le mock SUGGESTED_SIGNAL_MOCK affichait "Ami Paris..."
-                    pour toutes les marques, ce qui mentait. Le slot
-                    revient Sprint 37 avec une vraie source (Task Forces). */}
+                {/* Sprint 37 Lot 5 — CTA "Préparer le week-end" (scénario B4).
+                    Visible uniquement vendredi 16h+ (réutilise isFridayLate
+                    pour éviter une 2e fenêtre temporelle séparée — doctrine
+                    doc 09 §4 mentionne vendredi 18h, brief Lot 5 dit 17h+,
+                    on prend le plus précoce pratique). */}
+                {isFridayLate ? (
+                  <div className="cfs-stagger cfs-stagger-9">
+                    <a
+                      href="/outils/conseiller?scenario=B4"
+                      className="glass-thin"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 4,
+                        padding: '14px 18px',
+                        borderRadius: 14,
+                        border: '1px solid rgba(0, 122, 255, 0.4)',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-system)',
+                          fontSize: 11,
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          color: '#007AFF',
+                        }}
+                      >
+                        Avec le conseiller
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-system)',
+                          fontSize: 15,
+                          fontWeight: 600,
+                          color: '#1C1C1E',
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        Préparer le week-end
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-system)',
+                          fontSize: 13,
+                          color: 'rgba(0,0,0,0.55)',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        Un post, pas deux. Le week-end appelle la respiration.
+                      </span>
+                    </a>
+                  </div>
+                ) : null}
               </div>
             }
           />
