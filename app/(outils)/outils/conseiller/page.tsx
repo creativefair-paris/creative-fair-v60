@@ -121,7 +121,10 @@ export default async function ConseillerPage({ searchParams }: Props) {
           flexDirection: 'column',
         }}
       >
-        <PageHeader title="Conseiller" />
+        <PageHeader
+          title="Conseiller"
+          breadcrumb={["Aujourd'hui", { label: 'Outils', href: '/outils' }, 'Conseiller']}
+        />
 
         <section
           className="cfs-page-container"

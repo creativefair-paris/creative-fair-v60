@@ -49,6 +49,7 @@ export default async function ReviewsPage() {
         <PageHeader
           title="Modération"
           subtitle="Messages reçus en DM et commentaires"
+          breadcrumb={["Aujourd'hui", { label: 'Outils', href: '/outils' }, 'Modération']}
         />
 
         <section

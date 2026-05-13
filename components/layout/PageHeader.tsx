@@ -18,11 +18,18 @@ import { createClient } from '@/lib/supabase/server'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { UserMenuTrigger } from './UserMenuTrigger'
 
+// Sprint 37.A F6 — breadcrumb peut désormais accepter des objets
+// `{ label, href }` pour rendre les segments intermédiaires cliquables
+// (cas /outils/* qui doivent linker "Outils" vers /outils).
+type BreadcrumbItem = string | { label: string; href?: string }
+
 type Props = {
   title: string
-  // Breadcrumb : array de labels (le 1er pointe automatiquement vers /programme).
+  // Breadcrumb : array de labels (le 1er pointe automatiquement vers
+  // /aujourd-hui via le composant Breadcrumb). Sprint 37.A : items
+  // intermédiaires peuvent être { label, href } pour être cliquables.
   // Si non fourni, on déduit "Aujourd'hui › {title}".
-  breadcrumb?: ReadonlyArray<string>
+  breadcrumb?: ReadonlyArray<BreadcrumbItem>
   // Sprint 36.H — supprime la breadcrumb si true (cas /aujourd-hui : H1 = "Aujourd'hui"
   // donc afficher "Aujourd'hui" en breadcrumb au-dessus serait un doublon).
   hideBreadcrumb?: boolean
@@ -103,7 +110,7 @@ async function loadUserMeta(): Promise<
 }
 
 export async function PageHeader({ title, breadcrumb, hideBreadcrumb, subtitle, trailing }: Props) {
-  const items: ReadonlyArray<string> = breadcrumb ?? ["Aujourd'hui", title]
+  const items: ReadonlyArray<BreadcrumbItem> = breadcrumb ?? ["Aujourd'hui", title]
 
   let trailingNode: ReactNode = trailing ?? null
   if (trailingNode === null) {
