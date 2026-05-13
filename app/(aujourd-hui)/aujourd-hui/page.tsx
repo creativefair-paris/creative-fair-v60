@@ -102,7 +102,7 @@ export default async function AujourdhuiPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {/* ── Bloc 1 — Prochaine action (Liquid Glass niveau 2) ── */}
                 <section
-                  className="glass-regular cfs-bloc-prochaine"
+                  className="glass-regular cfs-bloc-prochaine cfs-stagger cfs-stagger-2"
                   style={{
                     borderRadius: 16,
                     padding: '20px 22px',
@@ -163,6 +163,7 @@ export default async function AujourdhuiPage() {
                       </span>
                       <Link
                         href={`/programme/post/${prochain.id}`}
+                        className="cfs-bloc-prochaine-cta"
                         style={{
                           marginTop: 4,
                           alignSelf: 'flex-start',
@@ -203,12 +204,11 @@ export default async function AujourdhuiPage() {
                   }}
                 >
                   <section
-                    className="glass-thin cfs-bloc-link"
+                    className="glass-thin cfs-bloc-link cfs-stagger cfs-stagger-6"
                     style={{
                       borderRadius: 14,
                       padding: '14px 18px',
                       border: '1px solid rgba(255,255,255,0.5)',
-                      transition: 'background-color 200ms ease-out, transform 200ms ease-out',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 4,
@@ -243,7 +243,7 @@ export default async function AujourdhuiPage() {
                 {/* ── Bloc 3 — État Ma Marque (Liquid Glass niveau 1, conditionnel) ── */}
                 {showMaMarqueBloc ? (
                   <section
-                    className="glass-thin"
+                    className="glass-thin cfs-stagger cfs-stagger-7"
                     style={{
                       borderRadius: 14,
                       padding: '14px 18px',
@@ -295,7 +295,10 @@ export default async function AujourdhuiPage() {
             rightColumn={
               <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                 {/* ── Bloc A — Aujourd'hui (Sprint 36.H Finding 2) ── */}
-                <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <section
+                  className="cfs-stagger cfs-stagger-3"
+                  style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+                >
                   <h2
                     style={{
                       fontFamily: 'var(--font-system)',
@@ -330,15 +333,19 @@ export default async function AujourdhuiPage() {
                 </section>
 
                 {/* ── Bloc B — Cette semaine ── */}
-                <BlocCetteSemaine
-                  posts={data.postsWeek}
-                  initialOpen={isMondayMorning}
-                  showWeekendCta={isFridayLate}
-                  todayISO={data.todayISO}
-                />
+                <div className="cfs-stagger cfs-stagger-8">
+                  <BlocCetteSemaine
+                    posts={data.postsWeek}
+                    initialOpen={isMondayMorning}
+                    showWeekendCta={isFridayLate}
+                    todayISO={data.todayISO}
+                  />
+                </div>
 
                 {/* ── Bloc C — Suggéré pour toi (mocké V1) ── */}
-                <SuggestedSignal signal={data.dailySignal} />
+                <div className="cfs-stagger cfs-stagger-9">
+                  <SuggestedSignal signal={data.dailySignal} />
+                </div>
               </div>
             }
           />
