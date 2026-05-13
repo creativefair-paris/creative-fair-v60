@@ -269,6 +269,10 @@ export type SystemPromptOptions = {
   addressForm: AddressForm
   scenarioSubPrompt: string
   brandContext?: string
+  // Sprint 37.A F5 — si présent, le pilote reprend une conversation
+  // antérieure (état REOPENED). Le bloc inclut un rappel formaté de
+  // l'historique de la conversation source.
+  reopenedRecap?: string
 }
 
 export function buildConseillerSystemPrompt(opts: SystemPromptOptions): string {
@@ -301,6 +305,9 @@ export function buildConseillerSystemPrompt(opts: SystemPromptOptions): string {
   ]
   if (opts.brandContext) {
     parts.push('', '# Contexte marque', opts.brandContext)
+  }
+  if (opts.reopenedRecap) {
+    parts.push('', '# Reprise de conversation', opts.reopenedRecap)
   }
   parts.push('', '# Scénario en cours', opts.scenarioSubPrompt)
   return parts.join('\n')

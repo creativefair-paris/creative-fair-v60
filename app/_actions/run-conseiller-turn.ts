@@ -359,12 +359,49 @@ export async function runConseillerTurn(
   // 6. Brand context
   const brandContext = await loadBrandContext(supabase, tenantId)
 
+  // 6.bis Sprint 37.A F5 — si context.continued_from présent, on injecte
+  // un rappel de la conversation précédente dans le system prompt
+  // (état REOPENED).
+  const continuedFromId =
+    input.context && typeof input.context['continued_from'] === 'string'
+      ? (input.context['continued_from'] as string)
+      : null
+  let reopenedRecap: string | null = null
+  if (continuedFromId) {
+    const { data: rawSource } = await supabase
+      .from('conseiller_conversations')
+      .select('messages, scenario_type, created_at')
+      .eq('id', continuedFromId)
+      .maybeSingle()
+    const source = rawSource as {
+      messages: unknown
+      scenario_type: string
+      created_at: string
+    } | null
+    if (source && Array.isArray(source.messages)) {
+      const msgs = source.messages as ConversationMessage[]
+      const formatted = msgs
+        .map((m) => `${m.role === 'user' ? 'Pilote' : 'Toi'} : ${m.content}`)
+        .join('\n\n')
+      reopenedRecap = `Tu reprends une conversation précédente (${source.scenario_type}, démarrée le ${new Date(
+        source.created_at,
+      ).toLocaleDateString('fr-FR')}).
+
+Historique pour rappel :
+
+${formatted}
+
+Le pilote veut continuer. Réponds en partant du contexte de cette ancienne conversation. Tu peux la prolonger directement, sans redemander le contexte.`
+    }
+  }
+
   // 7. Construit le system prompt complet
   const systemPrompt = buildConseillerSystemPrompt({
     pilotRole,
     addressForm: addressesFormally ? 'vouvoiement' : 'tutoiement',
     scenarioSubPrompt: getScenarioSubPrompt(input.scenarioType),
     ...(brandContext ? { brandContext } : {}),
+    ...(reopenedRecap ? { reopenedRecap } : {}),
   })
 
   // 8. Appel Anthropic Opus 4.7 (ou fallback hors-ligne)

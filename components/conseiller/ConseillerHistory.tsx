@@ -93,6 +93,24 @@ export function ConseillerHistory({ conversations, initialSheet = null }: Props)
     })
   }
 
+  function handleReprendre(source: ConseillerConversation) {
+    // Sprint 37.A F5 — reprise (état REOPENED doc 09 §9).
+    // On ouvre la sheet avec :
+    //   * même scenario_type que la conversation source
+    //   * context enrichi de { continued_from: source.id } + l'ancien
+    //     contexte (post_id, period, etc.) pour la cohérence
+    //   * le system prompt côté server action charge l'historique de
+    //     la source et l'inclut dans le bloc "Reprise de conversation"
+    setSheetConfig({
+      scenarioType: source.scenario_type,
+      headerLabel: `${scenarioLabel(source.scenario_type)} (reprise)`,
+      context: {
+        ...(source.context ?? {}),
+        continued_from: source.id,
+      },
+    })
+  }
+
   return (
     <>
       <div
@@ -205,7 +223,7 @@ export function ConseillerHistory({ conversations, initialSheet = null }: Props)
         }
         rightColumn={
           selected ? (
-            <ReadOnlyConversation conv={selected} />
+            <ReadOnlyConversation conv={selected} onReprendre={handleReprendre} />
           ) : (
             <EmptyPreview onNew={handleNewQuestion} />
           )
@@ -292,7 +310,13 @@ function EmptyPreview({ onNew }: { onNew: () => void }) {
   )
 }
 
-function ReadOnlyConversation({ conv }: { conv: ConseillerConversation }) {
+function ReadOnlyConversation({
+  conv,
+  onReprendre,
+}: {
+  conv: ConseillerConversation
+  onReprendre: (conv: ConseillerConversation) => void
+}) {
   const title = deriveTitleFromConversation(conv)
   const scenario = scenarioLabel(conv.scenario_type)
   return (
@@ -365,6 +389,25 @@ function ReadOnlyConversation({ conv }: { conv: ConseillerConversation }) {
         )}
       </div>
 
+      {/* Sprint 37.A F5 — bouton Reprendre (état REOPENED doc 09 §9). */}
+      {conv.messages.length > 0 ? (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: 24,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => onReprendre(conv)}
+            className="btn-choice btn-choice-sm"
+          >
+            Reprendre
+          </button>
+        </div>
+      ) : null}
+
       <p
         style={{
           fontFamily: 'var(--font-system)',
@@ -374,8 +417,8 @@ function ReadOnlyConversation({ conv }: { conv: ConseillerConversation }) {
           fontStyle: 'italic',
         }}
       >
-        Conversation en lecture seule. Pour une nouvelle question, clique sur
-        "Nouvelle question" en haut.
+        Conversation en lecture seule. Pour reprendre cette conversation, clique
+        sur "Reprendre".
       </p>
     </article>
   )
