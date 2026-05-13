@@ -17,7 +17,8 @@ import { useEffect, useState } from 'react'
 import { SplitBrief } from '@/components/layouts/SplitBrief'
 import { ConseillerBubble } from './ConseillerBubble'
 import { PiloteBubble } from './PiloteBubble'
-import { ConseillerSheet, createStubSendMessage } from './ConseillerSheet'
+import { ConseillerSheet } from './ConseillerSheet'
+import { runConseillerTurn } from '@/app/_actions/run-conseiller-turn'
 import {
   deriveTitleFromConversation,
   scenarioLabel,
@@ -228,7 +229,7 @@ export function ConseillerHistory({ conversations, initialSheet = null }: Props)
           scenarioType={sheetConfig.scenarioType}
           headerLabel={sheetConfig.headerLabel}
           initialContext={sheetConfig.context}
-          onSendMessage={createStubSendMessage()}
+          onSendMessage={runConseillerTurn}
         />
       ) : null}
     </>

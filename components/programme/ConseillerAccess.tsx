@@ -18,7 +18,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ConseillerSheet, createStubSendMessage } from '@/components/conseiller/ConseillerSheet'
+import { ConseillerSheet } from '@/components/conseiller/ConseillerSheet'
+import { runConseillerTurn } from '@/app/_actions/run-conseiller-turn'
 import { PeriodSelectionSheet, type PublicationFrequency } from './PeriodSelectionSheet'
 import type { ConseillerContext, ScenarioType } from '@/lib/conseiller/types'
 
@@ -338,7 +339,7 @@ export function ConseillerAccess({
           scenarioType={phase.scenarioType}
           headerLabel={phase.headerLabel}
           initialContext={phase.context}
-          onSendMessage={createStubSendMessage()}
+          onSendMessage={runConseillerTurn}
         />
       ) : null}
     </>
