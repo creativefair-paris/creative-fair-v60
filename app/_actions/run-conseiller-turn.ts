@@ -275,7 +275,8 @@ CHOIX:
 // Extrait le bloc structuré "CHOIX:\n1) ...\n2) ...\n3) ..." en fin de
 // réponse Anthropic et renvoie { cleanText, choices }. Si pas de bloc,
 // renvoie { cleanText: response, choices: undefined }.
-export function parseChoixBlock(response: string): {
+// (Pas exporté : 'use server' n'autorise que des exports async.)
+function parseChoixBlock(response: string): {
   cleanText: string
   choices: ReadonlyArray<{ id: string; label: string }> | undefined
 } {
