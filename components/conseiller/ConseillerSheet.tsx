@@ -347,12 +347,25 @@ export function ConseillerSheet({
                 currentChoices.length > 0 ? (
                   <div
                     style={{
-                      marginTop: 12,
+                      marginTop: 16,
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 8,
                     }}
                   >
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-system)',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        color: 'var(--color-tertiary-label)',
+                        marginBottom: 2,
+                      }}
+                    >
+                      Choisis une direction
+                    </span>
                     {currentChoices.map((c) => (
                       <button
                         key={c.id}
