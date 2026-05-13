@@ -23,6 +23,11 @@ type Props = {
   // Breadcrumb : array de labels (le 1er pointe automatiquement vers /programme).
   // Si non fourni, on déduit "Aujourd'hui › {title}".
   breadcrumb?: ReadonlyArray<string>
+  // Sprint 36.H — supprime la breadcrumb si true (cas /aujourd-hui : H1 = "Aujourd'hui"
+  // donc afficher "Aujourd'hui" en breadcrumb au-dessus serait un doublon).
+  hideBreadcrumb?: boolean
+  // Sprint 36.H — sous-titre H2 sous le H1, opacité 0.6, taille intermédiaire.
+  subtitle?: string
   // Override du trailing (utile pour les pages non-auth comme login).
   trailing?: ReactNode
 }
@@ -97,7 +102,7 @@ async function loadUserMeta(): Promise<
   }
 }
 
-export async function PageHeader({ title, breadcrumb, trailing }: Props) {
+export async function PageHeader({ title, breadcrumb, hideBreadcrumb, subtitle, trailing }: Props) {
   const items: ReadonlyArray<string> = breadcrumb ?? ["Aujourd'hui", title]
 
   let trailingNode: ReactNode = trailing ?? null
@@ -117,9 +122,14 @@ export async function PageHeader({ title, breadcrumb, trailing }: Props) {
   return (
     <header className="cfs-page-header">
       <div className="cfs-page-header-inner">
-        <Breadcrumb items={items} />
+        {hideBreadcrumb ? null : <Breadcrumb items={items} />}
         <div className="cfs-page-header-row">
-          <h1 className="cfs-page-header-title">{title}</h1>
+          <div className="cfs-page-header-title-stack">
+            <h1 className="cfs-page-header-title">{title}</h1>
+            {subtitle ? (
+              <p className="cfs-page-header-subtitle">{subtitle}</p>
+            ) : null}
+          </div>
           {trailingNode ? (
             <div className="cfs-page-header-trailing">{trailingNode}</div>
           ) : null}

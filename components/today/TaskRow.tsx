@@ -1,28 +1,32 @@
-// Sprint 36.G — Ligne d'une tâche /aujourd-hui (post ou rang).
+// Sprint 36.G → 36.H — Ligne d'une tâche /aujourd-hui.
 //
-// Rendu : cercle d'état + titre + sous-titre + heure + bouton "..."
-// Click ligne → navigue vers /programme/post/[id]
-// Click bouton "..." → ouvre ContextMenu (desktop) ou long-press (mobile)
+// Sprint 36.H Finding 6 : suppression du menu contextuel (boutons "..."
+// avec 6 actions reporter/avancer). Remplacé par un lien latent
+// "Demander →" à droite, opacity 0.4 au repos, 0.8 au hover de la ligne.
+//
+// Sprint 36.H Finding 4 : pastille statut redesignée 8px (cf. StateCircle),
+// gap pastille-titre 12px, ligne sans cherche-d'action visuelle.
+//
+// Sprint 36.H Finding 7 : label "Reporté de N jours" sous le sous-titre
+// si reported_from NOT NULL.
 
 'use client'
 
-import { useCallback, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { StateCircle } from '@/components/ui/state-circles/StateCircle'
-import { ContextMenu, type ContextMenuItem } from '@/components/ui/context-menu/ContextMenu'
-import { useLongPress } from '@/components/ui/context-menu/use-long-press'
-import { shiftPostDate } from '@/app/_actions/shift-post-date'
 import type { PostState, TaskPost } from '@/lib/types/post'
-import { mapStatutToState, getScheduledAt } from '@/lib/types/post'
+import { mapStatutToState } from '@/lib/types/post'
+import { reportedLabel } from '@/lib/aujourd-hui/dates-fr'
 
 type Props = {
   post: TaskPost
   // Affichage compact pour le bloc B "Cette semaine".
   variant?: 'today' | 'week'
+  // Pour le calcul du label "Reporté de N jours" — passé par le parent.
+  today?: Date
 }
 
 function heureLisible(heurePrevue: string): string {
-  // "HH:MM:SS" → "HHhMM" ou "HHh" si MM=00
   const [hRaw, mRaw] = heurePrevue.split(':')
   const h = Number(hRaw ?? 0)
   const m = Number(mRaw ?? 0)
@@ -40,7 +44,6 @@ function buildTitle(state: PostState, heurePrevue: string): string {
 }
 
 function buildSubtitle(post: TaskPost): string {
-  // "Titre du post · type"
   const tipoFr =
     post.type_contenu === 'photo' ? 'photo'
       : post.type_contenu === 'carousel' ? 'carrousel'
@@ -53,89 +56,46 @@ function buildSubtitle(post: TaskPost): string {
   return tipoFr
 }
 
-export function TaskRow({ post, variant = 'today' }: Props) {
+export function TaskRow({ post, variant = 'today', today }: Props) {
   const router = useRouter()
-  const [menuAnchor, setMenuAnchor] = useState<{ top: number; left: number } | null>(null)
-  const [isPending, startTransition] = useTransition()
-  const dotsBtnRef = useRef<HTMLButtonElement | null>(null)
-
   const state = mapStatutToState(post.statut)
   const titre = buildTitle(state, post.heure_prevue)
   const sousTitre = buildSubtitle(post)
   const isPublished = state === 'published'
 
-  const openMenu = useCallback(() => {
-    const btn = dotsBtnRef.current
-    if (!btn) return
-    const rect = btn.getBoundingClientRect()
-    setMenuAnchor({ top: rect.bottom + 4, left: Math.max(8, rect.right - 220) })
-  }, [])
-
-  const closeMenu = useCallback(() => setMenuAnchor(null), [])
-
-  const onShift = useCallback(
-    (days: number) => {
-      startTransition(async () => {
-        await shiftPostDate(post.id, days)
-        // revalidatePath dans la server action invalide /aujourd-hui ;
-        // le refresh est implicite au prochain navigate. Forcer ici
-        // garantit l'update immédiate à l'écran.
-        router.refresh()
-      })
-    },
-    [post.id, router],
-  )
-
-  const longPressHandlers = useLongPress(openMenu)
-
-  const items: ContextMenuItem[] = [
-    { kind: 'action', label: "Reporter d'1 jour", onActivate: () => onShift(1) },
-    { kind: 'action', label: 'Reporter de 2 jours', onActivate: () => onShift(2) },
-    { kind: 'action', label: 'Reporter de 3 jours', onActivate: () => onShift(3) },
-    { kind: 'action', label: "Avancer d'1 jour", onActivate: () => onShift(-1) },
-    { kind: 'action', label: 'Avancer de 2 jours', onActivate: () => onShift(-2) },
-    { kind: 'action', label: 'Avancer de 3 jours', onActivate: () => onShift(-3) },
-    { kind: 'separator' },
-    {
-      kind: 'action',
-      label: 'Demander au Conseiller',
-      onActivate: () =>
-        router.push(`/outils/conseiller?context=post_${encodeURIComponent(post.id)}`),
-    },
-  ]
+  const reported = today
+    ? reportedLabel(post.reported_from, post.date_prevue, today)
+    : null
 
   return (
     <div
       className="cfs-task-row"
       data-variant={variant}
       data-state={state}
-      {...longPressHandlers}
       style={{
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         gap: 12,
         padding: variant === 'week' ? '10px 8px' : '12px 8px',
         borderRadius: 8,
         cursor: 'pointer',
         opacity: isPublished ? 0.5 : variant === 'week' ? 0.85 : 1,
         position: 'relative',
-        transition: 'background-color 120ms ease-out',
+        transition: 'background-color 200ms ease-out',
       }}
       onClick={(e) => {
-        // Ignore clicks on the dots button.
-        if ((e.target as HTMLElement).closest('[data-row-dots="true"]')) return
+        // Ignore clicks on the conseiller link.
+        if ((e.target as HTMLElement).closest('[data-conseiller-link="true"]')) return
         router.push(`/programme/post/${post.id}`)
       }}
       onMouseEnter={(e) => {
-        ;(e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(0,0,0,0.03)'
+        ;(e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(0,0,0,0.02)'
       }}
       onMouseLeave={(e) => {
         ;(e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'
       }}
     >
-      <span style={{ paddingTop: 2 }}>
-        <StateCircle state={state} />
-      </span>
+      <StateCircle state={state} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 }}>
         <span
           style={{
@@ -172,55 +132,49 @@ export function TaskRow({ post, variant = 'today' }: Props) {
           >
             Publication échouée · Action requise
           </span>
-        ) : state === 'ready' ? (
+        ) : null}
+        {reported ? (
           <span
             style={{
               fontFamily: 'var(--font-system)',
               fontSize: 12,
-              fontWeight: 500,
-              color: '#007AFF',
+              fontStyle: 'italic',
+              color: 'rgba(0,0,0,0.55)',
+              opacity: 0.85,
               marginTop: 2,
             }}
           >
-            Prêt à publier
+            {reported}
           </span>
         ) : null}
       </div>
 
-      <button
-        ref={dotsBtnRef}
-        type="button"
-        data-row-dots="true"
-        aria-label="Actions sur ce post"
+      {/* Sprint 36.H Finding 6 — lien latent vers Conseiller.
+          Opacity 0.4 par défaut, 0.8 quand la ligne est hovered.
+          Sur mobile, toujours visible (CSS @media). */}
+      <a
+        href={`/outils/conseiller?context=post_${encodeURIComponent(post.id)}`}
+        data-conseiller-link="true"
+        className="cfs-task-conseiller-link"
         onClick={(e) => {
+          // Empêche la navigation parent vers /programme/post/<id>.
           e.stopPropagation()
-          if (menuAnchor) closeMenu()
-          else openMenu()
         }}
-        disabled={isPending}
+        aria-label="Demander au Conseiller à propos de ce post"
         style={{
-          all: 'unset',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 28,
-          height: 28,
-          borderRadius: 6,
-          cursor: 'pointer',
-          color: 'rgba(0,0,0,0.45)',
+          fontFamily: 'var(--font-system)',
+          fontSize: 13,
+          fontWeight: 500,
+          color: '#007AFF',
+          textDecoration: 'none',
           flexShrink: 0,
-          opacity: isPending ? 0.4 : 1,
+          padding: '4px 6px',
+          opacity: 0.4,
+          transition: 'opacity 200ms ease-out',
         }}
       >
-        <span style={{ fontSize: 18, lineHeight: 1, fontWeight: 700, letterSpacing: 1 }}>···</span>
-      </button>
-
-      {menuAnchor ? <ContextMenu items={items} onClose={closeMenu} anchor={menuAnchor} /> : null}
+        Demander →
+      </a>
     </div>
   )
 }
-
-// Note : `getScheduledAt` est importé mais pas encore utilisé directement
-// dans ce composant (le serveur fait déjà l'ordering). Conservé pour les
-// composants futurs qui voudront comparer un post à un timestamp courant.
-export { getScheduledAt }

@@ -19,6 +19,8 @@ type Props = {
   initialOpen: boolean
   // CTA fin de semaine (vendredi >= 16h) géré server-side.
   showWeekendCta?: boolean
+  // ISO du jour pour le calcul du label "Reporté de N jours".
+  todayISO?: string
 }
 
 const NOMS_JOURS_FR: Record<number, string> = {
@@ -52,10 +54,11 @@ function groupByDay(posts: TaskPost[]): Array<{ key: string; label: string; item
   }))
 }
 
-export function BlocCetteSemaine({ posts, initialOpen, showWeekendCta = false }: Props) {
+export function BlocCetteSemaine({ posts, initialOpen, showWeekendCta = false, todayISO }: Props) {
   const [open, setOpen] = useState(initialOpen)
   const groups = groupByDay(posts)
   const hasContent = groups.length > 0
+  const today = todayISO ? new Date(todayISO) : undefined
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -131,7 +134,7 @@ export function BlocCetteSemaine({ posts, initialOpen, showWeekendCta = false }:
                   {g.label}
                 </span>
                 {g.items.map((p) => (
-                  <TaskRow key={p.id} post={p} variant="week" />
+                  <TaskRow key={p.id} post={p} variant="week" {...(today ? { today } : {})} />
                 ))}
               </div>
             ))
@@ -150,12 +153,14 @@ export function BlocCetteSemaine({ posts, initialOpen, showWeekendCta = false }:
 
           {showWeekendCta ? (
             <a
-              href="/mon-programme"
+              href="/programme"
               style={{
                 fontFamily: 'var(--font-system)',
                 fontSize: 13,
                 fontWeight: 500,
-                color: '#007AFF',
+                // Sprint 36.H Finding 9e — bleu accent réservé aux 3 CTA
+                // canoniques. Ce CTA hebdo passe en gris sombre.
+                color: 'rgba(0,0,0,0.7)',
                 textDecoration: 'none',
                 paddingLeft: 8,
                 marginTop: 4,

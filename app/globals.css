@@ -483,6 +483,13 @@ h1, h2, h3, h4, h5, h6 {
 .cfs-page-header-row h1 {
   margin: 0;
 }
+.cfs-page-header-title-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
 .cfs-page-header-title {
   font-family: var(--font-system);
   font-size: 28px;
@@ -491,12 +498,24 @@ h1, h2, h3, h4, h5, h6 {
   color: #1C1C1E;
   line-height: 1.2;
   margin: 0;
-  flex: 1;
-  min-width: 0;
+}
+/* Sprint 36.H Finding 1 — sous-titre H2 sous le H1, opacité 0.6,
+   taille intermédiaire entre H1 (28px) et corps (15px). */
+.cfs-page-header-subtitle {
+  font-family: var(--font-system);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: 1.3;
+  margin: 0;
 }
 @media (max-width: 768px) {
   .cfs-page-header-title {
     font-size: 24px;
+  }
+  .cfs-page-header-subtitle {
+    font-size: 15px;
   }
 }
 .cfs-page-header-trailing {
@@ -1372,4 +1391,81 @@ h1, h2, h3, h4, h5, h6 {
    ont été retirées : la refonte V3 utilise les composants TaskRow,
    StateCircle, SplitBrief avec styles inline. Pattern A gros chiffres
    migré vers /mon-programme (sprint séparé). */
+
+/* Sprint 36.H Finding 6 — lien latent Conseiller sur TaskRow.
+   Hover ligne révèle l'opacité ; sur touch (mobile), toujours visible. */
+.cfs-task-row:hover .cfs-task-conseiller-link {
+  opacity: 0.8;
+}
+.cfs-task-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+@media (hover: none) {
+  .cfs-task-conseiller-link {
+    opacity: 0.7 !important;
+  }
+}
+
+/* Sprint 36.H Finding 9 — animations stagger à l'entrée + hover
+   signatures sur le bouton Commencer.
+   Pas de framer-motion (pas dans package.json) — CSS pur. */
+@keyframes cfs-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.cfs-stagger {
+  opacity: 0;
+  transform: translateY(-8px);
+  animation: cfs-stagger-in 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.cfs-stagger-1 { animation-delay: 0ms; }
+.cfs-stagger-2 { animation-delay: 80ms; }
+.cfs-stagger-3 { animation-delay: 160ms; }
+.cfs-stagger-4 { animation-delay: 240ms; }
+.cfs-stagger-5 { animation-delay: 320ms; }
+.cfs-stagger-6 { animation-delay: 400ms; }
+.cfs-stagger-7 { animation-delay: 480ms; }
+.cfs-stagger-8 { animation-delay: 560ms; }
+.cfs-stagger-9 { animation-delay: 640ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cfs-stagger,
+  .cfs-stagger-1, .cfs-stagger-2, .cfs-stagger-3, .cfs-stagger-4,
+  .cfs-stagger-5, .cfs-stagger-6, .cfs-stagger-7, .cfs-stagger-8,
+  .cfs-stagger-9 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Hover signature sur le bouton Commencer (Bloc 1).
+   Pas de hover sur mobile (touch). */
+.cfs-bloc-prochaine-cta {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+.cfs-bloc-prochaine-cta:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+@media (hover: none) {
+  .cfs-bloc-prochaine-cta:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Hover signature sur Bloc 2 (lien vers /programme). */
+.cfs-bloc-link {
+  transition: background-color 200ms ease-out, transform 200ms ease-out;
+}
+.cfs-bloc-link:hover {
+  background-color: rgba(255, 255, 255, 0.75);
+}
 

@@ -48,4 +48,8 @@ export type TaskPost = {
   date_prevue: string  // YYYY-MM-DD
   heure_prevue: string // HH:MM:SS
   statut: PostStatutDB | string
+  // Sprint 36.H — Si reported_from NOT NULL, le post a été déplacé par
+  // catchUpOverduePosts. Sert à afficher le label "Reporté de N jours"
+  // sous le titre dans le TaskRow.
+  reported_from?: string | null
 }

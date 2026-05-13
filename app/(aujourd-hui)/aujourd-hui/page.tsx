@@ -21,7 +21,8 @@ import { BlocCetteSemaine } from '@/components/today/BlocCetteSemaine'
 import { SuggestedSignal } from '@/components/today/SuggestedSignal'
 import { loadAujourdhuiData } from '@/lib/aujourd-hui/load-data'
 import { mapStatutToState } from '@/lib/types/post'
-import { capitalize, formatDateHeaderFr, getISOWeek } from '@/lib/aujourd-hui/dates-fr'
+import { jourCourantFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
+import { startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,9 +51,14 @@ export default async function AujourdhuiPage() {
   // ── Bloc 3 — Affiché uniquement si fondations < 14 ─────────────────────
   const showMaMarqueBloc = data.questionsAnswered < 14
 
-  // ── Header text ────────────────────────────────────────────────────────
-  const dateFr = capitalize(formatDateHeaderFr(now))
-  const headerLabel = `Aujourd'hui · ${dateFr} · Semaine ${getISOWeek(now)}`
+  // ── Header text (Sprint 36.H Findings 1+2) ─────────────────────────────
+  // H1 = "Aujourd'hui" (breadcrumb supprimée — doublon).
+  // Sous-titre = "Semaine du 11 au 17 mai" (range dynamique, sans année).
+  // Bloc A titre = "Aujourd'hui, 13 mai".
+  const weekStart = startOfWeek(now)
+  const weekEnd = endOfWeek(now)
+  const semaineLabel = semaineRangeFr(weekStart, weekEnd)
+  const blocATitre = `Aujourd'hui, ${jourCourantFr(now)}`
 
   return (
     <div
@@ -75,8 +81,8 @@ export default async function AujourdhuiPage() {
           flexDirection: 'column',
         }}
       >
-        {/* Header full-width — date à gauche, avatar à droite (PageHeader réutilisé). */}
-        <PageHeader title={headerLabel} breadcrumb={[headerLabel]} />
+        {/* Header full-width — H1 "Aujourd'hui" + sous-titre Semaine, avatar à droite. */}
+        <PageHeader title="Aujourd'hui" subtitle={semaineLabel} hideBreadcrumb />
 
         <div
           className="cfs-page-container"
@@ -94,9 +100,9 @@ export default async function AujourdhuiPage() {
           <SplitBrief
             leftColumn={
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {/* ── Bloc 1 — Prochaine action ── */}
+                {/* ── Bloc 1 — Prochaine action (Liquid Glass niveau 2) ── */}
                 <section
-                  className="glass-thin"
+                  className="glass-regular cfs-bloc-prochaine cfs-stagger cfs-stagger-2"
                   style={{
                     borderRadius: 16,
                     padding: '20px 22px',
@@ -157,6 +163,7 @@ export default async function AujourdhuiPage() {
                       </span>
                       <Link
                         href={`/programme/post/${prochain.id}`}
+                        className="cfs-bloc-prochaine-cta"
                         style={{
                           marginTop: 4,
                           alignSelf: 'flex-start',
@@ -188,20 +195,20 @@ export default async function AujourdhuiPage() {
                   )}
                 </section>
 
-                {/* ── Bloc 2 — État du programme ── */}
+                {/* ── Bloc 2 — État du programme (Liquid Glass niveau 1) ── */}
                 <Link
-                  href="/mon-programme"
+                  href="/programme"
                   style={{
                     textDecoration: 'none',
                     color: 'inherit',
                   }}
                 >
                   <section
+                    className="glass-thin cfs-bloc-link cfs-stagger cfs-stagger-6"
                     style={{
                       borderRadius: 14,
                       padding: '14px 18px',
-                      border: '1px solid rgba(0,0,0,0.06)',
-                      transition: 'background-color 120ms ease-out',
+                      border: '1px solid rgba(255,255,255,0.5)',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 4,
@@ -233,13 +240,14 @@ export default async function AujourdhuiPage() {
                   </section>
                 </Link>
 
-                {/* ── Bloc 3 — État Ma Marque (conditionnel) ── */}
+                {/* ── Bloc 3 — État Ma Marque (Liquid Glass niveau 1, conditionnel) ── */}
                 {showMaMarqueBloc ? (
                   <section
+                    className="glass-thin cfs-stagger cfs-stagger-7"
                     style={{
                       borderRadius: 14,
                       padding: '14px 18px',
-                      border: '1px solid rgba(0,0,0,0.06)',
+                      border: '1px solid rgba(255,255,255,0.5)',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 4,
@@ -286,8 +294,11 @@ export default async function AujourdhuiPage() {
             }
             rightColumn={
               <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-                {/* ── Bloc A — Aujourd'hui ── */}
-                <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {/* ── Bloc A — Aujourd'hui (Sprint 36.H Finding 2) ── */}
+                <section
+                  className="cfs-stagger cfs-stagger-3"
+                  style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+                >
                   <h2
                     style={{
                       fontFamily: 'var(--font-system)',
@@ -299,7 +310,7 @@ export default async function AujourdhuiPage() {
                       padding: '6px 0',
                     }}
                   >
-                    Aujourd&apos;hui
+                    {blocATitre}
                   </h2>
                   {data.postsToday.length === 0 ? (
                     <p
@@ -315,21 +326,26 @@ export default async function AujourdhuiPage() {
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                       {data.postsToday.map((post) => (
-                        <TaskRow key={post.id} post={post} variant="today" />
+                        <TaskRow key={post.id} post={post} variant="today" today={now} />
                       ))}
                     </div>
                   )}
                 </section>
 
                 {/* ── Bloc B — Cette semaine ── */}
-                <BlocCetteSemaine
-                  posts={data.postsWeek}
-                  initialOpen={isMondayMorning}
-                  showWeekendCta={isFridayLate}
-                />
+                <div className="cfs-stagger cfs-stagger-8">
+                  <BlocCetteSemaine
+                    posts={data.postsWeek}
+                    initialOpen={isMondayMorning}
+                    showWeekendCta={isFridayLate}
+                    todayISO={data.todayISO}
+                  />
+                </div>
 
                 {/* ── Bloc C — Suggéré pour toi (mocké V1) ── */}
-                <SuggestedSignal signal={data.dailySignal} />
+                <div className="cfs-stagger cfs-stagger-9">
+                  <SuggestedSignal signal={data.dailySignal} />
+                </div>
               </div>
             }
           />

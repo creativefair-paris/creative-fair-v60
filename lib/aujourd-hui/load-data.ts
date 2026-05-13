@@ -15,6 +15,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 import { ensureProfile } from '@/app/_actions/ensure-profile'
+import { catchUpOverduePosts } from '@/app/_actions/catch-up-overdue-posts'
 import { SUGGESTED_SIGNAL_MOCK } from '@/lib/mocks/daily-signal'
 import type { TaskPost, PostStatutDB } from '@/lib/types/post'
 import type { Alert } from '@/components/today/CriticalBanner'
@@ -73,6 +74,12 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
     return { authenticated: true, redirect: '/onboarding/analyse-marque' }
   }
 
+  // ── Catch-up des posts en retard (Sprint 36.H Finding 7) ──────────────
+  // On exécute AVANT le SELECT principal pour que les posts catch-up
+  // apparaissent dans postsToday/postsWeek avec leur nouvelle date_prevue.
+  // Idempotent : un post déjà reporté (reported_from NOT NULL) est exclu.
+  await catchUpOverduePosts()
+
   // ── Bornes temporelles ───────────────────────────────────────────────────
   const today = new Date()
   const dayStart = startOfDay(today)
@@ -83,7 +90,7 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
   // ── Posts d'aujourd'hui ─────────────────────────────────────────────────
   const { data: rawPostsToday } = await supabase
     .from('posts')
-    .select('id, titre, heure_prevue, type_contenu, pilier_nom, date_prevue, statut')
+    .select('id, titre, heure_prevue, type_contenu, pilier_nom, date_prevue, statut, reported_from')
     .eq('brand_id', brand.id)
     .gte('date_prevue', dayStart.toISOString().slice(0, 10))
     .lte('date_prevue', dayEnd.toISOString().slice(0, 10))
@@ -97,13 +104,14 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
     pilier_nom: p.pilier_nom ?? '',
     date_prevue: p.date_prevue ?? '',
     statut: (p.statut as PostStatutDB) ?? 'planifie',
+    reported_from: p.reported_from ?? null,
   }))
 
   // ── Posts du reste de la semaine (hors today) ────────────────────────────
   const tomorrowISO = new Date(dayEnd.getTime() + 1000).toISOString().slice(0, 10)
   const { data: rawPostsWeek } = await supabase
     .from('posts')
-    .select('id, titre, date_prevue, type_contenu, pilier_nom, statut, heure_prevue')
+    .select('id, titre, date_prevue, type_contenu, pilier_nom, statut, heure_prevue, reported_from')
     .eq('brand_id', brand.id)
     .gte('date_prevue', tomorrowISO)
     .lte('date_prevue', weekEnd.toISOString().slice(0, 10))
@@ -118,6 +126,7 @@ export async function loadAujourdhuiData(): Promise<AujourdhuiData> {
     pilier_nom: p.pilier_nom ?? '',
     date_prevue: p.date_prevue ?? '',
     statut: (p.statut as PostStatutDB) ?? 'planifie',
+    reported_from: p.reported_from ?? null,
   }))
 
   // ── Stats semaine (Bloc 2 — chiffres bruts, pas de %) ──────────────────
