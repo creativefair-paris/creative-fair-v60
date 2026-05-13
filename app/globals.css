@@ -1635,3 +1635,227 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* ============================================================
+ * Sprint 37.B (F11) — Tokens primitives visuelles
+ * (TF Cupertino salve 5 — Sarah)
+ * ============================================================ */
+
+/* ── CalloutBox (recommandations importantes) ───────────────── */
+.callout-box {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  margin: 16px 0;
+  border-left: 3px solid;
+}
+.callout-box[data-variant="recommendation"] {
+  background: rgba(0, 122, 255, 0.06);
+  border-left-color: #007AFF;
+}
+.callout-box[data-variant="warning"] {
+  background: rgba(255, 149, 0, 0.06);
+  border-left-color: #FF9500;
+}
+.callout-box[data-variant="info"] {
+  background: rgba(0, 0, 0, 0.03);
+  border-left-color: rgba(0, 0, 0, 0.4);
+}
+.callout-box__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.callout-box__title {
+  font: 600 14px/1.4 var(--font-system, system-ui);
+  color: #000;
+}
+.callout-box__content {
+  font: 400 14px/1.6 var(--font-system, system-ui);
+  color: rgba(0, 0, 0, 0.85);
+}
+.callout-box__content p { margin: 0; }
+.callout-box__content p + p { margin-top: 8px; }
+
+/* ── DataTable (tableaux markdown → HTML stylé) ──────────────── */
+.data-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 16px 0;
+}
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font: 400 13px/1.5 var(--font-system, system-ui);
+}
+.data-table th {
+  background: rgba(0, 0, 0, 0.03);
+  font: 600 12px/1.5 var(--font-system, system-ui);
+  color: rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.85);
+}
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+.data-table td[data-align="right"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.data-table td[data-align="center"] {
+  text-align: center;
+}
+.data-table th[data-align="right"] { text-align: right; }
+.data-table th[data-align="center"] { text-align: center; }
+.data-table__caption {
+  display: block;
+  font: 500 11px/1.3 var(--font-system, system-ui);
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+}
+
+/* ── DocumentaryCard (anecdotes documentaires) ──────────────── */
+.documentary-card {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+.documentary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+.documentary-card__image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(0, 0, 0, 0.04);
+  object-fit: cover;
+  display: block;
+}
+.documentary-card__image--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.25);
+  font: 500 12px/1 var(--font-system, system-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.documentary-card__body {
+  padding: 16px 20px;
+}
+.documentary-card__title {
+  font: 600 15px/1.4 var(--font-system, system-ui);
+  color: #000;
+  margin: 0 0 6px 0;
+}
+.documentary-card__description {
+  font: 400 14px/1.6 var(--font-system, system-ui);
+  color: rgba(0, 0, 0, 0.75);
+  margin: 0 0 10px 0;
+}
+.documentary-card__meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font: 500 12px/1 var(--font-system, system-ui);
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.documentary-card__source-link {
+  color: #007AFF;
+  text-decoration: none;
+}
+.documentary-card__source-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Timeline (calendriers d'activation) ─────────────────────── */
+.timeline {
+  position: relative;
+  margin: 20px 0;
+  padding-left: 24px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.1);
+}
+.timeline__item {
+  position: relative;
+  padding-bottom: 20px;
+}
+.timeline__item:last-child {
+  padding-bottom: 0;
+}
+.timeline__item::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #FFF;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+.timeline__item[data-type="milestone"]::before {
+  border-color: #007AFF;
+  background: #007AFF;
+}
+.timeline__date {
+  font: 600 11px/1 var(--font-system, system-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 4px;
+}
+.timeline__title {
+  font: 500 14px/1.4 var(--font-system, system-ui);
+  color: #000;
+  margin-bottom: 2px;
+}
+.timeline__description {
+  font: 400 13px/1.5 var(--font-system, system-ui);
+  color: rgba(0, 0, 0, 0.65);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .documentary-card {
+    transition: none !important;
+  }
+  .documentary-card:hover {
+    transform: none !important;
+  }
+}
+
