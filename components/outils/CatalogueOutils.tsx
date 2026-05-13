@@ -134,10 +134,19 @@ const OUTILS: readonly Outil[] = [
     id: 'reviews',
     title: 'Reviews',
     description:
-      'Analyse les avis clients et prépare des réponses alignées sur le ton de ta marque.',
+      'Vérifie un post avant publication. Fact-check du texte, crédits du visuel.',
     href: '/outils/reviews',
     ctaLabel: 'Ouvrir Reviews',
     icon: <StarIcon />,
+  },
+  {
+    id: 'messages',
+    title: 'Messages',
+    description:
+      'Gère tes DM clients et commentaires Instagram avec le conseiller. Cet outil arrive bientôt.',
+    href: '/outils/messages',
+    ctaLabel: 'Ouvrir Messages',
+    icon: <BubbleIcon />,
   },
   {
     id: 'conseiller',
