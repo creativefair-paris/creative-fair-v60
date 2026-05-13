@@ -19,9 +19,15 @@
 
 import { useEffect, useState } from 'react'
 import { ConseillerSheet } from '@/components/conseiller/ConseillerSheet'
+import { ResumeChoiceSheet } from '@/components/conseiller/ResumeChoiceSheet'
 import { runConseillerTurn } from '@/app/_actions/run-conseiller-turn'
+import {
+  findResumableSession,
+  type ResumableMatch,
+} from '@/app/_actions/find-resumable-session'
 import { PeriodSelectionSheet, type PublicationFrequency } from './PeriodSelectionSheet'
 import type { ConseillerContext, ScenarioType } from '@/lib/conseiller/types'
+import { scenarioLabel } from '@/lib/conseiller/queries'
 
 type Props = {
   currentProgrammeEnd?: string | null // YYYY-MM-DD
@@ -39,6 +45,16 @@ type Phase =
       scenarioType: ScenarioType
       headerLabel: string
       context: ConseillerContext
+    }
+  // Sprint 37.B (F14) — mini-sheet "Tu as déjà commencé sur ce sujet"
+  // affichée quand findResumableSession() retourne un match.
+  | {
+      kind: 'resume-choice'
+      match: ResumableMatch
+      // Configuration de la sheet à ouvrir si le pilote choisit "Nouvelle".
+      newScenario: ScenarioType
+      newHeaderLabel: string
+      newContext: ConseillerContext
     }
 
 function daysUntil(iso: string): number | null {
@@ -74,21 +90,57 @@ export function ConseillerAccess({
     setPhase({ kind: 'period', followScenario: 'A2' })
   }
 
+  // Helper : avant d'ouvrir une sheet, on cherche une session reprenable.
+  // Si match → mini-sheet de choix (F14). Sinon → sheet directement.
+  async function openWithResumeCheck(
+    scenarioType: ScenarioType,
+    headerLabel: string,
+    context: ConseillerContext,
+  ) {
+    const match = await findResumableSession({ scenarioType, context })
+    if (match) {
+      setPhase({
+        kind: 'resume-choice',
+        match,
+        newScenario: scenarioType,
+        newHeaderLabel: headerLabel,
+        newContext: context,
+      })
+    } else {
+      setPhase({ kind: 'sheet', scenarioType, headerLabel, context })
+    }
+  }
+
   function openBilan() {
-    setPhase({
-      kind: 'sheet',
-      scenarioType: 'A7',
-      headerLabel: 'Faire le point',
-      context: {},
-    })
+    void openWithResumeCheck('A7', 'Faire le point', {})
   }
 
   function openReunion() {
+    void openWithResumeCheck('E1', 'Préparer ma réunion', {})
+  }
+
+  // Resume choice handlers (Sprint 37.B F14).
+  function handleResume() {
+    if (phase.kind !== 'resume-choice') return
+    const session = phase.match.session
     setPhase({
       kind: 'sheet',
-      scenarioType: 'E1',
-      headerLabel: 'Préparer ma réunion',
-      context: {},
+      scenarioType: session.scenario_type,
+      headerLabel: `${scenarioLabel(session.scenario_type)} (reprise)`,
+      context: {
+        ...(session.context ?? {}),
+        continued_from: session.id,
+      },
+    })
+  }
+
+  function handleNewFromResumeChoice() {
+    if (phase.kind !== 'resume-choice') return
+    setPhase({
+      kind: 'sheet',
+      scenarioType: phase.newScenario,
+      headerLabel: phase.newHeaderLabel,
+      context: phase.newContext,
     })
   }
 
@@ -340,6 +392,16 @@ export function ConseillerAccess({
           headerLabel={phase.headerLabel}
           initialContext={phase.context}
           onSendMessage={runConseillerTurn}
+        />
+      ) : null}
+
+      {phase.kind === 'resume-choice' ? (
+        <ResumeChoiceSheet
+          open
+          match={phase.match}
+          onResume={handleResume}
+          onNew={handleNewFromResumeChoice}
+          onClose={handleClose}
         />
       ) : null}
     </>

@@ -18,7 +18,12 @@ import { SplitBrief } from '@/components/layouts/SplitBrief'
 import { ConseillerBubble } from './ConseillerBubble'
 import { PiloteBubble } from './PiloteBubble'
 import { ConseillerSheet } from './ConseillerSheet'
+import { ResumeChoiceSheet } from './ResumeChoiceSheet'
 import { runConseillerTurn } from '@/app/_actions/run-conseiller-turn'
+import {
+  findResumableSession,
+  type ResumableMatch,
+} from '@/app/_actions/find-resumable-session'
 import {
   deriveTitleFromConversation,
   scenarioLabel,
@@ -49,6 +54,10 @@ type Props = {
   // paramètres. L'URL est ensuite nettoyée par le composant pour
   // éviter qu'un reload ne ré-ouvre la sheet.
   initialSheet?: InitialSheet | null
+  // Sprint 37.B (F14) — si fourni, la ResumeChoiceSheet s'ouvre
+  // automatiquement au mount (cas : arrivée via URL avec un match
+  // détecté côté server dans /outils/conseiller/page.tsx).
+  initialResumeMatch?: ResumableMatch | null
 }
 
 function formatTimeShort(iso: string): string {
@@ -61,13 +70,29 @@ function formatTimeShort(iso: string): string {
   }).format(d)
 }
 
-export function ConseillerHistory({ conversations, initialSheet = null }: Props) {
+export function ConseillerHistory({
+  conversations,
+  initialSheet = null,
+  initialResumeMatch = null,
+}: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(
     conversations[0]?.id ?? null,
   )
   // Sheet ouvrable depuis l'URL (Lot 5 — voies d'accès TaskRow / week-end /
   // modération) ou depuis le bouton "Nouvelle question".
-  const [sheetConfig, setSheetConfig] = useState<InitialSheet | null>(initialSheet)
+  const [sheetConfig, setSheetConfig] = useState<InitialSheet | null>(
+    initialResumeMatch ? null : initialSheet,
+  )
+  // Sprint 37.B (F14) — état mini-sheet "Tu as déjà commencé sur ce sujet".
+  // Si initialResumeMatch est fourni, on l'ouvre auto au mount.
+  const [resumeChoice, setResumeChoice] = useState<{
+    match: ResumableMatch
+    newConfig: InitialSheet
+  } | null>(
+    initialResumeMatch && initialSheet
+      ? { match: initialResumeMatch, newConfig: initialSheet }
+      : null,
+  )
 
   const groups: ConversationGroup[] = groupConversationsByDate(conversations)
   const selected = conversations.find((c) => c.id === selectedId) ?? null
@@ -85,12 +110,44 @@ export function ConseillerHistory({ conversations, initialSheet = null }: Props)
     }
   }, [initialSheet])
 
-  function handleNewQuestion() {
-    setSheetConfig({
+  async function handleNewQuestion() {
+    // Sprint 37.B (F14) — avant d'ouvrir, on vérifie s'il y a une
+    // session reprenable. E-divers est un scénario générique : le match
+    // sera plus rare mais reste possible.
+    const newConfig: InitialSheet = {
       scenarioType: 'E-divers',
       headerLabel: 'Nouvelle question',
       context: {},
+    }
+    const match = await findResumableSession({
+      scenarioType: 'E-divers',
+      context: {},
     })
+    if (match) {
+      setResumeChoice({ match, newConfig })
+    } else {
+      setSheetConfig(newConfig)
+    }
+  }
+
+  function handleResumeFromChoice() {
+    if (!resumeChoice) return
+    const session = resumeChoice.match.session
+    setSheetConfig({
+      scenarioType: session.scenario_type,
+      headerLabel: `${scenarioLabel(session.scenario_type)} (reprise)`,
+      context: {
+        ...(session.context ?? {}),
+        continued_from: session.id,
+      },
+    })
+    setResumeChoice(null)
+  }
+
+  function handleNewFromResumeChoice() {
+    if (!resumeChoice) return
+    setSheetConfig(resumeChoice.newConfig)
+    setResumeChoice(null)
   }
 
   function handleReprendre(source: ConseillerConversation) {
@@ -238,6 +295,16 @@ export function ConseillerHistory({ conversations, initialSheet = null }: Props)
           headerLabel={sheetConfig.headerLabel}
           initialContext={sheetConfig.context}
           onSendMessage={runConseillerTurn}
+        />
+      ) : null}
+
+      {resumeChoice ? (
+        <ResumeChoiceSheet
+          open
+          match={resumeChoice.match}
+          onResume={handleResumeFromChoice}
+          onNew={handleNewFromResumeChoice}
+          onClose={() => setResumeChoice(null)}
         />
       ) : null}
     </>

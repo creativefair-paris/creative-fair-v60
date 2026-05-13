@@ -26,6 +26,7 @@ import {
   type InitialSheet,
 } from '@/components/conseiller/ConseillerHistory'
 import { listConversations } from '@/lib/conseiller/queries'
+import { findResumableSession } from '@/app/_actions/find-resumable-session'
 import type { ConseillerContext, ScenarioType } from '@/lib/conseiller/types'
 
 export const dynamic = 'force-dynamic'
@@ -99,6 +100,17 @@ export default async function ConseillerPage({ searchParams }: Props) {
   const resolved = (await searchParams) ?? {}
   const initialSheet = parseInitialSheet(resolved)
 
+  // Sprint 37.B (F14) — si la page est ouverte avec un scenario+context
+  // précis (TaskRow, B5, B4, etc.), on cherche une session reprenable.
+  // Si match → ResumeChoiceSheet ouverte côté client (la ConseillerSheet
+  // n'est PAS ouverte directement). Sinon → comportement standard.
+  const initialResumeMatch = initialSheet
+    ? await findResumableSession({
+        scenarioType: initialSheet.scenarioType,
+        context: initialSheet.context,
+      })
+    : null
+
   const conversations = await listConversations(supabase)
 
   return (
@@ -135,7 +147,11 @@ export default async function ConseillerPage({ searchParams }: Props) {
             paddingBottom: 'var(--space-12)',
           }}
         >
-          <ConseillerHistory conversations={conversations} initialSheet={initialSheet} />
+          <ConseillerHistory
+            conversations={conversations}
+            initialSheet={initialSheet}
+            initialResumeMatch={initialResumeMatch}
+          />
         </section>
       </div>
     </main>
