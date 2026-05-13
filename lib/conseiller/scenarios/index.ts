@@ -15,10 +15,13 @@ import { D8_SUBPROMPT } from './D8'
 import { D9_SUBPROMPT } from './D9'
 import { E1_SUBPROMPT } from './E1'
 import { E_DIVERS_SUBPROMPT } from './E-divers'
+import { A8_SUBPROMPT } from './A8'
 import type { ScenarioType } from '../types'
 
 export function getScenarioSubPrompt(scenario: ScenarioType): string {
   switch (scenario) {
+    case 'A8':
+      return A8_SUBPROMPT
     case 'A1':
       return A1_SUBPROMPT
     case 'A2':

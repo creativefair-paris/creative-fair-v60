@@ -147,6 +147,7 @@ export function scenarioLabel(type: ScenarioType): string {
     D9: 'Opportunité visibilité',
     E1: 'Préparation réunion',
     'E-divers': 'Question ouverte',
+    A8: 'Renseigner mes chiffres',
   }
   return labels[type]
 }

@@ -65,6 +65,10 @@ export const WAITING_STATES: Record<ScenarioType, ReadonlyArray<string>> = {
     'Je regarde ta question…',
     'Je consulte ton contexte marque…',
   ],
+  A8: [
+    'Je note tes chiffres…',
+    'Je calibre tes indicateurs éditoriaux…',
+  ],
 }
 
 // Timer-guard : si après 15s aucun token n'a été reçu, on bascule en

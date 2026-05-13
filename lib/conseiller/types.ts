@@ -20,6 +20,7 @@ export type ScenarioType =
   | 'D9' // Opportunité visibilité (/outils/conseiller libre)
   | 'E1' // Réunion lundi matin (CTA secondaire /programme)
   | 'E-divers' // Question ouverte (/outils/conseiller libre)
+  | 'A8' // Sprint 37.C — Renseigner ses chiffres (parenthèse ou bouton /programme/retombees)
 
 // ── Machine à états (doc 09 §9) ──────────────────────────────────────────
 // Cycle nominal : IDLE → CONTEXT_LOAD → THINKING_1 → TURN_1 → THINKING_2 →

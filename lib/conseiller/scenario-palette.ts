@@ -34,6 +34,8 @@ const PALETTE: Record<ScenarioType, ScenarioVisual> = {
   D9: { family: 'D', color: '#AF52DE', shortLabel: 'Opportunité visibilité' },
   E1: { family: 'E', color: 'rgba(0, 0, 0, 0.5)', shortLabel: 'Réunion' },
   'E-divers': { family: 'E', color: 'rgba(0, 0, 0, 0.5)', shortLabel: 'Question ouverte' },
+  // Sprint 37.C — A8 partage la famille A (génération/bilans, bleu).
+  A8: { family: 'A', color: '#007AFF', shortLabel: 'Mes chiffres' },
 }
 
 export function scenarioVisual(type: ScenarioType): ScenarioVisual {

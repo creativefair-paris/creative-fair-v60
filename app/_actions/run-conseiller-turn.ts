@@ -30,6 +30,46 @@ import {
 } from '@/lib/conseiller/types'
 import type { PilotRole } from '@/lib/conseiller/onboarding-types'
 import type { ReasoningStep } from '@/components/conseiller/StreamingReasoning'
+import {
+  parseMetricsBlock,
+  stripMetricsBlock,
+  type ParsedMetric,
+} from '@/lib/conseiller/parse-metrics-block'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// Sprint 37.C (A8) — Insert dans brand_metrics les métriques extraites
+// d'une réponse conseiller. Skip si valeur identique au dernier
+// enregistrement pour ce metric_type dans les 30 derniers jours.
+async function persistBrandMetrics(
+  admin: SupabaseClient,
+  tenantId: string,
+  userId: string,
+  metrics: ReadonlyArray<ParsedMetric>,
+): Promise<void> {
+  if (metrics.length === 0) return
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString()
+  for (const m of metrics) {
+    const { data: last } = await admin
+      .from('brand_metrics')
+      .select('value, recorded_at')
+      .eq('tenant_id', tenantId)
+      .eq('metric_type', m.type)
+      .gte('recorded_at', thirtyDaysAgo)
+      .order('recorded_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const lastValue = (last as { value?: number } | null)?.value
+    if (typeof lastValue === 'number' && lastValue === m.value) continue
+    await admin.from('brand_metrics').insert({
+      tenant_id: tenantId,
+      user_id: userId,
+      metric_type: m.type,
+      value: m.value,
+      period: 'month',
+      source: 'conversation_extract',
+    })
+  }
+}
 
 // ── Input / output types ──────────────────────────────────────────────────
 
@@ -460,7 +500,19 @@ Le pilote veut continuer. Réponds en partant du contexte de cette ancienne conv
   // Sprint 37.A F3 — extraction du bloc CHOIX en fin de réponse, si
   // présent. Le texte rendu en bulle = cleanText (sans le bloc),
   // les choices sont rendus en boutons sous la bulle côté UI.
-  const parsed = parseChoixBlock(assistantReply)
+  // Sprint 37.C (A8) — extraction préalable du bloc METRICS, persistance
+  // dans brand_metrics, puis strip avant parsing CHOIX.
+  let preChoixText = assistantReply
+  try {
+    const metrics = parseMetricsBlock(assistantReply)
+    if (metrics.length > 0) {
+      await persistBrandMetrics(admin, conv.tenant_id as string, conv.user_id as string, metrics)
+    }
+    preChoixText = stripMetricsBlock(assistantReply)
+  } catch (err) {
+    console.warn('[runConseillerTurn] METRICS parse failed:', err)
+  }
+  const parsed = parseChoixBlock(preChoixText)
   const finalText = parsed.cleanText
   const choices = parsed.choices
 

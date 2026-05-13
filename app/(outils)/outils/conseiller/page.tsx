@@ -32,7 +32,7 @@ import type { ConseillerContext, ScenarioType } from '@/lib/conseiller/types'
 export const dynamic = 'force-dynamic'
 
 const VALID_SCENARIOS: ReadonlySet<ScenarioType> = new Set<ScenarioType>([
-  'A1', 'A2', 'A7', 'B2', 'B4', 'B5', 'C3a', 'C3b', 'D6', 'D8', 'D9', 'E1', 'E-divers',
+  'A1', 'A2', 'A7', 'B2', 'B4', 'B5', 'C3a', 'C3b', 'D6', 'D8', 'D9', 'E1', 'E-divers', 'A8',
 ])
 
 const HEADER_LABELS: Record<ScenarioType, string> = {
@@ -49,6 +49,7 @@ const HEADER_LABELS: Record<ScenarioType, string> = {
   D9: 'Opportunité visibilité',
   E1: 'Préparer ma réunion',
   'E-divers': 'Nouvelle question',
+  A8: 'Renseigner mes chiffres',
 }
 
 type SearchParamsRaw = {
