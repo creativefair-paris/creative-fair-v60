@@ -3,7 +3,7 @@
 // Gère ouverture bulle + Sheet de confirmation déconnexion.
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { Avatar } from './Avatar'
@@ -26,6 +26,29 @@ export function UserMenuTrigger({ prenom, photoUrl, nomMarque }: UserMenuTrigger
     setIsOpen(false)
     setIsLogoutSheetOpen(true)
   }, [])
+
+  // Sprint 37.C (F27) — raccourcis clavier globaux ⌘1/2/3/⌘,
+  useEffect(() => {
+    function handleKeydown(event: KeyboardEvent) {
+      const modifier = event.metaKey || event.ctrlKey
+      if (!modifier) return
+      const target = event.target as HTMLElement | null
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return
+      }
+      let route: string | null = null
+      if (event.key === '1') route = '/programme'
+      else if (event.key === '2') route = '/ma-marque'
+      else if (event.key === '3') route = '/outils'
+      else if (event.key === ',') route = '/compte'
+      if (route) {
+        event.preventDefault()
+        router.push(route)
+      }
+    }
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
+  }, [router])
 
   const handleLogoutCancel = useCallback(() => {
     if (isLoggingOut) return

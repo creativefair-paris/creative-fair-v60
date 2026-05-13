@@ -670,20 +670,21 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Sprint 36.B.4 — Patch 1 : fond solide lisible sur tout gradient.
    Niveau 3 Liquid Glass : background 0.92, blur 20, shadow renforcée. */
+/* Sprint 37.C (F27) — polish : radius 14px, shadow Apple renforcée. */
 .cfs-user-menu-bubble {
   position: absolute;
   top: 76px;
   right: 24px;
   width: 280px;
-  padding: 16px;
-  border-radius: 16px;
+  padding: 14px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.08);
+    0 16px 48px rgba(0, 0, 0, 0.16),
+    0 4px 16px rgba(0, 0, 0, 0.08);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -770,7 +771,42 @@ h1, h2, h3, h4, h5, h6 {
 }
 .cfs-user-menu-item.is-active {
   font-weight: 600;
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(0, 122, 255, 0.06);
+  color: #007AFF;
+}
+
+/* Sprint 37.C (F27) — items en rangées avec icône + label + raccourci. */
+.cfs-menu-row {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+.cfs-menu-row .cfs-menu-icon {
+  flex-shrink: 0;
+  color: var(--color-secondary-label);
+  transition: color 150ms var(--ease-out-quart);
+}
+.cfs-menu-row.is-active .cfs-menu-icon {
+  color: #007AFF;
+}
+.cfs-menu-row .cfs-menu-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cfs-menu-row .cfs-menu-shortcut {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-tertiary-label);
+  letter-spacing: 0.02em;
+  font-family: var(--font-system);
+}
+.cfs-user-menu-destructive .cfs-menu-icon {
+  color: #FF3B30;
 }
 .cfs-user-menu-action {
   font-size: 15px;

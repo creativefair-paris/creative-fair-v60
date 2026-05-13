@@ -1,17 +1,17 @@
-// Sprint 36.B.1 → 36.I — Bulle déployée depuis l'avatar.
-// 3 destinations (Mon Programme / Ma Marque / Mes Outils) — pas de Conseiller
-// dans le menu (accessible via bouton flottant Header existant).
+// Sprint 37.C (F27) — Polish popover nav.
+// - Icônes Lucide React devant chaque item
+// - 3 sections séparées par dividers : destinations app / compte / déconnexion
+// - Raccourcis clavier affichés à droite (⌘1, ⌘2, ⌘3, ⌘,)
+// - Active state : background rgba(0, 122, 255, 0.06), color #007AFF
+// - Box-shadow Apple renforcée, border-radius 14px
 //
-// Sprint 36.I Finding 9 : la toggle "Programme / Outils" entre les
-// sections du menu était redondante avec les liens "Mon Programme" et
-// "Mes Outils" déjà présents juste au-dessus. Subtraction.
-//
-// Déconnexion → onLogout (Sheet confirmation géré par le parent).
+// Sprint 36.B.1 → 36.I (historique) — Bulle déployée depuis l'avatar.
 'use client'
 
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Calendar, Aperture, LayoutGrid, User, LogOut } from 'lucide-react'
 import { Avatar } from './Avatar'
 
 type UserMenuBubbleProps = {
@@ -21,6 +21,8 @@ type UserMenuBubbleProps = {
   onClose: () => void
   onLogout: () => void
 }
+
+const SHORTCUT_KEY = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform) ? '⌘' : 'Ctrl'
 
 export function UserMenuBubble({
   prenom,
@@ -56,10 +58,10 @@ export function UserMenuBubble({
     return pathname === href || pathname.startsWith(`${href}/`)
   }
 
-  const navItems: Array<{ href: string; label: string }> = [
-    { href: '/programme', label: 'Mon Programme' },
-    { href: '/ma-marque', label: 'Ma Marque' },
-    { href: '/outils', label: 'Mes Outils' },
+  const destinations = [
+    { href: '/programme', label: 'Mon Programme', icon: Calendar, shortcut: '1' },
+    { href: '/ma-marque', label: 'Ma Marque', icon: Aperture, shortcut: '2' },
+    { href: '/outils', label: 'Mes Outils', icon: LayoutGrid, shortcut: '3' },
   ]
 
   return (
@@ -79,38 +81,57 @@ export function UserMenuBubble({
 
       <div className="cfs-user-menu-divider" aria-hidden="true" />
 
+      {/* Section 1 — Destinations app */}
       <nav className="cfs-user-menu-nav" aria-label="Destinations">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`cfs-user-menu-item${isActive(item.href) ? ' is-active' : ''}`}
-            onClick={onClose}
-            role="menuitem"
-          >
-            {item.label}
-          </Link>
-        ))}
+        {destinations.map((item) => {
+          const Icon = item.icon
+          const active = isActive(item.href)
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`cfs-user-menu-item cfs-menu-row${active ? ' is-active' : ''}`}
+              onClick={onClose}
+              role="menuitem"
+            >
+              <Icon size={18} strokeWidth={1.6} aria-hidden="true" className="cfs-menu-icon" />
+              <span className="cfs-menu-label">{item.label}</span>
+              <span className="cfs-menu-shortcut" aria-hidden="true">
+                {SHORTCUT_KEY}{item.shortcut}
+              </span>
+            </Link>
+          )
+        })}
       </nav>
 
       <div className="cfs-user-menu-divider" aria-hidden="true" />
 
+      {/* Section 2 — Compte */}
       <div className="cfs-user-menu-actions">
         <Link
           href="/compte"
-          className="cfs-user-menu-item cfs-user-menu-action"
+          className={`cfs-user-menu-item cfs-user-menu-action cfs-menu-row${isActive('/compte') ? ' is-active' : ''}`}
           onClick={onClose}
           role="menuitem"
         >
-          Mon compte
+          <User size={18} strokeWidth={1.6} aria-hidden="true" className="cfs-menu-icon" />
+          <span className="cfs-menu-label">Mon compte</span>
+          <span className="cfs-menu-shortcut" aria-hidden="true">{SHORTCUT_KEY},</span>
         </Link>
+      </div>
+
+      <div className="cfs-user-menu-divider" aria-hidden="true" />
+
+      {/* Section 3 — Déconnexion */}
+      <div className="cfs-user-menu-actions">
         <button
           type="button"
           onClick={onLogout}
-          className="cfs-user-menu-item cfs-user-menu-action cfs-user-menu-destructive"
+          className="cfs-user-menu-item cfs-user-menu-action cfs-user-menu-destructive cfs-menu-row"
           role="menuitem"
         >
-          Déconnexion
+          <LogOut size={18} strokeWidth={1.6} aria-hidden="true" className="cfs-menu-icon" />
+          <span className="cfs-menu-label">Déconnexion</span>
         </button>
       </div>
     </div>
