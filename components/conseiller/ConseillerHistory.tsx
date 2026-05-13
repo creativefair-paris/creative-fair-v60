@@ -106,17 +106,7 @@ export function ConseillerHistory({ conversations, initialSheet = null }: Props)
         <button
           type="button"
           onClick={handleNewQuestion}
-          style={{
-            padding: '10px 20px',
-            borderRadius: 22,
-            border: 'none',
-            background: 'var(--color-label)',
-            color: 'var(--color-background)',
-            fontFamily: 'var(--font-system)',
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
+          className="btn-primary"
         >
           Nouvelle question
         </button>
@@ -293,18 +283,8 @@ function EmptyPreview({ onNew }: { onNew: () => void }) {
       <button
         type="button"
         onClick={onNew}
-        style={{
-          alignSelf: 'flex-start',
-          padding: '10px 20px',
-          borderRadius: 22,
-          border: 'none',
-          background: 'var(--color-label)',
-          color: 'var(--color-background)',
-          fontFamily: 'var(--font-system)',
-          fontSize: 14,
-          fontWeight: 600,
-          cursor: 'pointer',
-        }}
+        className="btn-primary"
+        style={{ alignSelf: 'flex-start' }}
       >
         Nouvelle question
       </button>

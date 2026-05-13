@@ -393,18 +393,7 @@ export function PeriodSelectionSheet({
               type="button"
               onClick={() => handleConfirm(overlap !== null)}
               disabled={!canContinue}
-              style={{
-                padding: '10px 20px',
-                borderRadius: 22,
-                border: 'none',
-                background: 'var(--color-label)',
-                color: 'var(--color-background)',
-                fontFamily: 'var(--font-system)',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: canContinue ? 'pointer' : 'not-allowed',
-                opacity: canContinue ? 1 : 0.4,
-              }}
+              className="btn-primary"
             >
               {overlap ? `Démarrer le ${formatFr(start)}` : 'Continuer'}
             </button>

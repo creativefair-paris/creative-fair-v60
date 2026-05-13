@@ -31,7 +31,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { ConseillerBubble } from './ConseillerBubble'
+import { ConseillerBubble, ConseillerBubblesFromText } from './ConseillerBubble'
 import { PiloteBubble } from './PiloteBubble'
 import { StreamingReasoning, type ReasoningStep } from './StreamingReasoning'
 import {
@@ -42,6 +42,7 @@ import {
   type ConversationMessage,
   type ScenarioType,
 } from '@/lib/conseiller/types'
+import { scenarioVisual } from '@/lib/conseiller/scenario-palette'
 
 // Réponse renvoyée par la server action (ou son stub côté Lot 2). Le
 // streaming est simulé côté client via reasoningSteps que la server
@@ -261,10 +262,10 @@ export function ConseillerSheet({
         onClick={onClose}
         aria-hidden="true"
       />
-      <aside className="cfs-conseiller-sheet glass-regular">
-        {/* Header sticky — contexte session permanent pendant le scroll */}
+      <aside className="cfs-conseiller-sheet">
+        {/* Header sticky — pastille + label scénario + titre + croix */}
         <header className="cfs-conseiller-header">
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
             <span
               style={{
                 fontFamily: 'var(--font-system)',
@@ -273,9 +274,22 @@ export function ConseillerSheet({
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
                 color: 'var(--color-tertiary-label)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
               }}
             >
-              Conseiller
+              <span
+                aria-hidden="true"
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  background: scenarioVisual(scenarioType).color,
+                  display: 'inline-block',
+                }}
+              />
+              {scenarioVisual(scenarioType).shortLabel}
             </span>
             <h2
               id="conseiller-sheet-title"
@@ -284,7 +298,7 @@ export function ConseillerSheet({
                 fontSize: 18,
                 fontWeight: 600,
                 color: 'var(--color-label)',
-                margin: '2px 0 0 0',
+                margin: 0,
                 lineHeight: 1.3,
               }}
             >
@@ -295,7 +309,7 @@ export function ConseillerSheet({
             type="button"
             onClick={onClose}
             aria-label="Fermer le conseiller"
-            className="glass-thin cfs-conseiller-close-btn"
+            className="cfs-conseiller-close-btn"
           >
             <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <path
@@ -327,31 +341,33 @@ export function ConseillerSheet({
           ) : null}
 
           {!isThinkingNow && currentReply ? (
-            <ConseillerBubble>
-              <div style={{ whiteSpace: 'pre-wrap' }}>{currentReply}</div>
-              {currentChoices.length > 0 ? (
-                <div
-                  style={{
-                    marginTop: 12,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 8,
-                  }}
-                >
-                  {currentChoices.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => handleChoiceClick(c)}
-                      disabled={pending}
-                      className="glass-thin cfs-conseiller-choice-btn"
-                    >
-                      {c.label}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </ConseillerBubble>
+            <ConseillerBubblesFromText
+              text={currentReply}
+              trailing={
+                currentChoices.length > 0 ? (
+                  <div
+                    style={{
+                      marginTop: 12,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                    }}
+                  >
+                    {currentChoices.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => handleChoiceClick(c)}
+                        disabled={pending}
+                        className="btn-choice"
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null
+              }
+            />
           ) : null}
 
           {state === 'FORCED_DELIVERY' ? (
@@ -379,7 +395,8 @@ export function ConseillerSheet({
           ) : null}
         </div>
 
-        {/* Footer — input texte (boutons-choix au-dessus dans le body) */}
+        {/* Footer — input texte. Bouton envoyer style dynamique
+            (transparent/bleu) selon présence de texte (token Apple-grade). */}
         <footer className="cfs-conseiller-footer">
           <textarea
             ref={textareaRef}
@@ -394,7 +411,7 @@ export function ConseillerSheet({
             placeholder={
               isTerminal(state)
                 ? 'Conversation close. Ouvre une nouvelle session pour continuer.'
-                : 'Écris au conseiller…'
+                : 'Tape une autre direction…'
             }
             rows={2}
             disabled={pending || isTerminal(state)}
@@ -405,7 +422,11 @@ export function ConseillerSheet({
             type="button"
             onClick={() => handleSubmit(input)}
             disabled={pending || isTerminal(state) || input.trim().length === 0}
-            className="cfs-conseiller-send-btn"
+            className={`cfs-conseiller-send-btn ${
+              input.trim().length > 0 && !pending && !isTerminal(state)
+                ? 'btn-send-active'
+                : 'btn-send-inactive'
+            }`}
             aria-label="Envoyer"
           >
             envoyer
@@ -420,24 +441,41 @@ export function ConseillerSheet({
           z-index: 1000;
           display: flex;
           justify-content: flex-end;
+          align-items: stretch;
+          /* Sprint 37.A F1+F2 — Sheet flottante : marge 16px tout autour */
+          padding: 16px 16px 16px 0;
+          box-sizing: border-box;
+          pointer-events: none;
+        }
+        .cfs-conseiller-overlay > * {
+          pointer-events: auto;
         }
         .cfs-conseiller-backdrop {
-          position: absolute;
+          position: fixed;
           inset: 0;
           background: rgba(0, 0, 0, 0.18);
           animation: cfs-conseiller-overlay-in 250ms ease-out;
+          pointer-events: auto;
         }
         .cfs-conseiller-sheet {
           position: relative;
           z-index: 1;
-          width: 60%;
-          max-width: 720px;
+          width: min(640px, calc(100vw - 32px));
           height: 100%;
           display: flex;
           flex-direction: column;
-          border-radius: 0;
-          animation: cfs-conseiller-sheet-in-desktop 320ms ease-out;
-          box-shadow: -16px 0 32px rgba(0, 0, 0, 0.08);
+          border-radius: 20px;
+          overflow: hidden;
+          background: rgba(251, 250, 247, 0.92);
+          backdrop-filter: blur(40px) saturate(180%);
+          -webkit-backdrop-filter: blur(40px) saturate(180%);
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 4px 20px rgba(0, 0, 0, 0.08);
+          animation: cfs-conseiller-sheet-in-desktop 280ms ease-out;
+        }
+        @supports not (backdrop-filter: blur(20px)) {
+          .cfs-conseiller-sheet {
+            background: rgba(251, 250, 247, 0.98);
+          }
         }
         .cfs-conseiller-header {
           position: sticky;
@@ -446,30 +484,34 @@ export function ConseillerSheet({
           display: flex;
           align-items: flex-start;
           gap: 16px;
-          padding: 20px 24px;
-          background: rgba(255, 255, 255, 0.88);
-          backdrop-filter: saturate(180%) blur(20px);
-          -webkit-backdrop-filter: saturate(180%) blur(20px);
-          border-bottom: 1px solid var(--color-separator);
+          padding: 18px 22px;
+          background: rgba(251, 250, 247, 0.95);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         }
         .cfs-conseiller-close-btn {
           flex-shrink: 0;
-          width: 36px;
-          height: 36px;
-          border-radius: 18px;
+          width: 32px;
+          height: 32px;
+          border-radius: 16px;
           border: none;
+          background: rgba(120, 120, 128, 0.12);
           cursor: pointer;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           color: var(--color-label);
-          transition: background-color 200ms ease;
+          transition: background-color 180ms ease-out;
+        }
+        .cfs-conseiller-close-btn:hover {
+          background: rgba(120, 120, 128, 0.18);
         }
         .cfs-conseiller-body {
           flex: 1;
           min-height: 0;
           overflow-y: auto;
-          padding: 16px 24px 24px 24px;
+          padding: 20px 22px 24px 22px;
           display: flex;
           flex-direction: column;
           gap: 4px;
@@ -478,17 +520,17 @@ export function ConseillerSheet({
           flex-shrink: 0;
           display: flex;
           gap: 8px;
-          padding: 12px 20px 20px 20px;
-          border-top: 1px solid var(--color-separator);
-          background: rgba(255, 255, 255, 0.88);
-          backdrop-filter: saturate(180%) blur(20px);
-          -webkit-backdrop-filter: saturate(180%) blur(20px);
+          padding: 12px 18px 18px 18px;
+          border-top: 1px solid rgba(0, 0, 0, 0.06);
+          background: rgba(251, 250, 247, 0.95);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
         }
         .cfs-conseiller-input {
           flex: 1;
           padding: 10px 12px;
           border-radius: 12px;
-          border: 1px solid var(--color-separator);
+          border: 1px solid rgba(0, 0, 0, 0.08);
           font-family: var(--font-system);
           font-size: 15px;
           line-height: 1.45;
@@ -496,7 +538,7 @@ export function ConseillerSheet({
           background: rgba(255, 255, 255, 0.6);
           resize: none;
           outline: none;
-          transition: border-color 200ms ease;
+          transition: border-color 180ms ease-out;
         }
         .cfs-conseiller-input:focus {
           border-color: #007AFF;
@@ -510,37 +552,12 @@ export function ConseillerSheet({
           padding: 0 16px;
           border-radius: 12px;
           border: none;
-          background: var(--color-label);
-          color: var(--color-background);
           font-family: var(--font-system);
           font-size: 14px;
           font-weight: 600;
-          cursor: pointer;
-          transition: opacity 200ms ease;
+          transition: background-color 180ms ease-out, color 180ms ease-out, transform 120ms ease-out;
         }
         .cfs-conseiller-send-btn:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
-        .cfs-conseiller-choice-btn {
-          width: 100%;
-          padding: 10px 14px;
-          border-radius: 10px;
-          border: 1px solid var(--color-separator);
-          background: rgba(255, 255, 255, 0.6);
-          font-family: var(--font-system);
-          font-size: 14px;
-          color: var(--color-label);
-          cursor: pointer;
-          text-align: left;
-          transition: background-color 200ms ease, border-color 200ms ease;
-        }
-        .cfs-conseiller-choice-btn:hover:not(:disabled) {
-          background-color: rgba(255, 255, 255, 0.85);
-          border-color: var(--color-label);
-        }
-        .cfs-conseiller-choice-btn:disabled {
-          opacity: 0.5;
           cursor: not-allowed;
         }
         @keyframes cfs-conseiller-overlay-in {
@@ -548,25 +565,35 @@ export function ConseillerSheet({
           to   { opacity: 1; }
         }
         @keyframes cfs-conseiller-sheet-in-desktop {
-          from { transform: translateX(100%); }
-          to   { transform: translateX(0); }
+          from { transform: translateX(32px); opacity: 0; }
+          to   { transform: translateX(0); opacity: 1; }
         }
         @keyframes cfs-conseiller-sheet-in-mobile {
-          from { transform: translateY(100%); }
-          to   { transform: translateY(0); }
+          from { transform: translateY(32px); opacity: 0; }
+          to   { transform: translateY(0); opacity: 1; }
         }
-        /* Tablet portrait + mobile = full-sheet (décision technique #11) */
+        /* Tablet portrait + mobile = full-sheet (décision technique #11)
+           → on supprime la marge flottante de l'overlay. */
         @media (max-width: ${TABLET_PORTRAIT_BREAKPOINT - 1}px) and (orientation: portrait) {
-          .cfs-conseiller-sheet { width: 100%; max-width: none; }
-        }
-        @media (max-width: ${MOBILE_BREAKPOINT - 1}px) {
+          .cfs-conseiller-overlay { padding: 0; }
           .cfs-conseiller-sheet {
             width: 100%;
             max-width: none;
-            animation: cfs-conseiller-sheet-in-mobile 320ms ease-out;
+            border-radius: 0;
+            box-shadow: none;
+          }
+        }
+        @media (max-width: ${MOBILE_BREAKPOINT - 1}px) {
+          .cfs-conseiller-overlay { padding: 0; }
+          .cfs-conseiller-sheet {
+            width: 100%;
+            max-width: none;
+            border-radius: 0;
+            box-shadow: none;
+            animation: cfs-conseiller-sheet-in-mobile 280ms ease-out;
           }
           .cfs-conseiller-header { padding: 16px 18px; }
-          .cfs-conseiller-body { padding: 12px 18px 20px 18px; }
+          .cfs-conseiller-body { padding: 16px 18px 20px 18px; }
           .cfs-conseiller-footer { padding: 10px 16px 16px 16px; }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -584,11 +611,8 @@ function ConversationItem({ message }: { message: ConversationMessage }) {
   if (message.role === 'user') {
     return <PiloteBubble content={message.content} />
   }
-  return (
-    <ConseillerBubble>
-      <div style={{ whiteSpace: 'pre-wrap' }}>{message.content}</div>
-    </ConseillerBubble>
-  )
+  // Split visuel des bulles longues sur "\n\n---\n\n" (pattern Messages).
+  return <ConseillerBubblesFromText text={message.content} />
 }
 
 // ── Stub SendMessageFn pour Lot 2 ────────────────────────────────────────
