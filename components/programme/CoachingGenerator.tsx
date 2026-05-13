@@ -116,7 +116,7 @@ export function CoachingGenerator({ autoGenerate = true }: Props) {
           Le coaching personnalisé sera disponible dès que ton identité de marque est définie.
         </p>
         <Link
-          href="/ma-marque/onboarding"
+          href="/onboarding/analyse-marque"
           className="inline-flex items-center px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90"
           style={{
             backgroundColor: 'var(--color-accent)',

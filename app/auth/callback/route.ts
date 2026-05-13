@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
   if (profile.tenant_id) {
     const brand = await getBrandByTenantId(supabase, profile.tenant_id)
     if (!brand) {
-      return NextResponse.redirect(new URL('/ma-marque/onboarding', origin))
+      return NextResponse.redirect(new URL('/onboarding/analyse-marque', origin))
     }
   }
 
