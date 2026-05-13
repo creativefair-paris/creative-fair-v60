@@ -20,14 +20,22 @@
 import { useEffect, useState } from 'react'
 import { ConseillerSheet } from '@/components/conseiller/ConseillerSheet'
 import { ResumeChoiceSheet } from '@/components/conseiller/ResumeChoiceSheet'
+import { WizardImmersiveSheet } from '@/components/conseiller/WizardImmersiveSheet'
 import { runConseillerTurn } from '@/app/_actions/run-conseiller-turn'
 import {
   findResumableSession,
   type ResumableMatch,
 } from '@/app/_actions/find-resumable-session'
+import { createProgrammeCreationSession } from '@/app/_actions/wizard-session'
 import { PeriodSelectionSheet, type PublicationFrequency } from './PeriodSelectionSheet'
 import type { ConseillerContext, ScenarioType } from '@/lib/conseiller/types'
 import { scenarioLabel } from '@/lib/conseiller/queries'
+import type {
+  WizardSessionRow,
+  WizardSuggestion,
+} from '@/lib/programme-creation/types'
+
+type PilierLite = { id: string; nom: string }
 
 type Props = {
   currentProgrammeEnd?: string | null // YYYY-MM-DD
@@ -35,6 +43,11 @@ type Props = {
   // Auto-ouvre la PeriodSelectionSheet au mount si true (cas
   // ?action=create-plan venant du mini-onboarding du conseiller).
   autoOpenCreatePlan?: boolean
+  // Sprint 37.B (F16) — catalogue de piliers + suggestions pour le
+  // wizard immersif. Alimenté par le Server Component parent
+  // (/programme/page.tsx) qui les fetch depuis brand_book.
+  pillarsCatalog?: ReadonlyArray<PilierLite>
+  businessAnchorSuggestions?: ReadonlyArray<WizardSuggestion>
 }
 
 type Phase =
@@ -45,6 +58,11 @@ type Phase =
       scenarioType: ScenarioType
       headerLabel: string
       context: ConseillerContext
+    }
+  // Sprint 37.B (F16) — wizard immersif fullscreen pour A1.
+  | {
+      kind: 'wizard'
+      session: WizardSessionRow
     }
   // Sprint 37.B (F14) — mini-sheet "Tu as déjà commencé sur ce sujet"
   // affichée quand findResumableSession() retourne un match.
@@ -69,6 +87,8 @@ export function ConseillerAccess({
   currentProgrammeEnd,
   publicationFrequency,
   autoOpenCreatePlan = false,
+  pillarsCatalog = [],
+  businessAnchorSuggestions = [],
 }: Props) {
   const [phase, setPhase] = useState<Phase>({ kind: 'closed' })
 
@@ -144,13 +164,34 @@ export function ConseillerAccess({
     })
   }
 
-  function handlePeriodConfirm(params: { start: string; end: string }) {
+  async function handlePeriodConfirm(params: { start: string; end: string }) {
     if (phase.kind !== 'period') return
+    // Sprint 37.B (F16) — pour A1, on ouvre le wizard immersif
+    // (création de la session DB en premier). Pour A2 (régénération),
+    // on garde le flow ConseillerSheet classique.
+    if (phase.followScenario === 'A1') {
+      const result = await createProgrammeCreationSession({
+        periodStart: params.start,
+        periodEnd: params.end,
+      })
+      if (result.ok) {
+        setPhase({ kind: 'wizard', session: result.session })
+      } else {
+        // Fallback : si la création échoue (réseau, etc.), on tombe sur
+        // la sheet classique pour ne pas bloquer le pilote.
+        setPhase({
+          kind: 'sheet',
+          scenarioType: 'A1',
+          headerLabel: 'Création de plan',
+          context: { period_start: params.start, period_end: params.end },
+        })
+      }
+      return
+    }
     setPhase({
       kind: 'sheet',
       scenarioType: phase.followScenario,
-      headerLabel:
-        phase.followScenario === 'A1' ? 'Création de plan' : 'Régénération de plan',
+      headerLabel: 'Régénération de plan',
       context: { period_start: params.start, period_end: params.end },
     })
   }
@@ -401,6 +442,15 @@ export function ConseillerAccess({
           match={phase.match}
           onResume={handleResume}
           onNew={handleNewFromResumeChoice}
+          onClose={handleClose}
+        />
+      ) : null}
+
+      {phase.kind === 'wizard' ? (
+        <WizardImmersiveSheet
+          session={phase.session}
+          pillarsCatalog={pillarsCatalog}
+          businessAnchorSuggestions={businessAnchorSuggestions}
           onClose={handleClose}
         />
       ) : null}

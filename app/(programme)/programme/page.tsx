@@ -150,6 +150,42 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
 
   const hasProgramme = programme != null && posts.length > 0
 
+  // Sprint 37.B (F16) — alimente le wizard immersif :
+  //   * pillarsCatalog depuis brand.piliers_narratifs
+  //   * businessAnchorSuggestions construites à partir de
+  //     brand.business_calendar (upcomingLaunches + industryEvents
+  //     filtrés sur les 90 prochains jours, label "calendar"). Pas
+  //     d'appel Anthropic streaming V1 — Sprint 38 ajoutera les
+  //     suggestions externes.
+  const piliersForWizard: ReadonlyArray<{ id: string; nom: string }> =
+    (piliers ?? []).map((p, i) => ({
+      id: `pilier-${i}`,
+      nom: (p as { nom?: string }).nom ?? `Pilier ${i + 1}`,
+    }))
+
+  const businessAnchorSuggestions: Array<{
+    value: string
+    source: 'calendar' | 'external' | 'history'
+  }> = []
+  if (brandCalendar) {
+    for (const l of brandCalendar.upcomingLaunches ?? []) {
+      if (l.date && new Date(l.date).getTime() <= now90Plus.getTime()) {
+        businessAnchorSuggestions.push({
+          value: `${l.name} — ${l.date}`,
+          source: 'calendar',
+        })
+      }
+    }
+    for (const e of brandCalendar.industryEvents ?? []) {
+      if (e.date && new Date(e.date).getTime() <= now90Plus.getTime()) {
+        businessAnchorSuggestions.push({
+          value: `${e.name} — ${e.date}`,
+          source: 'calendar',
+        })
+      }
+    }
+  }
+
   // Sprint 36.B.7 — Patch 1 : alignement DOM identique à /ma-marque.
   // La page /programme utilisait <main> comme racine alors que le layout.tsx
   // fournit déjà un <main class="flex-1"> — deux <main> imbriqués cassaient
@@ -202,6 +238,8 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             currentProgrammeEnd={programme?.date_fin ?? null}
             publicationFrequency={publicationFrequency}
             autoOpenCreatePlan={autoOpenCreatePlan}
+            pillarsCatalog={piliersForWizard}
+            businessAnchorSuggestions={businessAnchorSuggestions}
           />
 
           {/* Sprint 37.B F17 — CTA secondaire si le calendrier business
