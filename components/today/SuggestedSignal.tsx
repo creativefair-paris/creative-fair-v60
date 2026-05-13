@@ -1,16 +1,25 @@
-// Sprint 36.G — Bloc C "Suggéré pour toi" (mocké en V1).
+// Sprint 36.G → 36.H — Bloc C "Suggéré pour toi".
 //
-// Si signal null : retourne null. Le composant est prêt pour brancher
-// un vrai endpoint au sprint futur sans refacto.
+// Sprint 36.H Finding 8 : le CTA est désormais spécifique au signal
+// (ctaLabel + ctaContext sur le type DailySignal). Le composant reste
+// agnostique du backend — il consomme ce qu'on lui passe.
 
 'use client'
 
 import Link from 'next/link'
 
+export type DailySignalTerritory =
+  | 'SIGNAL DE VEILLE'
+  | 'INSIGHT ÉDITORIAL'
+  | 'OPPORTUNITÉ CULTURELLE'
+
 export type DailySignal = {
   signalId: string
-  territory: string
+  territory: DailySignalTerritory
   message: string
+  // Sprint 36.H Finding 8 — CTA spécifique au signal.
+  ctaLabel: string
+  ctaContext: string  // pré-fill conseiller
 }
 
 type Props = {
@@ -19,6 +28,8 @@ type Props = {
 
 export function SuggestedSignal({ signal }: Props) {
   if (!signal) return null
+
+  const href = `/outils/conseiller?context=${encodeURIComponent(signal.ctaContext)}`
 
   return (
     <section
@@ -47,7 +58,7 @@ export function SuggestedSignal({ signal }: Props) {
         {signal.message}
       </p>
       <Link
-        href={`/outils/conseiller?context=signal_${encodeURIComponent(signal.signalId)}`}
+        href={href}
         style={{
           marginTop: 4,
           fontSize: 13,
@@ -57,7 +68,7 @@ export function SuggestedSignal({ signal }: Props) {
           alignSelf: 'flex-start',
         }}
       >
-        Demander au Conseiller →
+        {signal.ctaLabel} →
       </Link>
     </section>
   )
