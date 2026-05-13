@@ -100,9 +100,9 @@ export default async function AujourdhuiPage() {
           <SplitBrief
             leftColumn={
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {/* ── Bloc 1 — Prochaine action ── */}
+                {/* ── Bloc 1 — Prochaine action (Liquid Glass niveau 2) ── */}
                 <section
-                  className="glass-thin"
+                  className="glass-regular cfs-bloc-prochaine"
                   style={{
                     borderRadius: 16,
                     padding: '20px 22px',
@@ -194,20 +194,21 @@ export default async function AujourdhuiPage() {
                   )}
                 </section>
 
-                {/* ── Bloc 2 — État du programme ── */}
+                {/* ── Bloc 2 — État du programme (Liquid Glass niveau 1) ── */}
                 <Link
-                  href="/mon-programme"
+                  href="/programme"
                   style={{
                     textDecoration: 'none',
                     color: 'inherit',
                   }}
                 >
                   <section
+                    className="glass-thin cfs-bloc-link"
                     style={{
                       borderRadius: 14,
                       padding: '14px 18px',
-                      border: '1px solid rgba(0,0,0,0.06)',
-                      transition: 'background-color 120ms ease-out',
+                      border: '1px solid rgba(255,255,255,0.5)',
+                      transition: 'background-color 200ms ease-out, transform 200ms ease-out',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 4,
@@ -239,13 +240,14 @@ export default async function AujourdhuiPage() {
                   </section>
                 </Link>
 
-                {/* ── Bloc 3 — État Ma Marque (conditionnel) ── */}
+                {/* ── Bloc 3 — État Ma Marque (Liquid Glass niveau 1, conditionnel) ── */}
                 {showMaMarqueBloc ? (
                   <section
+                    className="glass-thin"
                     style={{
                       borderRadius: 14,
                       padding: '14px 18px',
-                      border: '1px solid rgba(0,0,0,0.06)',
+                      border: '1px solid rgba(255,255,255,0.5)',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 4,

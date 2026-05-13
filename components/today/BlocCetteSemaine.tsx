@@ -150,7 +150,7 @@ export function BlocCetteSemaine({ posts, initialOpen, showWeekendCta = false }:
 
           {showWeekendCta ? (
             <a
-              href="/mon-programme"
+              href="/programme"
               style={{
                 fontFamily: 'var(--font-system)',
                 fontSize: 13,
