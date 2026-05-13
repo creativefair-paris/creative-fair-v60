@@ -36,9 +36,9 @@ test('charge /aujourd-hui sans erreur console et sans redirect', async ({ page }
   // Le H1 "Aujourd'hui" est rendu par le PageHeader.
   await expect(page.getByRole('heading', { name: "Aujourd'hui", level: 1 })).toBeVisible()
 
-  // Une des sections clés doit être présente (titre uppercase iOS).
-  // On accepte n'importe laquelle des 4 sections principales.
-  const sectionLabels = ["AUJOURD'HUI", 'CETTE SEMAINE', 'TA MARQUE PREND FORME']
+  // Une des sections clés doit être présente (DOM V3 Sprint 36.G+36.H).
+  // On accepte n'importe laquelle des sections principales.
+  const sectionLabels = ["PROCHAINE ACTION", "PROGRAMME", "Cette semaine"]
   let foundOne = false
   for (const label of sectionLabels) {
     if (await page.getByText(label, { exact: false }).first().isVisible({ timeout: 5000 }).catch(() => false)) {
