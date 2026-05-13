@@ -5,6 +5,7 @@
 // ProgrammeDashboard.
 
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
@@ -223,6 +224,22 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             paddingBottom: 'var(--space-6)',
           }}
         >
+          {/* Sprint 37.C — lien discret vers /programme/retombees. */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+            <Link
+              href="/programme/retombees"
+              style={{
+                fontFamily: 'var(--font-system)',
+                fontSize: 13,
+                fontWeight: 500,
+                color: '#007AFF',
+                textDecoration: 'none',
+              }}
+            >
+              Retombées →
+            </Link>
+          </div>
+
           {/* Sprint 37 Lot 4 — Voies d'accès au conseiller (1 CTA primaire +
               2 secondaires + bannière régénération <14j). Affiché au-dessus
               du dashboard ou de l'empty state. */}
