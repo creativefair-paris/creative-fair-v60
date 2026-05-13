@@ -12,7 +12,6 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
-import { CompleterCalendrierBusiness } from '@/components/programme/CompleterCalendrierBusiness'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
 import type { BusinessCalendar } from '@/types/business-calendar'
 import type { PilierNarratif, PostRow } from '@/types/programme'
@@ -106,25 +105,12 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
     (rawProfileFreq as { publication_frequency?: PublicationFrequency | null } | null)
       ?.publication_frequency ?? null
 
-  // Sprint 37.B (F17) — vérifie si le calendrier business a des événements
-  // dans les 90 prochains jours. Si vide → bloc "Compléter mon calendrier".
+  // Sprint 37.C (F25) — bloc "Compléter mon calendrier business" déplacé
+  // vers /aujourd-hui (F24). brandCalendar reste lu ci-dessous pour le
+  // wizard A1 (businessAnchorSuggestions).
   const brandCalendar = brand.business_calendar as BusinessCalendar | null
   const now90Plus = new Date()
   now90Plus.setDate(now90Plus.getDate() + 90)
-  const businessCalendarHasUpcoming = (() => {
-    if (!brandCalendar) return false
-    const inNinetyDays = (iso: string | null | undefined): boolean => {
-      if (!iso) return false
-      const d = new Date(iso)
-      if (Number.isNaN(d.getTime())) return false
-      return d.getTime() >= Date.now() && d.getTime() <= now90Plus.getTime()
-    }
-    const hasLaunch = (brandCalendar.upcomingLaunches ?? []).some((l) => inNinetyDays(l.date))
-    const hasIndustry = (brandCalendar.industryEvents ?? []).some((e) =>
-      inNinetyDays(e.date),
-    )
-    return hasLaunch || hasIndustry
-  })()
 
   let posts: PostRow[] = []
   let arcNarratif = ''
@@ -242,9 +228,8 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             businessAnchorSuggestions={businessAnchorSuggestions}
           />
 
-          {/* Sprint 37.B F17 — CTA secondaire si le calendrier business
-              n'a pas d'événements dans les 90 prochains jours. */}
-          {!businessCalendarHasUpcoming ? <CompleterCalendrierBusiness /> : null}
+          {/* Sprint 37.C (F25) — bloc Calendrier Business déplacé vers
+              /aujourd-hui (sous Ma Marque). Retrait propre du CTA F17. */}
 
           {hasProgramme ? (
             <ProgrammeDashboard

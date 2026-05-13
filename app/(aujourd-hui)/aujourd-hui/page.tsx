@@ -26,6 +26,7 @@ import { mapStatutToState } from '@/lib/types/post'
 import { jourCourantFr, nomDuJourFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
 import { startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 import { createClient } from '@/lib/supabase/server'
+import type { BusinessCalendar } from '@/types/business-calendar'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,6 +87,31 @@ export default async function AujourdhuiPage() {
     .maybeSingle()
   const currentProgrammeEnd =
     (rawSugProgramme as { date_fin?: string | null } | null)?.date_fin ?? null
+  const hasActiveProgramme = currentProgrammeEnd !== null
+
+  // Sprint 37.C (F24) — Calendrier Business : compte les événements à
+  // venir dans les 90 prochains jours (upcomingLaunches + industryEvents
+  // du brand.business_calendar).
+  const { data: rawBrandCalendar } = await supabaseSuggestions
+    .from('brands')
+    .select('business_calendar')
+    .limit(1)
+    .maybeSingle()
+  const brandCalendar = (rawBrandCalendar as { business_calendar?: BusinessCalendar | null } | null)
+    ?.business_calendar ?? null
+  const calendarHorizon = new Date(now.getTime() + 90 * 86400000)
+  const businessCalendarCount = ((): number => {
+    if (!brandCalendar) return 0
+    const inWindow = (iso: string | null | undefined): boolean => {
+      if (!iso) return false
+      const d = new Date(iso)
+      if (Number.isNaN(d.getTime())) return false
+      return d.getTime() >= now.getTime() && d.getTime() <= calendarHorizon.getTime()
+    }
+    const launches = (brandCalendar.upcomingLaunches ?? []).filter((l) => inWindow(l.date)).length
+    const events = (brandCalendar.industryEvents ?? []).filter((e) => inWindow(e.date)).length
+    return launches + events
+  })()
 
   const suggestions = computeSuggestions({
     currentProgrammeEnd,
@@ -286,50 +312,59 @@ export default async function AujourdhuiPage() {
                   )}
                 </section>
 
-                {/* ── Bloc 2 — État du programme (Liquid Glass niveau 1) ── */}
-                <Link
-                  href="/programme"
+                {/* ── Bloc 2 — État du programme (Liquid Glass niveau 1) ──
+                    Sprint 37.C (F24) : ajout d'une phrase bleue cliquable.
+                    Sans programme actif → "Créer Mon Programme →".
+                    Avec programme → "Voir Mon Programme →". */}
+                <section
+                  className="glass-thin cfs-stagger cfs-stagger-6"
                   style={{
-                    textDecoration: 'none',
-                    color: 'inherit',
+                    borderRadius: 14,
+                    padding: '14px 18px',
+                    border: '1px solid rgba(255,255,255,0.5)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 6,
                   }}
                 >
-                  <section
-                    className="glass-thin cfs-bloc-link cfs-stagger cfs-stagger-6"
+                  <span
                     style={{
-                      borderRadius: 14,
-                      padding: '14px 18px',
-                      border: '1px solid rgba(255,255,255,0.5)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 4,
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'rgba(0,0,0,0.55)',
                     }}
                   >
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-system)',
-                        fontSize: 11,
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        color: 'rgba(0,0,0,0.55)',
-                      }}
-                    >
-                      Programme
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-system)',
-                        fontSize: 15,
-                        fontWeight: 500,
-                        color: '#1C1C1E',
-                        lineHeight: 1.45,
-                      }}
-                    >
-                      {data.weekStats.total} {data.weekStats.total === 1 ? 'post' : 'posts'} cette semaine · {data.weekStats.ready} {data.weekStats.ready === 1 ? 'prêt' : 'prêts'} · {data.weekStats.todo} à préparer
-                    </span>
-                  </section>
-                </Link>
+                    Programme
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 15,
+                      fontWeight: 500,
+                      color: '#1C1C1E',
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    {data.weekStats.total} {data.weekStats.total === 1 ? 'post' : 'posts'} cette semaine · {data.weekStats.ready} {data.weekStats.ready === 1 ? 'prêt' : 'prêts'} · {data.weekStats.todo} à préparer
+                  </span>
+                  <Link
+                    href={hasActiveProgramme ? '/programme' : '/programme?action=create-plan'}
+                    style={{
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: '#007AFF',
+                      textDecoration: 'none',
+                      marginTop: 2,
+                      alignSelf: 'flex-start',
+                    }}
+                  >
+                    {hasActiveProgramme ? 'Voir Mon Programme →' : 'Créer Mon Programme →'}
+                  </Link>
+                </section>
 
                 {/* ── Bloc 3 — État Ma Marque (Liquid Glass niveau 1, conditionnel) ── */}
                 {showMaMarqueBloc ? (
@@ -381,6 +416,63 @@ export default async function AujourdhuiPage() {
                     </Link>
                   </section>
                 ) : null}
+
+                {/* ── Bloc 4 — Calendrier Business (Sprint 37.C F24) ──
+                    Affiché sous Ma Marque. Compte les événements à venir
+                    dans les 90 prochains jours (upcomingLaunches +
+                    industryEvents). Lien bleu vers la sheet d'édition. */}
+                <section
+                  className="glass-thin cfs-stagger cfs-stagger-7"
+                  aria-label="Calendrier Business"
+                  style={{
+                    borderRadius: 14,
+                    padding: '14px 18px',
+                    border: '1px solid rgba(255,255,255,0.5)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 6,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'rgba(0,0,0,0.55)',
+                    }}
+                  >
+                    Calendrier Business
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 15,
+                      fontWeight: 500,
+                      color: '#1C1C1E',
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    {businessCalendarCount > 0
+                      ? `${businessCalendarCount} ${businessCalendarCount === 1 ? 'événement' : 'événements'} à venir`
+                      : 'Aucun événement renseigné'}
+                  </span>
+                  <Link
+                    href="/ma-marque?section=calendrier-business"
+                    style={{
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: '#007AFF',
+                      textDecoration: 'none',
+                      marginTop: 2,
+                      alignSelf: 'flex-start',
+                    }}
+                  >
+                    Compléter mon Calendrier →
+                  </Link>
+                </section>
               </div>
             }
             rightColumn={
