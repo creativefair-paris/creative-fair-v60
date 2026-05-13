@@ -1,7 +1,11 @@
-// Sprint 36.B.1 — Bulle déployée depuis l'avatar.
+// Sprint 36.B.1 → 36.I — Bulle déployée depuis l'avatar.
 // 3 destinations (Mon Programme / Ma Marque / Mes Outils) — pas de Conseiller
 // dans le menu (accessible via bouton flottant Header existant).
-// Toggle mode réutilise <Toggle /> autonome (Sprint 33).
+//
+// Sprint 36.I Finding 9 : la toggle "Programme / Outils" entre les
+// sections du menu était redondante avec les liens "Mon Programme" et
+// "Mes Outils" déjà présents juste au-dessus. Subtraction.
+//
 // Déconnexion → onLogout (Sheet confirmation géré par le parent).
 'use client'
 
@@ -9,15 +13,12 @@ import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Avatar } from './Avatar'
-import { Toggle } from './Toggle'
 
 type UserMenuBubbleProps = {
   prenom: string
   photoUrl?: string
   nomMarque: string
-  currentMode: 'programme' | 'outils'
   onClose: () => void
-  onToggleMode: (mode: 'programme' | 'outils') => void
   onLogout: () => void
 }
 
@@ -25,9 +26,7 @@ export function UserMenuBubble({
   prenom,
   photoUrl,
   nomMarque,
-  currentMode,
   onClose,
-  onToggleMode,
   onLogout,
 }: UserMenuBubbleProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -93,12 +92,6 @@ export function UserMenuBubble({
           </Link>
         ))}
       </nav>
-
-      <div className="cfs-user-menu-divider" aria-hidden="true" />
-
-      <div className="cfs-user-menu-toggle-wrapper">
-        <Toggle value={currentMode} onChange={onToggleMode} />
-      </div>
 
       <div className="cfs-user-menu-divider" aria-hidden="true" />
 

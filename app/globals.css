@@ -784,12 +784,6 @@ h1, h2, h3, h4, h5, h6 {
   background-color: rgba(255, 59, 48, 0.08);
 }
 
-.cfs-user-menu-toggle-wrapper {
-  display: flex;
-  justify-content: center;
-  padding: 4px 8px;
-}
-
 /* Logout Sheet — confirmation déconnexion */
 .cfs-logout-message {
   font-family: var(--font-system);

@@ -4,7 +4,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { Avatar } from './Avatar'
 import { Sheet } from './Sheet'
@@ -16,28 +16,11 @@ type UserMenuTriggerProps = {
   nomMarque: string
 }
 
-function detectMode(pathname: string | null): 'programme' | 'outils' {
-  if (!pathname) return 'programme'
-  if (pathname.startsWith('/outils')) return 'outils'
-  return 'programme'
-}
-
 export function UserMenuTrigger({ prenom, photoUrl, nomMarque }: UserMenuTriggerProps) {
   const router = useRouter()
-  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [isLogoutSheetOpen, setIsLogoutSheetOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-
-  const currentMode = detectMode(pathname)
-
-  const handleToggleMode = useCallback(
-    (mode: 'programme' | 'outils') => {
-      setIsOpen(false)
-      router.push(mode === 'programme' ? '/programme' : '/outils')
-    },
-    [router],
-  )
 
   const handleLogoutRequest = useCallback(() => {
     setIsOpen(false)
@@ -79,9 +62,7 @@ export function UserMenuTrigger({ prenom, photoUrl, nomMarque }: UserMenuTrigger
           prenom={prenom}
           photoUrl={photoUrl}
           nomMarque={nomMarque}
-          currentMode={currentMode}
           onClose={() => setIsOpen(false)}
-          onToggleMode={handleToggleMode}
           onLogout={handleLogoutRequest}
         />
       ) : null}
