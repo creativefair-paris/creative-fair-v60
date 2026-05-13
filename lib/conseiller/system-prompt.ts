@@ -231,6 +231,53 @@ RÈGLES STRICTES :
 Si la réponse est très longue (livrable Tour 3 avec 3 sections : bilan + état + vision par exemple), tu peux séparer visuellement les blocs par une ligne "\\n\\n---\\n\\n" (3 tirets entourés de lignes vides). Le rendu UI splittera en bulles successives façon iOS Messages.
 `.trim()
 
+// ── Blocs structurés (Sprint 37.B F11) ──────────────────────────────────
+const BLOCS_STRUCTURES = `
+BLOCS STRUCTURÉS DISPONIBLES :
+
+Tu peux utiliser des blocs structurés dans ta réponse pour aérer le contenu. Choisis le format qui sert le mieux — pas tous à la fois. Un tour = 1 ou 2 blocs maximum.
+
+1. TABLEAU (markdown classique) — pour comparaisons et bilans chiffrés (comptages bruts uniquement, jamais de pourcentages perf) :
+
+| Pilier | Posts | Retombées |
+| --- | ---: | ---: |
+| Détail qui tue | 4 | 3 DM |
+| Querelles | 3 | 1 visite |
+
+Le rendu UI applique le style automatique (header gris uppercase, scroll horizontal mobile). Aligne à droite (---:) pour les nombres.
+
+2. CALLOUT — pour signaler une recommandation forte, un avertissement, ou une note contextuelle :
+
+:::callout-recommendation
+Mon conseil : démarre plutôt le 29 juin, tu finis ton plan actuel proprement.
+:::
+
+3 variants : "callout-recommendation" (bleu, ton conseil), "callout-warning" (orange, attention), "callout-info" (gris, note). Titre optionnel sur la ligne d'ouverture : ":::callout-warning Attention au timing".
+
+3. CARD DOCUMENTAIRE — pour proposer une anecdote sourcée alimentant un pilier :
+
+:::documentary
+Title: Querelle Soulages / Hartung
+Description: En 1958, les deux peintres se séparent publiquement après 12 ans d'amitié. Soulages refuse de signer un manifeste collectif.
+Source: BnF — Archives Soulages
+SourceUrl: https://gallica.bnf.fr/...
+Date: 1958
+ImageUrl: https://...
+:::
+
+Sources autorisées uniquement : BnF, Gallica, Getty Open, archives musées publics, corpus marque. Si pas d'image disponible, omets ImageUrl (le rendu affichera "Sans visuel", c'est OK).
+
+4. TIMELINE — pour un calendrier d'activation ou un arc narratif :
+
+:::timeline
+- Semaine 1 | Détail qui tue | 2 posts sur la matière brute | type=milestone
+- Semaine 2 | Querelles | 1 post sur dispute Soulages/Hartung
+- Semaine 3 | Accident génial | 2 posts sur expérimentations
+:::
+
+Format ligne : "- date | titre | description | type=milestone" (type optionnel, défaut "standard" = point gris, "milestone" = point bleu plein).
+`.trim()
+
 // ── Persona pilote (doc 09 §2) ───────────────────────────────────────────
 function personaBlock(role: PilotRole | null): string {
   if (role === 'pilots') {
@@ -299,6 +346,9 @@ export function buildConseillerSystemPrompt(opts: SystemPromptOptions): string {
     '# Format de réponse (boutons-choix)',
     FORMAT_CHOIX,
     '',
+    '# Blocs structurés',
+    BLOCS_STRUCTURES,
+    '',
     '# Pilote en face de toi',
     personaBlock(opts.pilotRole),
     '',
@@ -319,6 +369,7 @@ export function buildConseillerSystemPrompt(opts: SystemPromptOptions): string {
 // context, scenario) sont concaténées à chaque appel.
 export const STABLE_PROMPT_BLOCKS = {
   doctrineFondatrice: DOCTRINE_FONDATRICE,
+  blocsStructures: BLOCS_STRUCTURES,
   cinqLois: LES_5_LOIS,
   vocabulaireInterdit: VOCABULAIRE_INTERDIT,
   reglesPhrasing: REGLES_PHRASING,

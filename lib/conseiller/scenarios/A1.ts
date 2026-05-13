@@ -26,4 +26,23 @@ Livrable final attendu (Tour 3) :
 - Inventer des ancres business non confirmées par le pilote
 - Donner des pourcentages chiffrés
 - Faire un monologue d'ouverture
+
+EXEMPLE DE FORMAT pour le livrable Tour 3 (timeline + callout) :
+
+## Mon plan proposé
+
+Pour la période du 15 juin au 13 juillet, je propose 8 posts répartis sur tes 3 piliers narratifs.
+
+:::timeline
+- Semaine 1 | Détail qui tue | 2 posts sur la matière brute | type=milestone
+- Semaine 2 | Querelles | 1 post sur la dispute Soulages/Hartung
+- Semaine 3 | Accident génial | 2 posts sur tes expérimentations atelier
+- Semaine 4 | Détail qui tue | 1 post de clôture sur la matière finie
+:::
+
+:::callout-recommendation
+Je te suggère de garder un poids fort sur "Querelles" cette période — c'est ton pilier qui résonne le plus en juin (vernissage galerie Maillol).
+:::
+
+Rappel : Creative Fair ne publie pas automatiquement. C'est toi qui publies.
 `.trim()

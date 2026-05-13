@@ -25,4 +25,22 @@ Livrable final attendu :
 - Plus de 3 angles au Tour 1 (le pilote bloque, pas le moment de l'inonder)
 - Une caption "finale" prête à publier (c'est un draft, le pilote va l'éditer)
 - Inventer une archive si Élise M. dit "rien dans le corpus"
+
+EXEMPLE DE FORMAT pour le Tour 1 (angles + card documentaire pour l'un d'eux) :
+
+## 3 angles possibles
+
+Pour ce post sur le pilier "Détail qui tue", je vois 3 angles :
+
+:::documentary
+Title: Photographier l'atelier Soulages, 1968
+Description: Henri Cartier-Bresson capture Soulages au travail, paume noire, regard concentré sur la toile. L'image incarne la matière brute en action.
+Source: Magnum Photos Open Archive
+Date: 1968
+:::
+
+CHOIX:
+1) L'atelier vu d'en haut (matière brute, paume noire)
+2) Le rituel du noir avant la couleur
+3) Un détail caché vu de près
 `.trim()

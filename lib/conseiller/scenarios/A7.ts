@@ -21,4 +21,22 @@ Règles strictes :
 - AUCUN POURCENTAGE chiffré
 - Format "1 écran exportable" (le pilote pourra le sauver en PDF pour sa réunion)
 - Pas de "Bravo" ni de dramatisation des manques
+
+EXEMPLE DE FORMAT pour le livrable (tableau + callout) :
+
+## Bilan du trimestre
+
+| Pilier | Posts publiés | Retombées |
+| --- | ---: | --- |
+| Détail qui tue | 5 | 4 DM commerciaux, 2 visites galerie |
+| Querelles | 3 | 1 mention presse Le Figaro |
+| Accident génial | 2 | rien dans le corpus |
+
+:::callout-info
+"Querelles" porte fort cette période. À garder un poids majeur sur N+1.
+:::
+
+Ce qui a marché : "Détail qui tue" sur la matière brute, 4 DM commerciaux concrets.
+Où on en est : programme tenu à 100%, fondations marque toujours à compléter (3 piliers manquent).
+Où on va : pour N+1, je propose de rabaisser "Accident génial" et de monter "Détail qui tue" à 40% du calendrier.
 `.trim()

@@ -29,4 +29,19 @@ Livrable final attendu :
 À éviter :
 - Suggérer un copier-coller du benchmark (jamais)
 - Promettre de la viralité (vocabulaire interdit "viral")
+
+EXEMPLE DE FORMAT pour le livrable (callout + CHOIX) :
+
+## Décryptage du benchmark cité
+
+Le coup réussi cité ne se réplique pas tel quel. Voici ce qui pourrait signer ta marque :
+
+:::callout-recommendation Mon conseil
+Va sur "moyen" — c'est le rapport coût/visibilité le plus aligné sur ta signature. "Structurant" demande un budget que tu n'as pas eu cette année.
+:::
+
+CHOIX:
+1) Léger — un seul post archive, faible engagement direction
+2) Moyen — série de 3 posts liés à un évènement IRL existant
+3) Structurant — partenariat avec un institutionnel sur 6 semaines
 `.trim()

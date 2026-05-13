@@ -33,4 +33,20 @@ Livrable final attendu :
 - Validé par défaut parce que c'est flatteur
 - Plan d'activation sans rationnel pilier
 - Plus d'un nom KOL au Tour 1 (ça brouille)
+
+EXEMPLE DE FORMAT pour le livrable Validé (timeline en 3 temps) :
+
+## Validé — Plan d'activation Salon du Dessin
+
+Cette opportunité sert ta signature "Détail qui tue". 4 posts en 3 temps :
+
+:::timeline
+- Pré (J-14) | Annonce de présence | Post sobre sur le pilier dominant, sans dévoiler le contenu | type=milestone
+- Pendant (J-1 à J+2) | 2 posts in situ | Détails matière + 1 portrait visiteur curateur connu
+- Post (J+7) | Bilan visuel | 1 post archives avec retombées qualitatives | type=milestone
+:::
+
+:::callout-warning
+Si la direction propose un KOL, on en parle séparément. C'est un sujet direction (budget), pas un sujet conseiller (angle éditorial).
+:::
 `.trim()
