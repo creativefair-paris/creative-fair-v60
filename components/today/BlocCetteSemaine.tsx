@@ -152,15 +152,14 @@ export function BlocCetteSemaine({ posts, initialOpen, showWeekendCta = false, t
           )}
 
           {showWeekendCta ? (
-            {/* Sprint 36.H Finding 9e — #007AFF réservé aux 3 CTA canoniques
-                (Compléter Ma Marque, Et nous ?, Demander →). Ce CTA hebdo
-                passe en gris sombre pour rester discret. */}
             <a
               href="/programme"
               style={{
                 fontFamily: 'var(--font-system)',
                 fontSize: 13,
                 fontWeight: 500,
+                // Sprint 36.H Finding 9e — bleu accent réservé aux 3 CTA
+                // canoniques. Ce CTA hebdo passe en gris sombre.
                 color: 'rgba(0,0,0,0.7)',
                 textDecoration: 'none',
                 paddingLeft: 8,
