@@ -12,6 +12,7 @@ import { createAdmin } from '@/lib/supabase/admin'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { MaMarqueDashboard } from '@/components/ma-marque/MaMarqueDashboard'
+import { BrandOnboardingTrigger } from '@/components/onboarding-marque/BrandOnboardingTrigger'
 import type { BrandSnapshot14 } from '@/lib/ma-marque/completude'
 import type {
   MomentBusiness,
@@ -174,6 +175,11 @@ export default async function MaMarquePage() {
             archives={archives}
             {...(user.email ? { userEmail: user.email } : {})}
           />
+
+          {/* Sprint 37.C (F18) — Wizard guidé Ma Marque. Trigger via
+              ?onboarding=true (deep-link depuis /aujourd-hui ou CTA
+              jalon "marque"). Mini-sheet de reprise si session IN_PROGRESS. */}
+          <BrandOnboardingTrigger />
         </div>
       </div>
     </div>
