@@ -111,7 +111,9 @@ export function ConseillerSheet({
   const [state, setState] = useState<ConseillerState>('IDLE')
   const [history, setHistory] = useState<ConversationMessage[]>([])
   const [currentSteps, setCurrentSteps] = useState<ReadonlyArray<ReasoningStep>>([])
-  const [currentReply, setCurrentReply] = useState<string | null>(null)
+  // Sprint 37.A F4 — `currentChoices` est rattaché à la DERNIÈRE bulle
+  // conseiller de l'historique (pas un rendu séparé qui dupliquait la
+  // bulle, cause confirmée du bug doublon E-divers Substack).
   const [currentChoices, setCurrentChoices] = useState<
     ReadonlyArray<{ id: string; label: string }>
   >([])
@@ -119,6 +121,16 @@ export function ConseillerSheet({
   const [input, setInput] = useState('')
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Sprint 37.A F4 — guard anti-race :
+  //   * inflightTokenRef.current = jeton du tour en cours côté client.
+  //     Si une nouvelle requête est lancée pendant que la précédente
+  //     est encore en vol, on rejette le résultat stale au moment où
+  //     il arrive.
+  //   * lastSubmitAtRef pour debounce 300ms du bouton envoyer
+  //     (anti-double-clic + anti-double-Enter).
+  const inflightTokenRef = useRef<number>(0)
+  const lastSubmitAtRef = useRef<number>(0)
 
   // Ouverture initiale : charge contexte via server action (state passe
   // en CONTEXT_LOAD → THINKING_1 → TURN_1).
@@ -134,7 +146,7 @@ export function ConseillerSheet({
     const el = bodyRef.current
     if (!el) return
     el.scrollTop = el.scrollHeight
-  }, [history, currentSteps, currentReply])
+  }, [history, currentSteps])
 
   // Esc + click overlay → close
   useEffect(() => {
@@ -151,12 +163,16 @@ export function ConseillerSheet({
 
   const runTurn = useCallback(
     async (message: string | null) => {
+      // F4 — token anti-race. On invalide la précédente (si en vol) et
+      // on inscrit le jeton courant. Quand la réponse arrive, on vérifie
+      // que c'est encore le tour en cours avant d'écrire dans le state.
+      const token = inflightTokenRef.current + 1
+      inflightTokenRef.current = token
+
       setPending(true)
       setError(null)
-      setCurrentReply(null)
       setCurrentChoices([])
-      // Bascule visuelle THINKING immédiate (les steps s'animent ensuite
-      // via StreamingReasoning).
+      // Bascule visuelle THINKING immédiate.
       setState((prev) =>
         prev === 'IDLE' || prev === 'CONTEXT_LOAD'
           ? 'THINKING_1'
@@ -174,34 +190,59 @@ export function ConseillerSheet({
           userAddressesFormally,
           history,
         })
+
+        // Tour stale ? (une nouvelle requête a été lancée entre temps)
+        if (inflightTokenRef.current !== token) {
+          return
+        }
+
         setConversationId(newConvId)
         setCurrentSteps(result.reasoningSteps)
-        // Délai cosmétique pour que les steps streamés se voient un
-        // minimum avant l'apparition de la bulle conseiller. La cadence
-        // réelle vient des steps eux-mêmes (StreamingReasoning).
         const visibleStepsMs = Math.max(
           800,
           (result.reasoningSteps.length - 1) * 1200,
         )
         await new Promise((r) => setTimeout(r, visibleStepsMs))
-        setCurrentReply(result.message)
-        setCurrentChoices(result.choices ?? [])
+
+        if (inflightTokenRef.current !== token) {
+          return
+        }
+
         setState(result.state)
-        // Push la réponse dans l'historique (pour le tour suivant).
-        setHistory((prev) => [
-          ...prev,
-          {
-            role: 'conseiller',
-            content: result.message,
-            created_at: new Date().toISOString(),
-          },
-        ])
+        // F4 — Push UNE seule fois dans l'historique avec garde
+        // anti-doublon (même contenu ET même created_at à <500ms).
+        // C'est la SOURCE UNIQUE de la bulle conseiller (suppression
+        // de currentReply qui dupliquait via un rendu séparé).
+        const newMessage: ConversationMessage = {
+          role: 'conseiller',
+          content: result.message,
+          created_at: new Date().toISOString(),
+        }
+        setHistory((prev) => {
+          const last = prev[prev.length - 1]
+          if (
+            last &&
+            last.role === 'conseiller' &&
+            last.content === newMessage.content &&
+            Math.abs(
+              new Date(last.created_at).getTime() -
+                new Date(newMessage.created_at).getTime(),
+            ) < 500
+          ) {
+            return prev // doublon écarté
+          }
+          return [...prev, newMessage]
+        })
+        setCurrentChoices(result.choices ?? [])
       } catch (err) {
+        if (inflightTokenRef.current !== token) return
         const detail = err instanceof Error ? err.message : 'erreur inconnue'
         setError(detail)
         setState('ERROR_FALLBACK')
       } finally {
-        setPending(false)
+        if (inflightTokenRef.current === token) {
+          setPending(false)
+        }
       }
     },
     [
@@ -220,6 +261,11 @@ export function ConseillerSheet({
       if (trimmed.length === 0) return
       if (pending) return
       if (isTerminal(state)) return
+
+      // F4 — debounce 300ms anti-double-clic / anti-double-Enter.
+      const now = Date.now()
+      if (now - lastSubmitAtRef.current < 300) return
+      lastSubmitAtRef.current = now
 
       // Détection vouvoiement sur le 1er message pilote.
       const isFirstUserMessage = history.every((m) => m.role !== 'user')
@@ -322,11 +368,65 @@ export function ConseillerSheet({
           </button>
         </header>
 
-        {/* Body scrollable — bulles + streaming */}
+        {/* Body scrollable — bulles + streaming.
+            F4 : la source unique des bulles conseiller est `history`.
+            Les `currentChoices` sont rattachés à la DERNIÈRE bulle
+            conseiller (lastConseillerIndex) si l'état n'est pas
+            terminal et qu'on n'est pas en train de penser. */}
         <div ref={bodyRef} className="cfs-conseiller-body">
-          {history.map((msg, i) => (
-            <ConversationItem key={i} message={msg} />
-          ))}
+          {history.map((msg, i) => {
+            const isLastConseiller =
+              msg.role === 'conseiller' &&
+              i === history.length - 1 &&
+              !isThinkingNow &&
+              currentChoices.length > 0
+            if (msg.role === 'user') {
+              return <PiloteBubble key={i} content={msg.content} />
+            }
+            return (
+              <ConseillerBubblesFromText
+                key={i}
+                text={msg.content}
+                trailing={
+                  isLastConseiller ? (
+                    <div
+                      style={{
+                        marginTop: 16,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 8,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-system)',
+                          fontSize: 11,
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          color: 'var(--color-tertiary-label)',
+                          marginBottom: 2,
+                        }}
+                      >
+                        Choisis une direction
+                      </span>
+                      {currentChoices.map((c) => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => handleChoiceClick(c)}
+                          disabled={pending}
+                          className="btn-choice"
+                        >
+                          {c.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null
+                }
+              />
+            )
+          })}
 
           {isThinkingNow && currentSteps.length > 0 ? (
             <ConseillerBubble pulsing>
@@ -338,49 +438,6 @@ export function ConseillerSheet({
                   : {})}
               />
             </ConseillerBubble>
-          ) : null}
-
-          {!isThinkingNow && currentReply ? (
-            <ConseillerBubblesFromText
-              text={currentReply}
-              trailing={
-                currentChoices.length > 0 ? (
-                  <div
-                    style={{
-                      marginTop: 16,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 8,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-system)',
-                        fontSize: 11,
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        color: 'var(--color-tertiary-label)',
-                        marginBottom: 2,
-                      }}
-                    >
-                      Choisis une direction
-                    </span>
-                    {currentChoices.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => handleChoiceClick(c)}
-                        disabled={pending}
-                        className="btn-choice"
-                      >
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-                ) : null
-              }
-            />
           ) : null}
 
           {state === 'FORCED_DELIVERY' ? (
@@ -618,14 +675,6 @@ export function ConseillerSheet({
       `}</style>
     </div>
   )
-}
-
-function ConversationItem({ message }: { message: ConversationMessage }) {
-  if (message.role === 'user') {
-    return <PiloteBubble content={message.content} />
-  }
-  // Split visuel des bulles longues sur "\n\n---\n\n" (pattern Messages).
-  return <ConseillerBubblesFromText text={message.content} />
 }
 
 // ── Stub SendMessageFn pour Lot 2 ────────────────────────────────────────

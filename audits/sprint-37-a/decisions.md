@@ -26,4 +26,34 @@ d'invention locale.
 
 ## Findings en cours
 
-(Rempli au fil de l'eau, un § par finding.)
+### F4 — Bug duplication message (cause exacte)
+
+**Cause confirmée** : `runTurn()` populait DEUX surfaces avec le
+même contenu :
+1. `setCurrentReply(result.message)` qui alimentait un bloc de
+   rendu séparé `<ConseillerBubblesFromText text={currentReply} ...>`
+2. `setHistory(prev => [...prev, { role: 'conseiller', content: ... }])`
+   qui alimentait la `history.map(...)` au-dessus
+
+Quand le state passait à non-`THINKING_*`, les DEUX rendus
+étaient actifs simultanément → bulle doublée à l'écran.
+
+**Fix** :
+- Suppression complète de l'état `currentReply` (variable et
+  setter).
+- `history` est désormais la source UNIQUE des bulles
+  conseiller.
+- `currentChoices` rattaché à la dernière bulle conseiller de
+  `history` (via index check `i === history.length - 1`).
+- Push dans history avec garde anti-doublon (même contenu ET
+  `created_at` à <500ms d'écart) — filet pour les cas exotiques.
+- Anti-race : `inflightTokenRef` incrémenté à chaque tour, le
+  callback rejette les résultats stale qui arriveraient après
+  qu'un nouveau tour a été lancé.
+- Anti-double-clic : `lastSubmitAtRef` debounce 300ms côté
+  `handleSubmit`.
+
+Pas d'AbortController explicite ajouté — la server action
+non-streamée n'a pas de stream à abort. L'effet équivalent est
+atteint par le `inflightTokenRef` (les setters sont gardés
+côté client).
