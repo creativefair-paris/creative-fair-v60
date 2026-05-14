@@ -13,6 +13,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
+import { PlanPreview } from '@/components/programme/PlanPreview'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
 import { checkJalonStatus } from '@/lib/jalons/check-jalons'
 import type { BusinessCalendar } from '@/types/business-calendar'
@@ -35,7 +36,7 @@ type ProgrammeRow = {
 }
 
 type ProgrammePageProps = {
-  searchParams?: Promise<{ welcome?: string; action?: string }>
+  searchParams?: Promise<{ welcome?: string; action?: string; newPlan?: string }>
 }
 
 function asObjet<T>(v: unknown): T | null {
@@ -49,6 +50,8 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
   // Sprint 37 Lot 4 — viens du mini-onboarding du conseiller, on auto-ouvre
   // la PeriodSelectionSheet au mount (côté client via ConseillerAccess).
   const autoOpenCreatePlan = resolvedSearch.action === 'create-plan'
+  // Sprint 37.D (F34) — aperçu du plan fraîchement généré depuis le wizard.
+  const newPlanId = typeof resolvedSearch.newPlan === 'string' ? resolvedSearch.newPlan : null
 
   const supabase = await createClient()
   const {
@@ -111,6 +114,38 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
   // wizard A1. Si la marque n'est pas posée, un dialogue de friction
   // s'ouvre côté client.
   const jalonStatus = await checkJalonStatus(supabase, tenantId)
+
+  // Sprint 37.D (F34) — Charge l'aperçu du plan fraîchement généré.
+  type NewPlanPreviewPost = {
+    id: string
+    date_prevue: string | null
+    format: string | null
+    structure_type: string | null
+    pilier_nom: string | null
+    objectif_editorial: string | null
+    angle: string | null
+    titre: string | null
+  }
+  type NewPlanRow = {
+    date_debut: string | null
+    date_fin: string | null
+  }
+  let newPlanPosts: NewPlanPreviewPost[] = []
+  let newPlanRow: NewPlanRow | null = null
+  if (newPlanId) {
+    const { data: rawPlan } = await supabase
+      .from('programmes')
+      .select('date_debut, date_fin')
+      .eq('id', newPlanId)
+      .maybeSingle()
+    newPlanRow = (rawPlan as NewPlanRow | null) ?? null
+    const { data: rawPosts } = await supabase
+      .from('posts')
+      .select('id, date_prevue, format, structure_type, pilier_nom, objectif_editorial, angle, titre')
+      .eq('programme_id', newPlanId)
+      .order('date_prevue', { ascending: true })
+    newPlanPosts = (rawPosts as NewPlanPreviewPost[] | null) ?? []
+  }
 
   // Sprint 37.C (F25) — bloc "Compléter mon calendrier business" déplacé
   // vers /aujourd-hui (F24). brandCalendar reste lu ci-dessous pour le
@@ -239,6 +274,16 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
               Retombées →
             </Link>
           </div>
+
+          {/* Sprint 37.D (F34) — aperçu du plan fraîchement généré.
+              Affiché en haut quand on arrive avec ?newPlan=ID. */}
+          {newPlanId && newPlanPosts.length > 0 ? (
+            <PlanPreview
+              posts={newPlanPosts}
+              periodStart={newPlanRow?.date_debut}
+              periodEnd={newPlanRow?.date_fin}
+            />
+          ) : null}
 
           {/* Sprint 37 Lot 4 — Voies d'accès au conseiller (1 CTA primaire +
               2 secondaires + bannière régénération <14j). Affiché au-dessus
