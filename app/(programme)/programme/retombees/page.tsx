@@ -9,12 +9,10 @@
 // JAMAIS : stats / analytics / dashboard / performance / KPI / métriques.
 
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { RetombeesQualitativesList } from '@/components/retombees/RetombeesQualitativesList'
 import { RetombeesQuantitativesGrid } from '@/components/retombees/RetombeesQuantitativesGrid'
-import { ProgrammeTabs } from '@/components/programme/ProgrammeTabs'
+import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
 import { AppMetricsSection } from '@/components/retombees/AppMetricsSection'
 
 export const dynamic = 'force-dynamic'
@@ -118,83 +116,27 @@ export default async function RetombeesPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', position: 'relative' }}>
-      <div className="bg-halo bg-halo-1" aria-hidden="true" />
-      <div className="bg-halo bg-halo-2" aria-hidden="true" />
-      <div className="bg-halo bg-halo-3" aria-hidden="true" />
-
-      <PageHeader title="Mon Programme" />
-
-      <div
-        className="cfs-page-container"
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          paddingBottom: 'var(--space-12)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 28,
-        }}
-      >
-        {/* Sprint 37.E (F50) — ProgrammeTabs en haut de la sous-page. */}
-        <ProgrammeTabs activeTab="retombees" />
-
-        {/* Breadcrumb local Mon Programme › Retombées */}
-        <nav
-          aria-label="Fil d'ariane"
-          style={{
-            display: 'flex',
-            gap: 8,
-            alignItems: 'center',
-            fontSize: 13,
-            color: 'var(--color-tertiary-label)',
-            fontFamily: 'var(--font-system)',
-          }}
-        >
-          <Link
-            href="/programme"
-            style={{
-              color: 'var(--color-secondary-label)',
-              textDecoration: 'none',
-            }}
-          >
-            Mon Programme
-          </Link>
-          <span aria-hidden="true">›</span>
-          <span>Retombées</span>
-        </nav>
-
+    <ProgrammeSplitShell activeItem="retombees">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
         <header style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <h1
+          <h2
             style={{
               fontFamily: 'var(--font-system)',
-              fontSize: 28,
+              fontSize: 22,
               fontWeight: 700,
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.015em',
               color: 'var(--color-label)',
               margin: 0,
             }}
           >
             Retombées du programme actuel
-          </h1>
+          </h2>
           {programme?.date_debut && programme?.date_fin ? (
-            <p
-              style={{
-                margin: 0,
-                fontSize: 14,
-                color: 'var(--color-secondary-label)',
-              }}
-            >
+            <p style={{ margin: 0, fontSize: 14, color: 'var(--color-secondary-label)' }}>
               Du {formatFr(programme.date_debut)} au {formatFr(programme.date_fin)}
             </p>
           ) : (
-            <p
-              style={{
-                margin: 0,
-                fontSize: 14,
-                color: 'var(--color-secondary-label)',
-              }}
-            >
+            <p style={{ margin: 0, fontSize: 14, color: 'var(--color-secondary-label)' }}>
               Pas de programme actif. Crée un programme pour suivre tes retombées.
             </p>
           )}
@@ -210,12 +152,12 @@ export default async function RetombeesPage() {
           <RetombeesQuantitativesGrid latestByType={Object.fromEntries(latestByType)} />
         </section>
 
-        {/* Sprint 37.E (F52) — Chiffres app (plans, posts, conversations, biblio). */}
+        {/* Sprint 37.E (F52) — Chiffres app. */}
         <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <AppMetricsSection metrics={appMetrics} />
         </section>
       </div>
-    </main>
+    </ProgrammeSplitShell>
   )
 }
 

@@ -6,11 +6,10 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { ProgrammeCreateForm } from '@/components/programme-create/ProgrammeCreateForm'
 import { checkJalonStatus } from '@/lib/jalons/check-jalons'
 import { MarqueIncompleteWarning } from '@/components/programme-create/MarqueIncompleteWarning'
-import { ProgrammeTabs } from '@/components/programme/ProgrammeTabs'
+import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
 import type { BusinessCalendar } from '@/types/business-calendar'
 import type { PilierNarratif } from '@/types/programme'
 
@@ -75,50 +74,20 @@ export default async function CreateProgrammePage() {
   }
 
   return (
-    <main
-      className="min-h-screen"
-      style={{ position: 'relative', background: 'var(--color-background)' }}
-    >
-      <div className="bg-halo bg-halo-1" aria-hidden="true" />
-      <div className="bg-halo bg-halo-2" aria-hidden="true" />
-      <div className="bg-halo bg-halo-3" aria-hidden="true" />
+    <ProgrammeSplitShell activeItem="create">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {/* Sprint 37.E (F44) — Alerte si jalon marque non-atteint. */}
+        {!jalonStatus.marque.complete ? <MarqueIncompleteWarning /> : null}
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-        }}
-      >
-        <PageHeader title="Mon Programme" />
-
-        <div
-          className="cfs-page-container"
-          style={{
-            paddingBottom: 'var(--space-12)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 24,
-          }}
-        >
-          {/* Sprint 37.E (F50) — ProgrammeTabs segmented control. */}
-          <ProgrammeTabs activeTab="create" />
-
-          {/* Sprint 37.E (F44) — Alerte si jalon marque non-atteint. */}
-          {!jalonStatus.marque.complete ? <MarqueIncompleteWarning /> : null}
-
-          <ProgrammeCreateForm
-            pillarsCatalog={piliers.map((p, i) => ({
-              id: `pilier-${i}`,
-              nom: p.nom ?? `Pilier ${i + 1}`,
-            }))}
-            businessAnchorSuggestions={businessAnchorSuggestions}
-            publicationFrequency={profile?.publication_frequency ?? null}
-          />
-        </div>
+        <ProgrammeCreateForm
+          pillarsCatalog={piliers.map((p, i) => ({
+            id: `pilier-${i}`,
+            nom: p.nom ?? `Pilier ${i + 1}`,
+          }))}
+          businessAnchorSuggestions={businessAnchorSuggestions}
+          publicationFrequency={profile?.publication_frequency ?? null}
+        />
       </div>
-    </main>
+    </ProgrammeSplitShell>
   )
 }

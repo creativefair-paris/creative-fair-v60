@@ -5,17 +5,15 @@
 // ProgrammeDashboard.
 
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
 import { PlanPreview } from '@/components/programme/PlanPreview'
 import { NewPlanPedagogyOverlay } from '@/components/programme/NewPlanPedagogyOverlay'
-import { ProgrammeTabs } from '@/components/programme/ProgrammeTabs'
+import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
 import { checkJalonStatus } from '@/lib/jalons/check-jalons'
 import type { BusinessCalendar } from '@/types/business-calendar'
@@ -221,57 +219,17 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
     }
   }
 
-  // Sprint 36.B.7 — Patch 1 : alignement DOM identique à /ma-marque.
-  // La page /programme utilisait <main> comme racine alors que le layout.tsx
-  // fournit déjà un <main class="flex-1"> — deux <main> imbriqués cassaient
-  // le rendu flex et décalaient le PageHeader de ~56px vers la droite.
-  // Fix : <div> racine + PageHeader sibling du contenu (même profondeur DOM
-  // que /ma-marque). La classe `programme-wrapper` descend sur le seul
-  // conteneur de contenu (pour l'animation is-welcome).
+  // Sprint 37.F (F61) — /programme wrapped dans ProgrammeSplitShell.
+  // La vue Calendrier (default activeItem='calendrier') est livrée Sprint 37.F
+  // chantier 4 (F48 PlanPreview calendrier + preview + mini chat).
   return (
-    <div
-      className="min-h-screen"
-      style={{ position: 'relative', background: 'var(--color-background)' }}
-    >
-      <div className="bg-halo bg-halo-1" aria-hidden="true" />
-      <div className="bg-halo bg-halo-2" aria-hidden="true" />
-      <div className="bg-halo bg-halo-3" aria-hidden="true" />
-      <div className="bg-halo bg-halo-4" aria-hidden="true" />
-      <div className="bg-halo bg-halo-5" aria-hidden="true" />
-      <div className="bg-halo bg-halo-6" aria-hidden="true" />
-
+    <>
       {isWelcome ? <WelcomeURLCleaner /> : null}
-
-      {/* Conteneur principal — pattern identique à /ma-marque */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {/* Sprint 36.B.5/7 — PageHeader unifié : breadcrumb + H1 + avatar même ligne. */}
-        <PageHeader title="Mon Programme" />
-
-        {/* Contenu de page — cfs-page-container homogénéise l'alignement 1200px/24px.
-             programme-wrapper only classe les animations is-welcome (Sprint 36.B). */}
-        <div
-          className={`cfs-page-container${isWelcome ? ' programme-wrapper is-welcome' : ''}`}
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            paddingBottom: 'var(--space-6)',
-          }}
-        >
-          {/* Sprint 37.E (F50) — ProgrammeTabs segmented control remplace
-              le lien discret 'Retombées →' (F49 retiré). */}
-          <ProgrammeTabs activeTab="current" />
-
-          {/* Sprint 37.D (F34) — aperçu du plan fraîchement généré.
-              Affiché en haut quand on arrive avec ?newPlan=ID. */}
+      <ProgrammeSplitShell activeItem="calendrier">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {/* Sprint 37.D (F34) — aperçu du plan fraîchement généré quand
+              on arrive avec ?newPlan=ID. F48 le remplacera par le calendrier
+              interactif dans la vue par défaut. */}
           {newPlanId && newPlanPosts.length > 0 ? (
             <PlanPreview
               posts={newPlanPosts}
@@ -280,14 +238,10 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             />
           ) : null}
 
-          {/* Sprint 37.E (F47+F53) — Sheet de pédagogie post-génération
-              en overlay. S'affiche au mount si ?newPlan=ID, disparaît
-              au clic du pilote pour révéler le PlanPreview. */}
+          {/* Sprint 37.E (F47+F53) — Pédagogie post-génération en overlay. */}
           {newPlanId ? <NewPlanPedagogyOverlay programmeId={newPlanId} /> : null}
 
-          {/* Sprint 37 Lot 4 — Voies d'accès au conseiller (1 CTA primaire +
-              2 secondaires + bannière régénération <14j). Affiché au-dessus
-              du dashboard ou de l'empty state. */}
+          {/* Sprint 37 Lot 4 — Voies d'accès au conseiller. */}
           <ConseillerAccess
             currentProgrammeEnd={programme?.date_fin ?? null}
             publicationFrequency={publicationFrequency}
@@ -296,9 +250,6 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             businessAnchorSuggestions={businessAnchorSuggestions}
             marqueComplete={jalonStatus.marque.complete}
           />
-
-          {/* Sprint 37.C (F25) — bloc Calendrier Business déplacé vers
-              /aujourd-hui (sous Ma Marque). Retrait propre du CTA F17. */}
 
           {hasProgramme ? (
             <ProgrammeDashboard
@@ -310,7 +261,6 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
           ) : (
             <section
               style={{
-                flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -330,7 +280,7 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
                   width: '100%',
                 }}
               >
-                <h1
+                <h2
                   style={{
                     fontSize: 'var(--text-title-1-size)',
                     fontWeight: 700,
@@ -340,7 +290,7 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
                   }}
                 >
                   Tu n&apos;as pas encore de plan en cours.
-                </h1>
+                </h2>
                 <p
                   className="text-body"
                   style={{
@@ -361,7 +311,7 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             </section>
           )}
         </div>
-      </div>
-    </div>
+      </ProgrammeSplitShell>
+    </>
   )
 }
