@@ -39,40 +39,41 @@ export function ExitConfirmDialog({
         padding: 24,
       }}
     >
+      {/* Sprint 37.D (F32) — backdrop renforcé à 0.4 pour être clairement
+          perçu au-dessus du fond claire du wizard immersif. */}
       <div
         onClick={onContinue}
         aria-hidden="true"
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.18)',
+          background: 'rgba(0, 0, 0, 0.4)',
         }}
       />
       <section
-        className="glass-regular"
         style={{
           position: 'relative',
           zIndex: 1,
-          maxWidth: 440,
+          maxWidth: 400,
           width: '100%',
-          borderRadius: 20,
-          padding: '24px 26px 22px 26px',
+          borderRadius: 14,
+          padding: '24px 24px 20px 24px',
           display: 'flex',
           flexDirection: 'column',
-          gap: 14,
-          background: 'rgba(251, 250, 247, 0.96)',
-          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.12)',
+          gap: 12,
+          background: '#FFFFFF',
+          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.2)',
         }}
       >
         <h2
           id="exit-confirm-title"
           style={{
             fontFamily: 'var(--font-system)',
-            fontSize: 18,
-            fontWeight: 700,
+            fontSize: 17,
+            fontWeight: 600,
             color: 'var(--color-label)',
             margin: 0,
-            lineHeight: 1.3,
+            lineHeight: 1.4,
           }}
         >
           Tu as répondu à {stepsAnswered} question{stepsAnswered > 1 ? 's' : ''} sur {totalSteps}
@@ -82,7 +83,7 @@ export function ExitConfirmDialog({
             fontFamily: 'var(--font-system)',
             fontSize: 14,
             lineHeight: 1.5,
-            color: 'var(--color-secondary-label)',
+            color: 'rgba(0, 0, 0, 0.7)',
             margin: 0,
           }}
         >

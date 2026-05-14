@@ -123,14 +123,19 @@ export function WizardImmersiveSheet({
         setGenerating(false)
         return
       }
-      // V1 : on consomme la session, puis on route vers /programme avec
-      // un trigger conseiller A1 préchargé de la période. La génération
-      // réelle du programme (lib/programme/generation.ts) est consommée
-      // par la flow conseiller existante.
-      router.push('/programme?action=create-plan')
+      // Sprint 37.D (F36) — redirige vers /programme SANS action=create-plan
+      // (qui ré-ouvrait le wizard en boucle infinie). La génération du
+      // plan via Anthropic est déclenchée Sprint 37.D F34.
+      router.push('/programme')
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue')
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Impossible de finaliser le brief. Réessaie dans quelques secondes.',
+      )
+      console.error('[wizard] complete session failed:', err)
+    } finally {
       setGenerating(false)
     }
   }, [session.id, router, onClose])

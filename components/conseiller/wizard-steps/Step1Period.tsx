@@ -1,10 +1,8 @@
 // Sprint 37.B (F16) — Wizard Step 1 : Période.
+// Sprint 37.D (F33) — Quick options + custom toggle.
 //
-// Note : la création de la session passe par createProgrammeCreationSession
-// qui pré-remplit le step 0 (Period). En pratique, le wizard saute
-// directement au step 1 (Ancres) après le PeriodSelectionSheet. Mais
-// si on entre dans le wizard via "Reprendre", le step 0 peut redevenir
-// éditable — d'où ce composant.
+// Boutons-choix : 2 semaines, 1 mois, 6 semaines, 2 mois, 3 mois.
+// Option "Préciser des dates" qui ouvre les pickers natifs.
 
 'use client'
 
@@ -17,9 +15,42 @@ type Props = {
   saving?: boolean
 }
 
+const QUICK_OPTIONS: ReadonlyArray<{ value: string; label: string; weeks: number }> = [
+  { value: '2w', label: '2 semaines', weeks: 2 },
+  { value: '1m', label: '1 mois', weeks: 4 },
+  { value: '6w', label: '6 semaines', weeks: 6 },
+  { value: '2m', label: '2 mois', weeks: 8 },
+  { value: '3m', label: '3 mois', weeks: 12 },
+]
+
+function isoDate(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 export function Step1Period({ initialStart, initialEnd, onSave, saving }: Props) {
+  const [mode, setMode] = useState<'quick' | 'custom'>(
+    initialStart || initialEnd ? 'custom' : 'quick',
+  )
+  const [quickValue, setQuickValue] = useState<string | null>(null)
   const [start, setStart] = useState(initialStart)
   const [end, setEnd] = useState(initialEnd)
+
+  function handleQuickSelect(opt: typeof QUICK_OPTIONS[number]) {
+    setQuickValue(opt.value)
+    const today = new Date()
+    const endDate = new Date(today)
+    endDate.setDate(endDate.getDate() + opt.weeks * 7)
+    setStart(isoDate(today))
+    setEnd(isoDate(endDate))
+  }
+
+  function handleCustomMode() {
+    setMode('custom')
+    setQuickValue(null)
+  }
 
   const canSave =
     start.length > 0 &&
@@ -31,30 +62,83 @@ export function Step1Period({ initialStart, initialEnd, onSave, saving }: Props)
       <header style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <h2 style={titleStyle}>Sur quelle période veux-tu construire ce plan ?</h2>
         <p style={descStyle}>
-          Choisis tes dates de début et de fin. Le conseiller construit ensuite avec toi.
+          Choisis une durée rapide ou précise des dates.
         </p>
       </header>
 
-      <div style={{ display: 'flex', gap: 12 }}>
-        <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={labelStyle}>Date de début</span>
-          <input
-            type="date"
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-            style={inputStyle}
-          />
-        </label>
-        <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={labelStyle}>Date de fin</span>
-          <input
-            type="date"
-            value={end}
-            onChange={(e) => setEnd(e.target.value)}
-            style={inputStyle}
-          />
-        </label>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        {QUICK_OPTIONS.map((opt) => {
+          const selected = mode === 'quick' && quickValue === opt.value
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                setMode('quick')
+                handleQuickSelect(opt)
+              }}
+              aria-pressed={selected}
+              className="btn-choice"
+              style={{
+                padding: '10px 16px',
+                background: selected ? 'rgba(0, 122, 255, 0.16)' : 'rgba(0, 122, 255, 0.06)',
+                borderColor: selected ? 'rgba(0, 122, 255, 0.5)' : 'rgba(0, 122, 255, 0.18)',
+              }}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+        <button
+          type="button"
+          onClick={handleCustomMode}
+          aria-pressed={mode === 'custom'}
+          className="btn-choice"
+          style={{
+            padding: '10px 16px',
+            background: mode === 'custom' ? 'rgba(0, 122, 255, 0.16)' : 'rgba(0, 122, 255, 0.06)',
+            borderColor: mode === 'custom' ? 'rgba(0, 122, 255, 0.5)' : 'rgba(0, 122, 255, 0.18)',
+          }}
+        >
+          Préciser des dates →
+        </button>
       </div>
+
+      {mode === 'custom' ? (
+        <div style={{ display: 'flex', gap: 12 }}>
+          <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span style={labelStyle}>Date de début</span>
+            <input
+              type="date"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+              style={inputStyle}
+            />
+          </label>
+          <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span style={labelStyle}>Date de fin</span>
+            <input
+              type="date"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+              style={inputStyle}
+            />
+          </label>
+        </div>
+      ) : null}
+
+      {mode === 'quick' && start && end ? (
+        <p
+          style={{
+            fontFamily: 'var(--font-system)',
+            fontSize: 13,
+            color: 'var(--color-secondary-label)',
+            margin: 0,
+          }}
+        >
+          Du {start} au {end}.
+        </p>
+      ) : null}
 
       <footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button

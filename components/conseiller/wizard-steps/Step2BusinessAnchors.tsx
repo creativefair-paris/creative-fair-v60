@@ -36,6 +36,15 @@ export function Step2BusinessAnchors({
     onSave(all)
   }
 
+  // Sprint 37.D (F33) — bouton "Aucun événement à signaler" qui valide
+  // explicitement une période sans ancre business (le conseiller n'a
+  // alors pas d'ancre à intégrer dans le plan).
+  function handleNoAnchors() {
+    setSelected([])
+    setFree('')
+    onSave([])
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <header style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -56,6 +65,22 @@ export function Step2BusinessAnchors({
         onFreeTextChange={setFree}
         freeTextPlaceholder="Un autre événement à ajouter…"
       />
+
+      <button
+        type="button"
+        onClick={handleNoAnchors}
+        disabled={saving}
+        className="btn-choice"
+        style={{
+          alignSelf: 'flex-start',
+          padding: '10px 16px',
+          background: 'rgba(0, 0, 0, 0.04)',
+          borderColor: 'rgba(0, 0, 0, 0.08)',
+          color: 'var(--color-secondary-label)',
+        }}
+      >
+        Aucun événement à signaler
+      </button>
 
       <footer style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button type="button" onClick={onBack} className="btn-choice btn-choice-sm">
