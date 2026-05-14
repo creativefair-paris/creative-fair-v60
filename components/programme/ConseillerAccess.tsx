@@ -18,6 +18,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ConseillerSheet } from '@/components/conseiller/ConseillerSheet'
 import { ResumeChoiceSheet } from '@/components/conseiller/ResumeChoiceSheet'
 import { WizardImmersiveSheet } from '@/components/conseiller/WizardImmersiveSheet'
@@ -97,6 +98,7 @@ export function ConseillerAccess({
   businessAnchorSuggestions = [],
   marqueComplete = true,
 }: Props) {
+  const router = useRouter()
   const [phase, setPhase] = useState<Phase>({ kind: 'closed' })
   // Sprint 37.C (F26) — dialogue de friction si jalon "marque" non-atteint.
   const [jalonGuardOpen, setJalonGuardOpen] = useState(false)
@@ -120,7 +122,10 @@ export function ConseillerAccess({
       setJalonGuardOpen(true)
       return
     }
-    setPhase({ kind: 'period', followScenario: 'A1' })
+    // Sprint 37.D (F35b) — Le CTA "Créer mon plan" renvoie maintenant
+    // vers la page native /programme/create. Le wizard immersif reste
+    // accessible depuis là via "Préfère discuter avec le conseiller →".
+    router.push('/programme/create')
   }
 
   function openRegeneration() {
