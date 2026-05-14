@@ -16,8 +16,13 @@ export function BrandOnboardingHeaderCta({ hasResumable }: Props) {
   const router = useRouter()
 
   const handleClick = useCallback(() => {
-    // Le BrandOnboardingTrigger écoute `?onboarding=true` et gère
-    // automatiquement reprise vs nouvelle session.
+    // Sprint 37.F (F60a) — Double trigger pour robustesse :
+    // 1. CustomEvent qui force le BrandOnboardingTrigger à re-render
+    //    immédiatement (cas où useSearchParams n'est pas réactif).
+    // 2. URL push qui permet de partager le lien direct + back history.
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cfs-open-brand-onboarding'))
+    }
     router.push('/ma-marque?onboarding=true')
   }, [router])
 

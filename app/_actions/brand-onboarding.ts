@@ -83,7 +83,7 @@ export type CreateBrandOnboardingResult =
 export async function createBrandOnboardingSession(): Promise<CreateBrandOnboardingResult> {
   const ctx = await getCurrentTenantId()
   if (!ctx.ok) return { ok: false, reason: ctx.reason }
-  const admin = createAdmin() as unknown as SupabaseClient as unknown as SupabaseClient
+  const admin = createAdmin() as unknown as SupabaseClient
   const { data, error } = await admin
     .from('brand_onboarding_sessions')
     .insert({

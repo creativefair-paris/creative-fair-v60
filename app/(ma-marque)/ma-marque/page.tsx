@@ -171,22 +171,15 @@ export default async function MaMarquePage() {
         <div
           style={{
             width: '100%',
-            padding: '24px 0',
+            padding: '8px 0 24px 0',
             display: 'flex',
             flexDirection: 'column',
           }}
         >
-          {/* Sprint 37.D (F35a) — Bouton optionnel pour lancer l'onboarding
-              guidé (chemin assisté). La page native reste éditable directement
-              (chemin manuel). Anti-paternalisme Apple : on guide, on n'oblige pas. */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              padding: '0 var(--space-5)',
-              marginBottom: 16,
-            }}
-          >
+          {/* Sprint 37.F (F60b) — Page actions row alignée à droite, juste
+              sous le PageHeader. Visuellement proche du titre H1, aligné
+              avec la zone trailing (avatar) via le même container 1200px. */}
+          <div className="cfs-page-container" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -8, marginBottom: 16 }}>
             <BrandOnboardingHeaderCta hasResumable={resumableOnboarding !== null} />
           </div>
 

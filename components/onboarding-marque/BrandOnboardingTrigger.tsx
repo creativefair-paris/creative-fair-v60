@@ -9,6 +9,12 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+
+// Sprint 37.F (F60a) — Event-based trigger en complément du URL param.
+// Dispatché par BrandOnboardingHeaderCta au clic pour forcer le re-render
+// du trigger même si useSearchParams n'est pas réactif (cas observé en
+// production sur certains setups Vercel + force-dynamic).
+const OPEN_EVENT = 'cfs-open-brand-onboarding'
 import {
   createBrandOnboardingSession,
   getResumableBrandOnboardingSession,
@@ -29,9 +35,22 @@ export function BrandOnboardingTrigger({
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const triggered = autoOpen || searchParams?.get('onboarding') === 'true'
+  // Sprint 37.F (F60a) — état event-based en complément du URL param.
+  const [eventTriggered, setEventTriggered] = useState(false)
+  const triggered =
+    autoOpen || eventTriggered || searchParams?.get('onboarding') === 'true'
 
   const [phase, setPhase] = useState<Phase>({ kind: 'idle' })
+
+  // Sprint 37.F (F60a) — Listener CustomEvent pour ouverture programmatique.
+  useEffect(() => {
+    function handleOpen() {
+      console.info('[onboarding] event received', { phase: phase.kind })
+      setEventTriggered(true)
+    }
+    window.addEventListener(OPEN_EVENT, handleOpen)
+    return () => window.removeEventListener(OPEN_EVENT, handleOpen)
+  }, [phase.kind])
 
   const cleanUrl = useCallback(() => {
     // Retire le query param de l'URL sans recharger.
@@ -40,6 +59,7 @@ export function BrandOnboardingTrigger({
 
   const close = useCallback(() => {
     setPhase({ kind: 'idle' })
+    setEventTriggered(false)
     cleanUrl()
   }, [cleanUrl])
 
@@ -57,17 +77,21 @@ export function BrandOnboardingTrigger({
     if (!triggered || phase.kind !== 'idle') return
     let cancelled = false
     ;(async () => {
+      console.info('[onboarding] trigger fired, loading…')
       setPhase({ kind: 'loading' })
       const resumable = await getResumableBrandOnboardingSession()
       if (cancelled) return
       if (resumable) {
+        console.info('[onboarding] resumable session found', { id: resumable.id })
         setPhase({ kind: 'resume-choice', resumable })
       } else {
         const res = await createBrandOnboardingSession()
         if (cancelled) return
         if (res.ok) {
+          console.info('[onboarding] new session created', { id: res.session.id })
           setPhase({ kind: 'sheet', session: res.session })
         } else {
+          console.error('[onboarding] create_session_failed', { reason: res.reason })
           setPhase({ kind: 'idle' })
         }
       }
