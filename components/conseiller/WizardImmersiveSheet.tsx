@@ -21,7 +21,7 @@ import { Step3SensitiveTopics } from './wizard-steps/Step3SensitiveTopics'
 import { Step4Pillars } from './wizard-steps/Step4Pillars'
 import { Step5RiskCursor } from './wizard-steps/Step5RiskCursor'
 import { Step6Objectifs } from './wizard-steps/Step6Objectifs'
-import { Step6Format } from './wizard-steps/Step6Format'
+import { Step7Formats } from './wizard-steps/Step7Formats'
 import { Step7Confirmation } from './wizard-steps/Step7Confirmation'
 import {
   updateProgrammeCreationSessionStep,
@@ -30,7 +30,7 @@ import {
 import { generatePlanFromWizardSession } from '@/app/_actions/generate-plan-from-wizard'
 import {
   WIZARD_TOTAL_STEPS,
-  type DominantFormat,
+  type CanonicalFormat,
   type ObjectifEditorial,
   type RiskCursor,
   type WizardResponses,
@@ -364,8 +364,8 @@ export function WizardImmersiveSheet({
             // Sprint 37.C (F19) — Étape 5 = Objectifs éditoriaux.
             onSaveObjectifs: (objectifs) =>
               saveStep(5, '5', { objectifs_editoriaux: objectifs }),
-            // Format passe de l'index 5 à l'index 6.
-            onSaveFormat: (format) => saveStep(6, '6', { format }),
+            // Sprint 37.D (F29) — 1-3 formats canoniques en multi-select.
+            onSaveFormats: (formats) => saveStep(6, '6', { formats }),
             onGenerate: handleGenerate,
           }) : null}
         </div>
@@ -410,7 +410,7 @@ type RenderStepArgs = {
   onSavePillars: (pillars: Record<string, number>) => void
   onSaveRisk: (cursor: RiskCursor) => void
   onSaveObjectifs: (objectifs: ReadonlyArray<ObjectifEditorial>) => void
-  onSaveFormat: (format: DominantFormat) => void
+  onSaveFormats: (formats: ReadonlyArray<CanonicalFormat>) => void
   onGenerate: () => void
 }
 
@@ -475,15 +475,23 @@ function renderStep(args: RenderStepArgs) {
           saving={args.saving}
         />
       )
-    case 6:
+    case 6: {
+      // Sprint 37.D (F29) — Step7Formats. On lit 'formats' (nouveau) ou
+      // legacy 'format' single (compat IN_PROGRESS sessions ancien wizard).
+      const raw = r['6']
+      let initialFormats: ReadonlyArray<CanonicalFormat> = []
+      if (raw && 'formats' in raw && Array.isArray(raw.formats)) {
+        initialFormats = raw.formats
+      }
       return (
-        <Step6Format
-          initial={r['6']?.format ?? null}
+        <Step7Formats
+          initial={initialFormats}
           onBack={args.onBack}
-          onSave={args.onSaveFormat}
+          onSave={args.onSaveFormats}
           saving={args.saving}
         />
       )
+    }
     case 7:
       return (
         <Step7Confirmation

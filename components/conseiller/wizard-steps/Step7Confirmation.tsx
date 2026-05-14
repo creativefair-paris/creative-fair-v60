@@ -8,7 +8,7 @@
 
 import type {
   RiskCursor,
-  DominantFormat,
+  CanonicalFormat,
   WizardResponses,
 } from '@/lib/programme-creation/types'
 
@@ -17,11 +17,13 @@ const RISK_LABEL: Record<RiskCursor, string> = {
   moderate: 'Modéré',
   risky: 'Risqué',
 }
-const FORMAT_LABEL: Record<DominantFormat, string> = {
-  carousel: 'Carrousel',
-  reel: 'Reel',
-  post: 'Post unique',
-  mix: 'Mix',
+const CANONICAL_FORMAT_LABEL: Record<CanonicalFormat, string> = {
+  anecdote: 'Anecdote',
+  produit: 'Produit',
+  evenement: 'Événement',
+  coulisses: 'Coulisses',
+  manifeste: 'Manifeste',
+  question: 'Question',
 }
 
 type PilierLite = { id: string; nom: string }
@@ -48,7 +50,13 @@ export function Step7Confirmation({
   const risk = responses['4']?.risk_cursor
   // Sprint 37.C (F19) — réponse étape 5 = objectifs ; format passe à idx 6.
   const objectifs = responses['5']?.objectifs_editoriaux ?? []
-  const format = responses['6']?.format
+  // Sprint 37.D (F29) — étape 7 = 1-3 formats canoniques. Compat legacy
+  // sessions ancien wizard avec ?.format single.
+  const formatsRaw = responses['6']
+  const formats: ReadonlyArray<CanonicalFormat> =
+    formatsRaw && 'formats' in formatsRaw && Array.isArray(formatsRaw.formats)
+      ? formatsRaw.formats
+      : []
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -91,7 +99,14 @@ export function Step7Confirmation({
               : 'Aucun objectif renseigné'
           }
         />
-        <RecapRow label="Format dominant" value={format ? FORMAT_LABEL[format] : '—'} />
+        <RecapRow
+          label="Formats dominants"
+          value={
+            formats.length > 0
+              ? formats.map((f) => CANONICAL_FORMAT_LABEL[f]).join(' · ')
+              : 'Choix laissé au conseiller'
+          }
+        />
       </dl>
 
       <footer style={{ display: 'flex', justifyContent: 'space-between' }}>

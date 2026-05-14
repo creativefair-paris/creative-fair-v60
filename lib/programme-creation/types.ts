@@ -11,6 +11,20 @@ export type WizardState =
   | 'EXPIRED'
 
 export type RiskCursor = 'safe' | 'moderate' | 'risky'
+
+// Sprint 37.D (F29) — Les 6 formats canoniques de Creative Fair V1.
+// Vocabulaire EXACT (TF Communication, Hélène M.). Ce sont des intentions
+// éditoriales, pas des types structurels (qui restent carrousel/photo/reel
+// gérés dans posts.structure_type).
+export type CanonicalFormat =
+  | 'anecdote'
+  | 'produit'
+  | 'evenement'
+  | 'coulisses'
+  | 'manifeste'
+  | 'question'
+
+// Legacy type retained for backwards compat. À retirer Sprint 38+.
 export type DominantFormat = 'carousel' | 'reel' | 'post' | 'mix'
 
 // Sprint 37.C (F19) — type des objectifs éditoriaux (multi-select 1-2).
@@ -30,7 +44,10 @@ export type WizardResponses = {
   '4'?: { risk_cursor: RiskCursor }
   // Sprint 37.C (F19) — nouvelle étape Objectifs éditoriaux.
   '5'?: { objectifs_editoriaux: ReadonlyArray<ObjectifEditorial> }
-  '6'?: { format: DominantFormat }
+  // Sprint 37.D (F29) — l'étape 7 (idx 6) prend désormais 1 à 3 formats
+  // canoniques en multi-select. Le legacy "format: DominantFormat" reste
+  // accepté en lecture pour les sessions anciennes (compat IN_PROGRESS).
+  '6'?: { formats: ReadonlyArray<CanonicalFormat> } | { format: DominantFormat }
 }
 
 export type WizardSessionRow = {

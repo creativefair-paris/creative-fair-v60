@@ -82,11 +82,17 @@ export function buildWizardPlanUserPrompt(opts: {
   const pillarsWeights = r['3']?.pillars ?? {}
   const risk = r['4']?.risk_cursor ?? 'moderate'
   const objectifs = r['5']?.objectifs_editoriaux ?? []
-  const format = r['6']?.format ?? null
 
-  // Formats privilégiés : si le pilote a coché 1-3 formats (F29 multi-select)
-  // on les transmet, sinon on laisse le format dominant historique.
-  const formatsLine = format ? `Format dominant souhaité : ${format}.` : ''
+  // Sprint 37.D (F29) — étape 7 = 1-3 formats canoniques. Compat legacy
+  // sessions ancien wizard avec ?.format single.
+  const formatsRaw = r['6']
+  const canonicalFormats: ReadonlyArray<string> =
+    formatsRaw && 'formats' in formatsRaw && Array.isArray(formatsRaw.formats)
+      ? formatsRaw.formats
+      : []
+  const formatsLine = canonicalFormats.length > 0
+    ? `Formats canoniques à privilégier (1-3) : ${canonicalFormats.join(', ')}.`
+    : ''
 
   const pillarsLines = opts.pillarsCatalog.map((p) => {
     const weight = pillarsWeights[p.id]
