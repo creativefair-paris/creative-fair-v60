@@ -32,6 +32,7 @@ import {
   type ReactNode,
 } from 'react'
 import { ConseillerBubble, ConseillerBubblesFromText } from './ConseillerBubble'
+import { QuickMetricsRow } from './QuickMetricsRow'
 import { PiloteBubble } from './PiloteBubble'
 import { StreamingReasoning, type ReasoningStep } from './StreamingReasoning'
 import { WaitingState } from './WaitingState'
@@ -527,6 +528,12 @@ export function ConseillerSheet({
             </ConseillerBubble>
           ) : null}
         </div>
+
+        {/* Sprint 37.G (F38) — Wiring MetricSlider dans le scénario A8.
+            Affiché entre le body et le footer textarea uniquement pour A8. */}
+        {scenarioType === 'A8' && !isTerminal(state) ? (
+          <QuickMetricsRow onSubmit={(message) => handleSubmit(message)} />
+        ) : null}
 
         {/* Footer — input texte. Bouton envoyer style dynamique
             (transparent/bleu) selon présence de texte (token Apple-grade). */}
