@@ -8,12 +8,12 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
-import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
 import { PlanPreview } from '@/components/programme/PlanPreview'
 import { NewPlanPedagogyOverlay } from '@/components/programme/NewPlanPedagogyOverlay'
 import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
+import { ProgrammeCalendarView } from '@/components/programme/ProgrammeCalendarView'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
 import { checkJalonStatus } from '@/lib/jalons/check-jalons'
 import type { BusinessCalendar } from '@/types/business-calendar'
@@ -38,6 +38,8 @@ type ProgrammeRow = {
   arc_narratif: unknown
   // Sprint 37 Lot 4 : fin du programme pour calcul bannière régénération.
   date_fin?: string | null
+  // Sprint 37.F (F48) : début de période pour affichage calendrier.
+  date_debut?: string | null
 }
 
 type ProgrammePageProps = {
@@ -96,7 +98,7 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
   // Programme actif le plus récent
   const { data: rawProgramme } = await supabase
     .from('programmes')
-    .select('id, arc_narratif, date_fin')
+    .select('id, arc_narratif, date_debut, date_fin')
     .eq('tenant_id', tenantId)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
@@ -171,7 +173,9 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
     const { data: rawPosts } = await supabase
       .from('posts')
       .select(
-        'id, programme_id, tenant_id, brand_id, pilier_nom, jour, date_prevue, heure_prevue, titre, angle, type_contenu, statut, contenu_genere, created_at, updated_at',
+        // Sprint 37.F (F48) — ajout format/structure_type/objectif_editorial
+        // pour la vue Calendrier (Sprint 37.D F34 colonnes posts).
+        'id, programme_id, tenant_id, brand_id, pilier_nom, jour, date_prevue, heure_prevue, titre, angle, type_contenu, statut, contenu_genere, created_at, updated_at, format, structure_type, objectif_editorial',
       )
       .eq('programme_id', programme.id)
       .order('date_prevue', { ascending: true })
@@ -252,11 +256,23 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
           />
 
           {hasProgramme ? (
-            <ProgrammeDashboard
-              posts={posts}
-              piliers={piliers}
-              arcNarratif={arcNarratif}
-              brandBook={brandBook}
+            // Sprint 37.F (F48) — Vue Calendrier interactive avec mini chat.
+            // Remplace ProgrammeDashboard (l'ancien dashboard reste disponible
+            // pour rétro-compat depuis ProgrammeCreateForm — pas utilisé V1).
+            <ProgrammeCalendarView
+              posts={posts as unknown as Array<{
+                id: string
+                date_prevue: string | null
+                format: string | null
+                structure_type: string | null
+                pilier_nom: string | null
+                objectif_editorial: string | null
+                angle: string | null
+                titre: string | null
+                statut: string | null
+              }>}
+              programmeDateDebut={programme?.date_debut ?? null}
+              programmeDateFin={programme?.date_fin ?? null}
             />
           ) : (
             <section
