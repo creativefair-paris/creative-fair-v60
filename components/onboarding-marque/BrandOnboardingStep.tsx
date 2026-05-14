@@ -28,6 +28,7 @@ export function BrandOnboardingStep(props: StepProps) {
   const { stepIndex } = props
   const r = props.responses
 
+  // Sprint 37.E (F59) — Wizard ramené à 4 étapes critiques.
   switch (stepIndex) {
     case 0:
       return (
@@ -41,140 +42,31 @@ export function BrandOnboardingStep(props: StepProps) {
       return (
         <SingleTextArea
           {...props}
-          title="Comment décrirais-tu ton positionnement ?"
-          desc="Ce qui distingue ta marque sur ton marché. En 3-4 phrases."
-          placeholder="Ex. Une marque de joaillerie héritière qui revisite les pièces signature avec une mineure place faite à la main, pour une clientèle qui a déjà tout."
-          initial={r['1']?.positionnement ?? ''}
+          title="Qui est ton audience cible principale ?"
+          desc="Profil sociologique, attentes, comportements. Sois précis."
+          placeholder="Ex. Femmes 35-55, CSP+, déjà clientes joaillerie haute, attachées à la matière brute, lectrices Le Monde M Magazine."
+          initial={r['1']?.audience_principale ?? ''}
           responseKey="1"
-          fieldKey="positionnement"
+          fieldKey="audience_principale"
         />
       )
     case 2:
       return (
-        <SingleTextArea
-          {...props}
-          title="Quelle est ta promesse unique ?"
-          desc="Une phrase courte. Ce que tu rends possible que personne d'autre ne fait."
-          placeholder="Ex. Chaque bijou que tu portes vient avec son histoire documentée."
-          initial={r['2']?.promesse ?? ''}
+        <Step5Piliers
+          initial={r['2']?.piliers ?? []}
           responseKey="2"
-          fieldKey="promesse"
+          {...props}
         />
       )
     case 3:
       return (
-        <SingleTextArea
-          {...props}
-          title="Qui est ton audience cible principale ?"
-          desc="Profil sociologique, attentes, comportements. Sois précis."
-          placeholder="Ex. Femmes 35-55, CSP+, déjà clientes joaillerie haute, attachées à la matière brute, lectrices Le Monde M Magazine."
-          initial={r['3']?.audience_principale ?? ''}
-          responseKey="3"
-          fieldKey="audience_principale"
-        />
-      )
-    case 4:
-      return (
-        <SingleTextArea
-          {...props}
-          title="Et ton audience secondaire ?"
-          desc="Optionnel. Une cible adjacente que tu touches aussi."
-          placeholder="Ex. Galeristes et acheteurs presse, qui relaient sans acheter."
-          initial={r['4']?.audience_secondaire ?? ''}
-          responseKey="4"
-          fieldKey="audience_secondaire"
-          allowSkip
-        />
-      )
-    case 5:
-      return (
-        <Step5Piliers
-          initial={r['5']?.piliers ?? []}
-          {...props}
-        />
-      )
-    case 6:
-      return (
         <Step6Ton
-          initialAdjectifs={r['6']?.ton_adjectifs ?? []}
-          initialTexte={r['6']?.ton_texte ?? ''}
+          initialAdjectifs={r['3']?.ton_adjectifs ?? []}
+          initialTexte={r['3']?.ton_texte ?? ''}
+          responseKey="3"
           {...props}
         />
       )
-    case 7:
-      return (
-        <TagsList
-          {...props}
-          title="Quel vocabulaire veux-tu privilégier ?"
-          desc="Mots, expressions, tournures qui signent ta voix."
-          placeholder="Ex. matière brute, atelier, signature, héritage"
-          initial={r['7']?.vocabulaire_privilegier ?? []}
-          responseKey="7"
-          fieldKey="vocabulaire_privilegier"
-        />
-      )
-    case 8:
-      return (
-        <TagsList
-          {...props}
-          title="Quel vocabulaire veux-tu éviter ?"
-          desc="Mots interdits dans tes contenus. Précis."
-          placeholder="Ex. dispo, hyper, super, génial, KPI"
-          initial={r['8']?.vocabulaire_eviter ?? []}
-          responseKey="8"
-          fieldKey="vocabulaire_eviter"
-        />
-      )
-    case 9:
-      return (
-        <TagsList
-          {...props}
-          title="Tes références culturelles ?"
-          desc="Marques, personnes, lieux qui t'inspirent."
-          placeholder="Ex. Hermès Métiers, Aman Resorts, Veja, BnF Gallica"
-          initial={r['9']?.references ?? []}
-          responseKey="9"
-          fieldKey="references"
-        />
-      )
-    case 10:
-      return (
-        <SingleTextArea
-          {...props}
-          title="Ton style visuel ?"
-          desc="Comment ta marque doit ressembler en image. Matières, lumière, cadrage."
-          placeholder="Ex. Lumière naturelle latérale, fonds neutres pierre, matière texture appuyée, jamais de fond blanc studio."
-          initial={r['10']?.style_visuel ?? ''}
-          responseKey="10"
-          fieldKey="style_visuel"
-        />
-      )
-    case 11:
-      return (
-        <TagsList
-          {...props}
-          title="Sources d'images autorisées ?"
-          desc="Banques d'images et archives que tu utilises."
-          placeholder="Ex. BnF Gallica, Getty Open, archives marque, Unsplash"
-          initial={r['11']?.sources_autorisees ?? []}
-          responseKey="11"
-          fieldKey="sources_autorisees"
-        />
-      )
-    case 12:
-      return (
-        <TagsList
-          {...props}
-          title="Sources d'images interdites ?"
-          desc="Banques d'images à éviter."
-          placeholder="Ex. Pinterest, stock photos basiques"
-          initial={r['12']?.sources_interdites ?? []}
-          responseKey="12"
-          fieldKey="sources_interdites"
-        />
-      )
-    case 13:
-      return <Step13Chiffres {...props} />
     default:
       return null
   }
@@ -346,6 +238,7 @@ function TagsList(props: StepProps & {
 
 function Step5Piliers(props: StepProps & {
   initial: ReadonlyArray<{ nom: string; description?: string }>
+  responseKey: string
 }) {
   const [piliers, setPiliers] = useState<ReadonlyArray<{ nom: string; description?: string }>>(
     props.initial.length > 0 ? props.initial : [{ nom: '' }, { nom: '' }, { nom: '' }],
@@ -364,7 +257,8 @@ function Step5Piliers(props: StepProps & {
       onBack={props.onBack}
       onNext={() => {
         const cleaned = piliers.filter((p) => p.nom.trim().length > 0)
-        props.onSave(5, '5', { piliers: cleaned })
+        const idx = parseInt(props.responseKey, 10)
+        props.onSave(idx, props.responseKey, { piliers: cleaned })
       }}
       onComplete={props.isLastStep ? props.onComplete : null}
       saving={props.saving}
@@ -423,6 +317,7 @@ const TON_ADJECTIFS_OPTIONS = [
 function Step6Ton(props: StepProps & {
   initialAdjectifs: ReadonlyArray<string>
   initialTexte: string
+  responseKey: string
 }) {
   const [adjectifs, setAdjectifs] = useState<ReadonlyArray<string>>(props.initialAdjectifs)
   const [texte, setTexte] = useState(props.initialTexte)
@@ -437,7 +332,10 @@ function Step6Ton(props: StepProps & {
       title="Quel est ton ton de voix ?"
       desc="Coche jusqu'à 3 adjectifs + décris en 1-2 phrases comment ta marque parle."
       onBack={props.onBack}
-      onNext={() => props.onSave(6, '6', { ton_adjectifs: adjectifs, ton_texte: texte })}
+      onNext={() => {
+        const idx = parseInt(props.responseKey, 10)
+        props.onSave(idx, props.responseKey, { ton_adjectifs: adjectifs, ton_texte: texte })
+      }}
       onComplete={props.isLastStep ? props.onComplete : null}
       saving={props.saving}
       canContinue={adjectifs.length > 0 || texte.trim().length > 0}

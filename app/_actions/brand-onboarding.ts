@@ -194,27 +194,23 @@ export async function completeBrandOnboarding(input: {
 
   const responses = ((existing as { responses?: BrandOnboardingResponses } | null)?.responses ?? {}) as BrandOnboardingResponses
 
-  // Mapping responses → colonnes brands. Tous les champs sont optionnels :
-  // la session peut être complétée même si toutes les étapes ne sont pas
-  // remplies (mode "partiel-completable" évoqué dans la spec F18).
+  // Sprint 37.E (F59) — Mapping wizard 4 étapes → colonnes brands :
+  //   step 0 : identité (nom + description_courte)
+  //   step 1 : audience cible principale (stocké brand_book Sprint 38+)
+  //   step 2 : piliers narratifs (3 piliers)
+  //   step 3 : ton de voix (adjectifs + texte libre)
   const updates: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   }
-  if (responses['0']) {
+  if (responses['0']?.nom) {
     updates.nom = responses['0'].nom
-    // description_courte n'est pas une colonne dédiée → stockée dans
-    // brand_book.identite via le flux existant. V1 : juste le nom.
   }
-  if (responses['1']?.positionnement) updates.singularite = responses['1'].positionnement
-  // promesse (step 2) : pas de colonne dédiée V1 → ignored, sera ajouté
-  // dans une migration ultérieure si besoin.
-  if (responses['3']?.audience_principale) {
-    // pas de colonne dédiée → stocké en JSONB côté brand_book (Sprint 38)
+  if (responses['2']?.piliers && responses['2'].piliers.length > 0) {
+    updates.piliers_narratifs = responses['2'].piliers
   }
-  if (responses['5']?.piliers && responses['5'].piliers.length > 0) {
-    updates.piliers_narratifs = responses['5'].piliers
+  if (responses['3']?.ton_texte) {
+    updates.ton = responses['3'].ton_texte
   }
-  if (responses['6']?.ton_texte) updates.ton = responses['6'].ton_texte
 
   if (Object.keys(updates).length > 1) {
     await admin
