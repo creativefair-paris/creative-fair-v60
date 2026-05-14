@@ -19,6 +19,7 @@ import { Step1Period } from './wizard-steps/Step1Period'
 import { Step2BusinessAnchors } from './wizard-steps/Step2BusinessAnchors'
 import { Step3SensitiveTopics } from './wizard-steps/Step3SensitiveTopics'
 import { Step2MixMode } from './wizard-steps/Step2MixMode'
+import { Step5DefinirPiliers } from './wizard-steps/Step5DefinirPiliers'
 import { Step5RythmeEngagement } from './wizard-steps/Step5RythmeEngagement'
 import { Step6ObjectifsCombined } from './wizard-steps/Step6ObjectifsCombined'
 import { Step7Formats } from './wizard-steps/Step7Formats'
@@ -80,6 +81,15 @@ export function WizardImmersiveSheet({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  // Sprint 37.F (F46) — Auto-skip de l'étape 4 (Définir piliers conditionnel)
+  // si les piliers de la marque sont déjà posés. Le wizard saute directement
+  // à l'étape 5 (Rythme + Engagement).
+  useEffect(() => {
+    if (session.current_step === 4 && pillarsCatalog.length > 0) {
+      setSession((s) => ({ ...s, current_step: 5 }))
+    }
+  }, [session.current_step, pillarsCatalog.length])
 
   const goBack = useCallback(() => {
     setSession((s) => ({ ...s, current_step: Math.max(0, s.current_step - 1) }))
@@ -376,8 +386,13 @@ export function WizardImmersiveSheet({
             onSaveMixMode: (mix_mode) => saveStep(1, '1', { mix_mode }),
             onSaveAnchors: (anchors) => saveStep(2, '2', { business_anchors: anchors }),
             onSaveSensitive: (topics) => saveStep(3, '3', { sensitive_topics: topics }),
-            // L'étape 4 (Définir piliers, F46 conditionnel) est skip V1 — le
-            // wizard saute directement à l'étape 5 si piliers déjà posés.
+            // Sprint 37.F (F46) — Étape 4 conditionnelle Définir piliers.
+            onSaveDefinirPiliers: (piliers) =>
+              saveStep(4, '4', {
+                piliers_definis: piliers.map((nom, i) => ({ id: `pilier-${i}`, nom })),
+              }),
+            onSkipDefinirPiliers: () =>
+              saveStep(4, '4', { piliers_definis: [], skipped: true }),
             onSaveRythme: (params) => saveStep(5, '5', params),
             onSaveObjectifsCombined: (params) => saveStep(6, '6', params),
             onSaveFormats: (formats) => saveStep(7, '7', { formats }),
@@ -423,6 +438,8 @@ type RenderStepArgs = {
   onSaveMixMode: (mode: MixMode) => void
   onSaveAnchors: (anchors: string[]) => void
   onSaveSensitive: (topics: string) => void
+  onSaveDefinirPiliers: (piliers: ReadonlyArray<string>) => void
+  onSkipDefinirPiliers: () => void
   onSaveRythme: (params: { cadence: Cadence; engagement: EngagementLevel }) => void
   onSaveObjectifsCombined: (params: { objectif_editorial?: ObjectifEditorial; objectif_business?: ObjectifBusiness }) => void
   onSaveFormats: (formats: ReadonlyArray<CanonicalFormat>) => void
@@ -472,11 +489,25 @@ function renderStep(args: RenderStepArgs) {
           saving={args.saving}
         />
       )
-    case 4:
-      // Sprint 37.E F46 conditionnel — skip V1 (sera ajouté Sprint 37.F).
-      // L'index 4 est réservé pour cette étape, le wizard saute directement
-      // à l'index 5 (Rythme+Engagement) en pratique.
-      return null
+    case 4: {
+      // Sprint 37.F (F46) — Étape conditionnelle Définir tes piliers.
+      // Affichée uniquement si les piliers de la marque sont vides.
+      const pillarsEmpty = args.pillarsCatalog.length === 0
+      if (!pillarsEmpty) {
+        // Auto-skip : passe à l'étape suivante au mount.
+        return null
+      }
+      const existingPiliers = args.session.responses['4']?.piliers_definis ?? []
+      return (
+        <Step5DefinirPiliers
+          initial={existingPiliers.map((p) => p.nom)}
+          onBack={args.onBack}
+          onSave={args.onSaveDefinirPiliers}
+          onSkip={args.onSkipDefinirPiliers}
+          saving={args.saving}
+        />
+      )
+    }
     case 5:
       return (
         <Step5RythmeEngagement
