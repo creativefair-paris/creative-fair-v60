@@ -5,7 +5,7 @@
 // pour rendre ce composant au lieu de l'OutilPreview générique.
 
 import { ToolMockup } from '../ToolMockup'
-import { FormatCard } from '../post-creator/FormatCard'
+import { FormatCardApple } from '../post-creator/FormatCardApple'
 
 export function PostCreatorHubPreview() {
   return (
@@ -52,25 +52,25 @@ export function PostCreatorHubPreview() {
           <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <h3 style={sectionLabelStyle}>Supportés</h3>
             <div className="cfs-format-cards-grid">
-              <FormatCard
+              <FormatCardApple
                 format="anecdote"
                 label="Anecdote"
                 href="/outils/post-creator/anecdote"
                 description="Raconter une histoire qui sert un pilier."
               />
-              <FormatCard
+              <FormatCardApple
                 format="produit"
                 label="Produit"
                 href="/outils/post-creator/produit"
                 description="Mettre en avant une création avec son histoire."
               />
-              <FormatCard
+              <FormatCardApple
                 format="evenement"
                 label="Événement"
                 href="/outils/post-creator/evenement"
                 description="Annoncer une date qui compte."
               />
-              <FormatCard
+              <FormatCardApple
                 format="manifeste"
                 label="Manifeste"
                 href="/outils/post-creator/manifeste"
@@ -82,13 +82,13 @@ export function PostCreatorHubPreview() {
           <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <h3 style={sectionLabelStyle}>À venir</h3>
             <div className="cfs-format-cards-grid">
-              <FormatCard
+              <FormatCardApple
                 format="question"
                 label="Question"
                 disabled
                 description="Faire réagir la communauté."
               />
-              <FormatCard
+              <FormatCardApple
                 format="coulisses"
                 label="Coulisses"
                 disabled
