@@ -155,55 +155,135 @@ const FORMAT_PREVIEWS: ReadonlyArray<{ label: string; color: string; desc: strin
   { label: 'Coulisses', color: '#AF52DE', desc: 'Reel 20s' },
 ]
 
+// Sprint 37.H (F71) — Mockup Post Creator = preview Instagram iOS.
+// Remplace les cards de format empilées Sprint 37.D F28. Format vertical
+// 280×400 environ avec header brand, image carrée stylisée, row icons
+// like/comment/share/bookmark, caption courte avec timestamp.
 function PostCreatorMockup() {
   return (
-    <MockupShell>
-      <p
+    <div
+      aria-hidden="true"
+      style={{
+        width: '100%',
+        maxWidth: 280,
+        background: '#FFFFFF',
+        borderRadius: 16,
+        overflow: 'hidden',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+        fontFamily: '-apple-system, BlinkMacSystemFont, system-ui',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* Header Instagram : avatar + nom + bouton more */}
+      <header
         style={{
-          margin: '0 0 10px 0',
-          fontFamily: 'var(--font-system)',
-          fontSize: 11,
-          fontWeight: 600,
-          color: 'var(--color-tertiary-label)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px 12px',
+          gap: 10,
+          borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
         }}
       >
-        Choisis un format
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {FORMAT_PREVIEWS.map((f) => (
-          <div
-            key={f.label}
-            style={{
-              padding: '8px 10px',
-              borderRadius: 8,
-              border: '1px solid rgba(0, 0, 0, 0.06)',
-              background: 'rgba(255, 255, 255, 0.6)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <span
-              style={{
-                padding: '2px 8px',
-                borderRadius: 4,
-                fontSize: 9,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: '#FFFFFF',
-                background: f.color,
-              }}
-            >
-              {f.label}
-            </span>
-            <span style={{ fontSize: 11, color: 'var(--color-secondary-label)' }}>{f.desc}</span>
-          </div>
-        ))}
+        <div
+          style={{
+            width: 26,
+            height: 26,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #FFAA5A, #AF52DE)',
+            flexShrink: 0,
+          }}
+        />
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: '#000000',
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          tamarque.paris
+        </span>
+        <span
+          style={{
+            fontSize: 14,
+            color: 'rgba(0, 0, 0, 0.5)',
+            letterSpacing: 1,
+          }}
+        >
+          ⋯
+        </span>
+      </header>
+
+      {/* Image carrée stylisée (dégradé subtle pour évoquer un visuel) */}
+      <div
+        style={{
+          aspectRatio: '1 / 1',
+          background:
+            'linear-gradient(135deg, rgba(251, 250, 247, 1) 0%, rgba(0, 122, 255, 0.12) 100%)',
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: '50% 50%',
+            transform: 'translate(-50%, -50%)',
+            width: 56,
+            height: 56,
+            borderRadius: 12,
+            background: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(0, 0, 0, 0.05)',
+          }}
+        />
       </div>
-    </MockupShell>
+
+      {/* Row icons like / comment / share / bookmark */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px 12px 4px',
+          gap: 14,
+          fontSize: 18,
+          color: '#000',
+        }}
+      >
+        <span aria-hidden="true">♡</span>
+        <span aria-hidden="true">💬</span>
+        <span aria-hidden="true">📤</span>
+        <span aria-hidden="true" style={{ marginLeft: 'auto' }}>🔖</span>
+      </div>
+
+      {/* Caption Instagram */}
+      <div style={{ padding: '4px 12px 12px', color: '#000' }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 12,
+            lineHeight: 1.4,
+          }}
+        >
+          <span style={{ fontWeight: 600, marginRight: 5 }}>tamarque.paris</span>
+          <span>L&apos;histoire derrière ta création préférée…</span>
+        </p>
+        <p
+          style={{
+            margin: '4px 0 0',
+            fontSize: 10,
+            color: 'rgba(0, 0, 0, 0.4)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+          }}
+        >
+          Il y a 2 h
+        </p>
+      </div>
+    </div>
   )
 }
 
