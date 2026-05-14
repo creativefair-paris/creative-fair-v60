@@ -43,14 +43,16 @@ export function BrandOnboardingTrigger({
   const [phase, setPhase] = useState<Phase>({ kind: 'idle' })
 
   // Sprint 37.F (F60a) — Listener CustomEvent pour ouverture programmatique.
+  // Sprint 37.G (F67) — deps vidées (mount-only). Évite remove/re-add à chaque
+  // changement de phase qui pouvait manquer des events pendant la transition.
   useEffect(() => {
     function handleOpen() {
-      console.info('[onboarding] event received', { phase: phase.kind })
+      console.info('[onboarding] event received')
       setEventTriggered(true)
     }
     window.addEventListener(OPEN_EVENT, handleOpen)
     return () => window.removeEventListener(OPEN_EVENT, handleOpen)
-  }, [phase.kind])
+  }, [])
 
   const cleanUrl = useCallback(() => {
     // Retire le query param de l'URL sans recharger.
@@ -73,33 +75,58 @@ export function BrandOnboardingTrigger({
     }
   }, [])
 
+  // Sprint 37.G (F67) — Cause exacte du blocage en 'loading' identifiée :
+  // l'effet listait `phase.kind` dans ses deps. Quand on appelait
+  // `setPhase('loading')` au début de l'IIFE async, le phase changeait,
+  // les deps changeaient, React appelait le cleanup de l'effet précédent
+  // (cancelled = true). L'IIFE async terminait, voyait cancelled === true,
+  // et n'appelait jamais setPhase('sheet'). Phase restait bloqué en
+  // 'loading' pour toujours.
+  //
+  // Fix : retirer phase.kind des deps. Le guard `phase.kind !== 'idle'`
+  // au début (lu via closure) suffit à empêcher la double-exécution.
+  // L'effet ne se re-fire QUE quand `triggered` change → cleanup unique
+  // au moment du démontage → cancelled reste false jusqu'au bout de l'IIFE.
   useEffect(() => {
     if (!triggered || phase.kind !== 'idle') return
     let cancelled = false
     ;(async () => {
       console.info('[onboarding] trigger fired, loading…')
       setPhase({ kind: 'loading' })
+
+      console.info('[onboarding] before_resumable')
       const resumable = await getResumableBrandOnboardingSession()
-      if (cancelled) return
+      console.info('[onboarding] server_returned', { resumable: !!resumable })
+      if (cancelled) {
+        console.warn('[onboarding] cancelled after resumable check')
+        return
+      }
+
       if (resumable) {
-        console.info('[onboarding] resumable session found', { id: resumable.id })
+        console.info('[onboarding] phase_set_to_resume', { id: resumable.id })
         setPhase({ kind: 'resume-choice', resumable })
+        return
+      }
+
+      console.info('[onboarding] before_create')
+      const res = await createBrandOnboardingSession()
+      if (cancelled) {
+        console.warn('[onboarding] cancelled after create')
+        return
+      }
+      if (res.ok) {
+        console.info('[onboarding] phase_set_to_sheet', { id: res.session.id })
+        setPhase({ kind: 'sheet', session: res.session })
       } else {
-        const res = await createBrandOnboardingSession()
-        if (cancelled) return
-        if (res.ok) {
-          console.info('[onboarding] new session created', { id: res.session.id })
-          setPhase({ kind: 'sheet', session: res.session })
-        } else {
-          console.error('[onboarding] create_session_failed', { reason: res.reason })
-          setPhase({ kind: 'idle' })
-        }
+        console.error('[onboarding] create_session_failed', { reason: res.reason })
+        setPhase({ kind: 'idle' })
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [triggered, phase.kind])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggered])
 
   if (phase.kind === 'sheet') {
     return <BrandOnboardingSheet session={phase.session} onClose={close} />
