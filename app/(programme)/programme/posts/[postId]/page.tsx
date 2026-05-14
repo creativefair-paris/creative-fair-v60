@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SplitBrief } from '@/components/layouts/SplitBrief'
 import { PostEditor } from '@/components/programme/PostEditor'
+import { PostMiniChat } from '@/components/programme/PostMiniChat'
 
 export const dynamic = 'force-dynamic'
 
@@ -214,16 +215,21 @@ export default async function PostDetailPage({ params }: PageProps) {
               </aside>
             }
             rightColumn={
-              <article
-                style={{
-                  padding: '24px 26px',
-                  borderRadius: 14,
-                  background: 'rgba(255, 255, 255, 0.6)',
-                  border: '1px solid rgba(0, 0, 0, 0.06)',
-                }}
-              >
-                <PostEditor post={post} pillarsCatalog={pillarsCatalog} />
-              </article>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <article
+                  style={{
+                    padding: '24px 26px',
+                    borderRadius: 14,
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                  }}
+                >
+                  <PostEditor post={post} pillarsCatalog={pillarsCatalog} />
+                </article>
+                {/* Sprint 37.H (F69) — Mini chat déplacé depuis le Calendrier
+                    (Sprint 37.F F48). 3 tours max → bascule scénario B2. */}
+                <PostMiniChat postId={post.id} />
+              </div>
             }
           />
         </div>

@@ -7,9 +7,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { askMiniChat } from '@/app/_actions/ask-mini-chat'
 import {
   CalendarViewSwitcher,
   type CalendarViewKind,
@@ -49,10 +47,6 @@ const FORMAT_LABEL: Record<string, string> = {
   manifeste: 'Manifeste',
   question: 'Question',
 }
-
-type ChatMessage = { role: 'user' | 'conseiller'; content: string }
-
-const MAX_CHAT_TURNS = 3
 
 function startOfWeek(date: Date): Date {
   const d = new Date(date)
@@ -124,381 +118,100 @@ export function ProgrammeCalendarView({
     }
   }
 
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(
-    posts[0]?.id ?? null,
-  )
-  const selectedPost = useMemo(
-    () => posts.find((p) => p.id === selectedPostId) ?? null,
-    [posts, selectedPostId],
-  )
-
-  const [chatMessages, setChatMessages] = useState<ReadonlyArray<ChatMessage>>([])
-  const [chatInput, setChatInput] = useState('')
-  const [asking, setAsking] = useState(false)
-  const [chatError, setChatError] = useState<string | null>(null)
-
+  // Sprint 37.H (F69) — Plus de state selectedPostId / chatMessages.
+  // Le clic sur un post navigue directement vers /programme/posts/[postId].
+  // Le mini chat (composant PostMiniChat) a été déplacé dans la fiche post.
   function selectPost(p: PostRow) {
-    setSelectedPostId(p.id)
-    setChatMessages([])
-    setChatInput('')
-    setChatError(null)
-  }
-
-  const userTurns = chatMessages.filter((m) => m.role === 'user').length
-  const chatExhausted = userTurns >= MAX_CHAT_TURNS
-
-  async function handleAsk() {
-    if (!selectedPost || !chatInput.trim() || asking) return
-    if (chatExhausted) {
-      router.push(`/outils/conseiller?scenario=B2&post_id=${selectedPost.id}`)
-      return
-    }
-    const question = chatInput.trim()
-    const nextMsgs: ChatMessage[] = [
-      ...chatMessages,
-      { role: 'user', content: question },
-    ]
-    setChatMessages(nextMsgs)
-    setChatInput('')
-    setAsking(true)
-    setChatError(null)
-    try {
-      const res = await askMiniChat(selectedPost.id, question)
-      if (res.ok) {
-        setChatMessages([...nextMsgs, { role: 'conseiller', content: res.text }])
-      } else {
-        setChatError(res.reason)
-      }
-    } catch (err) {
-      setChatError(err instanceof Error ? err.message : 'Erreur inconnue')
-    } finally {
-      setAsking(false)
-    }
+    router.push(`/programme/posts/${p.id}`)
   }
 
   return (
     <div className="cfs-calendar-view">
-      <header style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <h2
-            style={{
-              fontFamily: 'var(--font-system)',
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: '-0.015em',
-              color: 'var(--color-label)',
-              margin: 0,
-            }}
-          >
-            Calendrier
-          </h2>
-          {programmeDateDebut && programmeDateFin ? (
-            <p style={{ margin: 0, fontSize: 14, color: 'var(--color-secondary-label)' }}>
-              Du {formatShortFr(programmeDateDebut)} au {formatShortFr(programmeDateFin)} ·{' '}
-              {posts.length} {posts.length === 1 ? 'post' : 'posts'}
-            </p>
-          ) : null}
-        </div>
-        {/* Sprint 37.G (F64) — Toggle 3 vues. */}
+      {/* Sprint 37.H (F70) — Titre 'Calendrier' + sous-titre période retirés
+          (redondants : breadcrumb + toggle suffisent comme repères). */}
+      <header style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
         <CalendarViewSwitcher active={viewKind} onChange={changeView} />
       </header>
 
-      <div className="cfs-calendar-grid">
-        <aside className="cfs-calendar-list">
-          {viewKind === 'month' ? (
-            <MonthGrid posts={posts} selectedPostId={selectedPostId} onSelect={selectPost} />
-          ) : viewKind === 'list' ? (
-            <FlatList posts={posts} selectedPostId={selectedPostId} onSelect={selectPost} />
-          ) : weeks.length === 0 ? (
-            <p style={{ padding: '24px 16px', fontSize: 13, color: 'var(--color-secondary-label)', margin: 0 }}>
-              Aucun post planifié.
-            </p>
-          ) : (
-            weeks.map((w) => (
+      {/* Sprint 37.H (F69) — Calendrier plein écran, plus de sous-split.
+          Le clic sur un post navigue vers /programme/posts/[postId] (fiche post). */}
+      <div className="cfs-calendar-full">
+        {viewKind === 'month' ? (
+          <MonthGrid posts={posts} onSelect={selectPost} />
+        ) : viewKind === 'list' ? (
+          <FlatList posts={posts} onSelect={selectPost} />
+        ) : weeks.length === 0 ? (
+          <p style={{ padding: '24px 16px', fontSize: 13, color: 'var(--color-secondary-label)', margin: 0 }}>
+            Aucun post planifié.
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            {weeks.map((w) => (
               <section key={w.startIso}>
                 <h3 className="cfs-calendar-week-label">
                   Semaine du {formatShortFr(w.startIso)}
                 </h3>
-                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {w.posts.map((p) => {
-                    const isSel = p.id === selectedPostId
-                    return (
-                      <li key={p.id}>
-                        <button
-                          type="button"
-                          onClick={() => selectPost(p)}
-                          aria-current={isSel ? 'true' : undefined}
-                          className={`cfs-calendar-day-btn${isSel ? ' is-selected' : ''}`}
-                        >
-                          <span
-                            aria-hidden="true"
-                            style={{
-                              flexShrink: 0,
-                              width: 8,
-                              height: 8,
-                              borderRadius: 4,
-                              background: p.format ? FORMAT_COLOR[p.format] ?? '#8E8E93' : '#D1D1D6',
-                              marginTop: 6,
-                            }}
-                          />
-                          <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <span style={{ fontSize: 12, color: 'var(--color-tertiary-label)' }}>
-                              {p.date_prevue ? formatShortFr(p.date_prevue) : '—'}
-                              {p.format ? ` · ${FORMAT_LABEL[p.format] ?? p.format}` : ''}
-                            </span>
-                            <span
-                              style={{
-                                fontFamily: 'var(--font-system)',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                color: 'var(--color-label)',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                display: '-webkit-box',
-                                WebkitBoxOrient: 'vertical',
-                                WebkitLineClamp: 2,
-                              }}
-                            >
-                              {p.objectif_editorial ?? p.titre ?? 'Post sans titre'}
-                            </span>
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {w.posts.map((p) => (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        onClick={() => selectPost(p)}
+                        className="cfs-calendar-day-btn"
+                      >
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            flexShrink: 0,
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            background: p.format ? FORMAT_COLOR[p.format] ?? '#8E8E93' : '#D1D1D6',
+                            marginTop: 6,
+                          }}
+                        />
+                        <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <span style={{ fontSize: 12, color: 'var(--color-tertiary-label)' }}>
+                            {p.date_prevue ? formatShortFr(p.date_prevue) : '—'}
+                            {p.format ? ` · ${FORMAT_LABEL[p.format] ?? p.format}` : ''}
                           </span>
-                        </button>
-                      </li>
-                    )
-                  })}
+                          <span
+                            style={{
+                              fontFamily: 'var(--font-system)',
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: 'var(--color-label)',
+                            }}
+                          >
+                            {p.objectif_editorial ?? p.titre ?? 'Post sans titre'}
+                          </span>
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            flexShrink: 0,
+                            color: 'var(--color-tertiary-label)',
+                            fontSize: 14,
+                            paddingRight: 4,
+                          }}
+                        >
+                          →
+                        </span>
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               </section>
-            ))
-          )}
-        </aside>
+            ))}
+          </div>
+        )}
 
-        <section className="cfs-calendar-preview">
-          {!selectedPost ? (
-            <p style={{ fontSize: 13, color: 'var(--color-secondary-label)', padding: '40px 20px', textAlign: 'center' }}>
-              Sélectionne un post dans le calendrier pour voir son détail.
-            </p>
-          ) : (
-            <article style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <header style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                {selectedPost.format ? (
-                  <span
-                    style={{
-                      padding: '3px 9px',
-                      borderRadius: 6,
-                      fontFamily: 'var(--font-system)',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      color: '#FFFFFF',
-                      background: FORMAT_COLOR[selectedPost.format] ?? '#8E8E93',
-                    }}
-                  >
-                    {FORMAT_LABEL[selectedPost.format] ?? selectedPost.format}
-                  </span>
-                ) : null}
-                {selectedPost.structure_type ? (
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: 'var(--color-secondary-label)',
-                      padding: '3px 8px',
-                      borderRadius: 6,
-                      background: 'rgba(0, 0, 0, 0.04)',
-                      border: '1px solid rgba(0, 0, 0, 0.06)',
-                    }}
-                  >
-                    {selectedPost.structure_type}
-                  </span>
-                ) : null}
-                {selectedPost.date_prevue ? (
-                  <span style={{ fontSize: 12, color: 'var(--color-tertiary-label)' }}>
-                    {formatShortFr(selectedPost.date_prevue)}
-                  </span>
-                ) : null}
-              </header>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontFamily: 'var(--font-system)',
-                    fontSize: 17,
-                    fontWeight: 600,
-                    color: 'var(--color-label)',
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {selectedPost.objectif_editorial ?? selectedPost.titre ?? 'Post sans titre'}
-                </h3>
-                {selectedPost.angle ? (
-                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: 'rgba(0, 0, 0, 0.75)' }}>
-                    {selectedPost.angle}
-                  </p>
-                ) : null}
-                {selectedPost.pilier_nom ? (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      color: 'var(--color-tertiary-label)',
-                      marginTop: 4,
-                    }}
-                  >
-                    Pilier : {selectedPost.pilier_nom}
-                  </span>
-                ) : null}
-              </div>
-
-              <section
-                style={{
-                  padding: '14px 16px',
-                  borderRadius: 12,
-                  background: 'rgba(0, 0, 0, 0.02)',
-                  border: '1px solid rgba(0, 0, 0, 0.05)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                }}
-              >
-                <h4
-                  style={{
-                    margin: 0,
-                    fontFamily: 'var(--font-system)',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    color: 'var(--color-tertiary-label)',
-                  }}
-                >
-                  Discuter de ce post
-                </h4>
-
-                {chatMessages.length > 0 ? (
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {chatMessages.map((m, i) => (
-                      <li
-                        key={i}
-                        style={{
-                          padding: '10px 12px',
-                          borderRadius: 10,
-                          fontSize: 13,
-                          lineHeight: 1.5,
-                          background: m.role === 'user' ? 'rgba(0, 122, 255, 0.08)' : 'rgba(255, 255, 255, 0.7)',
-                          border: '1px solid ' + (m.role === 'user' ? 'rgba(0, 122, 255, 0.18)' : 'rgba(0, 0, 0, 0.05)'),
-                          alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                          maxWidth: '85%',
-                          color: 'var(--color-label)',
-                        }}
-                      >
-                        {m.content}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-
-                {chatError ? (
-                  <p
-                    role="alert"
-                    style={{
-                      fontSize: 12,
-                      color: '#C0392B',
-                      padding: '6px 10px',
-                      borderRadius: 6,
-                      background: 'rgba(192, 57, 43, 0.06)',
-                      margin: 0,
-                    }}
-                  >
-                    {chatError}
-                  </p>
-                ) : null}
-
-                {chatExhausted ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(`/outils/conseiller?scenario=B2&post_id=${selectedPost.id}`)
-                    }
-                    className="btn-choice"
-                    style={{
-                      padding: '8px 14px',
-                      background: 'rgba(0, 122, 255, 0.06)',
-                      borderColor: 'rgba(0, 122, 255, 0.18)',
-                      color: '#007AFF',
-                      fontSize: 13,
-                    }}
-                  >
-                    Continuer dans une conversation complète →
-                  </button>
-                ) : (
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <input
-                      type="text"
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault()
-                          handleAsk()
-                        }
-                      }}
-                      placeholder="Poser une question rapide…"
-                      disabled={asking}
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        borderRadius: 8,
-                        border: '1px solid rgba(0, 0, 0, 0.08)',
-                        background: 'rgba(255, 255, 255, 0.7)',
-                        fontFamily: 'var(--font-system)',
-                        fontSize: 13,
-                        outline: 'none',
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAsk}
-                      disabled={!chatInput.trim() || asking}
-                      className="btn-primary"
-                      style={{ padding: '8px 14px', fontSize: 13 }}
-                    >
-                      {asking ? '…' : 'Envoyer'}
-                    </button>
-                  </div>
-                )}
-              </section>
-
-              <footer style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <Link
-                  href={`/programme/posts/${selectedPost.id}`}
-                  className="btn-primary"
-                  style={{ textDecoration: 'none' }}
-                >
-                  Éditer ce post →
-                </Link>
-              </footer>
-            </article>
-          )}
-        </section>
       </div>
 
       <style>{`
-        .cfs-calendar-grid {
-          display: grid;
-          grid-template-columns: 38% 62%;
-          gap: 18px;
-          align-items: start;
-        }
-        .cfs-calendar-list {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          max-height: 720px;
-          overflow-y: auto;
-          padding-right: 4px;
+        /* Sprint 37.H (F69) — Calendrier plein écran. Plus de sous-split. */
+        .cfs-calendar-full {
+          width: 100%;
         }
         .cfs-calendar-week-label {
           margin: 0 0 6px 4px;
@@ -513,43 +226,22 @@ export function ProgrammeCalendarView({
           width: 100%;
           display: flex;
           align-items: flex-start;
-          gap: 10px;
-          padding: 8px 10px;
-          border-radius: 8px;
+          gap: 12px;
+          padding: 12px 14px;
+          border-radius: 10px;
           border: 1px solid rgba(0, 0, 0, 0.04);
           background: rgba(255, 255, 255, 0.5);
           cursor: pointer;
           text-align: left;
-          transition: background-color 180ms ease-out, border-color 180ms ease-out;
+          transition: background-color 180ms ease-out, border-color 180ms ease-out, transform 180ms ease-out;
         }
-        .cfs-calendar-day-btn:hover:not(.is-selected) {
+        .cfs-calendar-day-btn:hover {
           background-color: rgba(0, 0, 0, 0.03);
-        }
-        .cfs-calendar-day-btn.is-selected {
-          background-color: rgba(0, 122, 255, 0.08);
-          border-color: rgba(0, 122, 255, 0.2);
-        }
-        .cfs-calendar-preview {
-          padding: 20px 22px;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.6);
-          border: 1px solid rgba(0, 0, 0, 0.05);
-          position: sticky;
-          top: 24px;
-        }
-        @media (max-width: 900px) {
-          .cfs-calendar-grid {
-            grid-template-columns: 1fr;
-          }
-          .cfs-calendar-list {
-            max-height: none;
-          }
-          .cfs-calendar-preview {
-            position: static;
-          }
+          border-color: rgba(0, 0, 0, 0.08);
+          transform: translateX(2px);
         }
         @media (prefers-reduced-motion: reduce) {
-          .cfs-calendar-day-btn { transition: none !important; }
+          .cfs-calendar-day-btn { transition: none !important; transform: none !important; }
         }
       `}</style>
     </div>
@@ -614,11 +306,9 @@ function buildMonthGrid(posts: ReadonlyArray<PostRow>): {
 
 function MonthGrid({
   posts,
-  selectedPostId,
   onSelect,
 }: {
   posts: ReadonlyArray<PostRow>
-  selectedPostId: string | null
   onSelect: (p: PostRow) => void
 }) {
   const grid = useMemo(() => buildMonthGrid(posts), [posts])
@@ -684,35 +374,31 @@ function MonthGrid({
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-secondary-label)' }}>
               {day.dayNumber}
             </span>
-            {day.posts.map((p) => {
-              const isSel = p.id === selectedPostId
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => onSelect(p)}
-                  aria-pressed={isSel}
-                  title={p.objectif_editorial ?? p.titre ?? ''}
-                  style={{
-                    width: '100%',
-                    padding: '3px 6px',
-                    borderRadius: 4,
-                    border: 'none',
-                    background: p.format ? `${FORMAT_COLOR[p.format] ?? '#8E8E93'}${isSel ? 'ff' : '22'}` : '#D1D1D6',
-                    color: isSel ? '#FFFFFF' : 'var(--color-label)',
-                    fontSize: 10,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {(p.format ?? '').slice(0, 3).toUpperCase()}
-                </button>
-              )
-            })}
+            {day.posts.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onSelect(p)}
+                title={p.objectif_editorial ?? p.titre ?? ''}
+                style={{
+                  width: '100%',
+                  padding: '3px 6px',
+                  borderRadius: 4,
+                  border: 'none',
+                  background: p.format ? `${FORMAT_COLOR[p.format] ?? '#8E8E93'}33` : '#D1D1D6',
+                  color: 'var(--color-label)',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {(p.format ?? '').slice(0, 3).toUpperCase()}
+              </button>
+            ))}
           </div>
         ))}
       </div>
@@ -724,11 +410,9 @@ function MonthGrid({
 
 function FlatList({
   posts,
-  selectedPostId,
   onSelect,
 }: {
   posts: ReadonlyArray<PostRow>
-  selectedPostId: string | null
   onSelect: (p: PostRow) => void
 }) {
   const sorted = useMemo(
@@ -748,21 +432,19 @@ function FlatList({
   return (
     <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
       {sorted.map((p) => {
-        const isSel = p.id === selectedPostId
         return (
           <li key={p.id}>
             <button
               type="button"
               onClick={() => onSelect(p)}
-              aria-current={isSel ? 'true' : undefined}
               style={{
                 width: '100%',
                 display: 'flex',
                 gap: 14,
                 padding: '12px 14px',
                 borderRadius: 10,
-                border: isSel ? '1px solid rgba(0, 122, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.04)',
-                background: isSel ? 'rgba(0, 122, 255, 0.08)' : 'rgba(255, 255, 255, 0.5)',
+                border: '1px solid rgba(0, 0, 0, 0.04)',
+                background: 'rgba(255, 255, 255, 0.5)',
                 cursor: 'pointer',
                 textAlign: 'left',
               }}
