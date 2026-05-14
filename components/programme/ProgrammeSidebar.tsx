@@ -8,7 +8,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Calendar, Compass, TrendingUp, RefreshCw } from 'lucide-react'
+import { Calendar, Compass, TrendingUp, RefreshCw, ClipboardCheck, Presentation } from 'lucide-react'
 
 export type ProgrammeSidebarActiveItem =
   | 'calendrier'
@@ -62,8 +62,16 @@ export function ProgrammeSidebar({ activeItem }: Props) {
       </Section>
 
       <Section title="Actions rapides">
-        <ActionItem label="Faire le point" onClick={() => openAction('A7')} />
-        <ActionItem label="Préparer ma réunion" onClick={() => openAction('E1')} />
+        <ActionItem
+          label="Faire le point"
+          icon={<ClipboardCheck size={18} strokeWidth={1.6} aria-hidden="true" />}
+          onClick={() => openAction('A7')}
+        />
+        <ActionItem
+          label="Préparer ma réunion"
+          icon={<Presentation size={18} strokeWidth={1.6} aria-hidden="true" />}
+          onClick={() => openAction('E1')}
+        />
       </Section>
 
       <style>{`
@@ -172,21 +180,36 @@ function RouteItem({
       <style>{`
         .cfs-sidebar-link:hover {
           background-color: rgba(0, 0, 0, 0.03) !important;
+          transform: translateX(2px);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .cfs-sidebar-link { transition: none !important; transform: none !important; }
         }
       `}</style>
     </li>
   )
 }
 
-function ActionItem({ label, onClick }: { label: string; onClick: () => void }) {
+function ActionItem({
+  label,
+  icon,
+  onClick,
+}: {
+  label: string
+  icon?: React.ReactNode
+  onClick: () => void
+}) {
   return (
     <li>
       <button
         type="button"
         onClick={onClick}
+        className="cfs-sidebar-action"
         style={{
           width: '100%',
-          textAlign: 'left',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
           padding: '12px 14px',
           borderRadius: 10,
           border: 'none',
@@ -195,16 +218,32 @@ function ActionItem({ label, onClick }: { label: string; onClick: () => void }) 
           fontFamily: 'var(--font-system)',
           fontSize: 14,
           fontWeight: 500,
+          textAlign: 'left',
           cursor: 'pointer',
-          transition: 'background-color 180ms ease-out',
+          transition: 'background-color 180ms ease-out, transform 180ms ease-out',
         }}
-        className="cfs-sidebar-action"
       >
-        {label}
+        {icon ? (
+          <span
+            aria-hidden="true"
+            style={{
+              flexShrink: 0,
+              color: 'var(--color-secondary-label)',
+              marginTop: 1,
+            }}
+          >
+            {icon}
+          </span>
+        ) : null}
+        <span>{label}</span>
       </button>
       <style>{`
         .cfs-sidebar-action:hover {
           background-color: rgba(0, 0, 0, 0.03);
+          transform: translateX(2px);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .cfs-sidebar-action { transition: none !important; transform: none !important; }
         }
       `}</style>
     </li>

@@ -476,12 +476,7 @@ function OutilPreview({ outil }: { outil: Outil }) {
       }}
     >
       <div className="cfs-outil-preview-grid">
-        {/* Mockup à gauche — taille fixe, ne déborde plus. */}
-        <div className="cfs-outil-preview-visual">
-          <ToolMockup toolType={outilToMockupType(outil.id)} />
-        </div>
-
-        {/* Contenu à droite — titre + description + CTA empilés. */}
+        {/* Sprint 37.G (F66) — Ordre inversé : contenu à gauche, mockup à droite. */}
         <div className="cfs-outil-preview-content">
           <header style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
             <span
@@ -550,12 +545,17 @@ function OutilPreview({ outil }: { outil: Outil }) {
             </span>
           )}
         </div>
+
+        {/* Sprint 37.G (F66) — Mockup à droite (swap colonnes vs F62). */}
+        <div className="cfs-outil-preview-visual">
+          <ToolMockup toolType={outilToMockupType(outil.id)} />
+        </div>
       </div>
 
       <style>{`
         .cfs-outil-preview-grid {
           display: grid;
-          grid-template-columns: 300px 1fr;
+          grid-template-columns: 1fr 300px;
           gap: 32px;
           align-items: center;
         }
