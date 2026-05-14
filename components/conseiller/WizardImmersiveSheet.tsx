@@ -117,20 +117,31 @@ export function WizardImmersiveSheet({
   const handleGenerate = useCallback(async () => {
     setGenerating(true)
     setError(null)
+    // Sprint 37.E (F37) — timeout fallback client. Si après 85s la server
+    // action ne répond pas (kill infra, network drop, etc.), on force
+    // l'arrêt du spinner et on affiche un message clair plutôt que de
+    // laisser le pilote bloqué indéfiniment.
+    const watchdog = setTimeout(() => {
+      setError(
+        "La génération prend plus de temps que prévu. Réessaie dans quelques secondes ou contacte le support.",
+      )
+      setGenerating(false)
+      console.error('[wizard] handleGenerate watchdog timeout (85s)')
+    }, 85_000)
     try {
+      console.info('[wizard] handleGenerate start', { sessionId: session.id })
       // Sprint 37.D (F34+F36) — pipeline complet :
       // (1) appelle Anthropic + parse JSON + insert programme/posts
       const genRes = await generatePlanFromWizardSession(session.id)
+      console.info('[wizard] generatePlan resolved', { ok: genRes.ok })
       if (!genRes.ok) {
         setError(genRes.reason)
-        setGenerating(false)
         return
       }
       // (2) marque la session COMPLETED
       const result = await completeProgrammeCreationSession(session.id)
       if (!result.ok) {
         setError(result.reason ?? 'Échec de la finalisation de la session')
-        setGenerating(false)
         return
       }
       // (3) redirige vers /programme avec newPlan en query param
@@ -144,6 +155,7 @@ export function WizardImmersiveSheet({
       )
       console.error('[wizard] generate plan failed:', err)
     } finally {
+      clearTimeout(watchdog)
       setGenerating(false)
     }
   }, [session.id, router, onClose])

@@ -20,9 +20,14 @@ import type { WizardResponses } from '@/lib/programme-creation/types'
 
 const MODELS_CASCADE = ['claude-opus-4-5', 'claude-opus-4-1', 'claude-sonnet-4-5'] as const
 const MODEL_PRIMARY = MODELS_CASCADE[0]
-const MAX_TOKENS = 4096
+// Sprint 37.E (F37) — Réduit de 4096 à 3072. Un plan de 12 posts ×
+// ~250 char description tient largement. Gagne 20-30% sur la latence.
+const MAX_TOKENS = 3072
 const TEMPERATURE = 0.7
-const TIMEOUT_MS = 60_000
+// Sprint 37.E (F37) — Réduit le timeout SDK pour qu'il échoue plus vite
+// que le timeout Next.js (90s configuré sur la route). Si on dépasse 75s
+// on cascade au modèle suivant.
+const TIMEOUT_MS = 75_000
 
 const VALID_FORMATS = ['anecdote', 'produit', 'evenement', 'coulisses', 'manifeste', 'question'] as const
 const VALID_STRUCTURES = ['carrousel', 'photo', 'reel'] as const
@@ -183,6 +188,12 @@ export async function generateFromWizardSession(opts: {
   publicationFrequency: 'discret' | 'equilibre' | 'dense' | null
   userId: string
 }): Promise<GenerateFromWizardResult> {
+  // Sprint 37.E (F37) — logging structuré pour diagnostiquer les blocages
+  // chat. Chaque étape clé est tracée avec une durée pour identifier où
+  // ça part en timeout en production.
+  const t0 = Date.now()
+  console.info('[wizard-gen] start', { sessionId: opts.sessionId, brandId: opts.brandId })
+
   // 1. Build prompt
   const userPrompt = buildWizardPlanUserPrompt({
     brandName: opts.brandName,
@@ -198,8 +209,10 @@ export async function generateFromWizardSession(opts: {
   let rawText: string
   try {
     rawText = await callAnthropic(userPrompt)
+    console.info('[wizard-gen] anthropic_response', { ms: Date.now() - t0, length: rawText.length })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'API Anthropic injoignable'
+    console.error('[wizard-gen] anthropic_failed', { ms: Date.now() - t0, message })
     return { ok: false, reason: `Anthropic : ${message}` }
   }
   const cleaned = extractJsonFromText(rawText)
@@ -207,7 +220,10 @@ export async function generateFromWizardSession(opts: {
   try {
     parsed = JSON.parse(cleaned)
   } catch {
-    console.error('[wizard-gen] invalid JSON, raw:', rawText.slice(0, 500))
+    console.error('[wizard-gen] invalid_json', {
+      ms: Date.now() - t0,
+      raw: rawText.slice(0, 500),
+    })
     return {
       ok: false,
       reason: "Le conseiller a renvoyé une réponse mal formée. Réessaie dans quelques secondes.",
@@ -217,9 +233,10 @@ export async function generateFromWizardSession(opts: {
   let validated: WizardGeneratedPlan
   try {
     validated = validatePlan(parsed)
+    console.info('[wizard-gen] validated', { ms: Date.now() - t0, posts: validated.plan.length })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'structure invalide'
-    console.error('[wizard-gen] schema validation failed:', message)
+    console.error('[wizard-gen] validation_failed', { ms: Date.now() - t0, message })
     return {
       ok: false,
       reason: `Le plan généré ne respecte pas le format attendu (${message}).`,
@@ -253,9 +270,14 @@ export async function generateFromWizardSession(opts: {
     .select('id')
     .single()
   if (progErr || !progRow) {
+    console.error('[wizard-gen] programme_insert_failed', {
+      ms: Date.now() - t0,
+      message: progErr?.message,
+    })
     return { ok: false, reason: progErr?.message ?? 'Création programme échouée' }
   }
   const programmeId = (progRow as { id: string }).id
+  console.info('[wizard-gen] programme_inserted', { ms: Date.now() - t0, programmeId })
 
   // 5. Insère les posts
   const postsToInsert = validated.plan.map((p) => ({
@@ -276,8 +298,13 @@ export async function generateFromWizardSession(opts: {
   }))
   const { error: postsErr } = await adminAny.from('posts').insert(postsToInsert)
   if (postsErr) {
+    console.error('[wizard-gen] posts_insert_failed', {
+      ms: Date.now() - t0,
+      message: postsErr.message,
+    })
     return { ok: false, reason: `Insertion posts : ${postsErr.message}` }
   }
+  console.info('[wizard-gen] done', { ms: Date.now() - t0, posts: postsToInsert.length })
 
   return { ok: true, programmeId }
 }

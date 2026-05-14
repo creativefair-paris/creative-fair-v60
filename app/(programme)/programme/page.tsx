@@ -21,6 +21,11 @@ import type { PilierNarratif, PostRow } from '@/types/programme'
 import type { BrandBook } from '@/types/ma-marque'
 
 export const dynamic = 'force-dynamic'
+// Sprint 37.E (F37) — Server actions déclenchées depuis cette route
+// (wizard A1 plan generation) peuvent prendre 30-60s côté Anthropic.
+// Le default Next.js (10-30s selon plan) coupe la promesse côté client
+// → spinner infini perçu comme bug. On élève à 90s.
+export const maxDuration = 90
 
 type BrandRowWithExtras = {
   id: string

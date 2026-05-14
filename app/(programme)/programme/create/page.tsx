@@ -12,6 +12,9 @@ import type { BusinessCalendar } from '@/types/business-calendar'
 import type { PilierNarratif } from '@/types/programme'
 
 export const dynamic = 'force-dynamic'
+// Sprint 37.E (F37) — Même justification que /programme : le submit du
+// formulaire natif déclenche la même server action de génération.
+export const maxDuration = 90
 
 export default async function CreateProgrammePage() {
   const supabase = await createClient()
