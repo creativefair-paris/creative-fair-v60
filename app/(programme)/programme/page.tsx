@@ -15,6 +15,7 @@ import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
 import { PlanPreview } from '@/components/programme/PlanPreview'
 import { NewPlanPedagogyOverlay } from '@/components/programme/NewPlanPedagogyOverlay'
+import { ProgrammeTabs } from '@/components/programme/ProgrammeTabs'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
 import { checkJalonStatus } from '@/lib/jalons/check-jalons'
 import type { BusinessCalendar } from '@/types/business-calendar'
@@ -265,21 +266,9 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             paddingBottom: 'var(--space-6)',
           }}
         >
-          {/* Sprint 37.C — lien discret vers /programme/retombees. */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-            <Link
-              href="/programme/retombees"
-              style={{
-                fontFamily: 'var(--font-system)',
-                fontSize: 13,
-                fontWeight: 500,
-                color: '#007AFF',
-                textDecoration: 'none',
-              }}
-            >
-              Retombées →
-            </Link>
-          </div>
+          {/* Sprint 37.E (F50) — ProgrammeTabs segmented control remplace
+              le lien discret 'Retombées →' (F49 retiré). */}
+          <ProgrammeTabs activeTab="current" />
 
           {/* Sprint 37.D (F34) — aperçu du plan fraîchement généré.
               Affiché en haut quand on arrive avec ?newPlan=ID. */}

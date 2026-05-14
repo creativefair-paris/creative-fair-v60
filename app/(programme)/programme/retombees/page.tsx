@@ -14,6 +14,8 @@ import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { RetombeesQualitativesList } from '@/components/retombees/RetombeesQualitativesList'
 import { RetombeesQuantitativesGrid } from '@/components/retombees/RetombeesQuantitativesGrid'
+import { ProgrammeTabs } from '@/components/programme/ProgrammeTabs'
+import { AppMetricsSection } from '@/components/retombees/AppMetricsSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,6 +88,35 @@ export default async function RetombeesPage() {
     if (!latestByType.has(m.metric_type)) latestByType.set(m.metric_type, m)
   }
 
+  // Sprint 37.E (F52) — Compteurs app pour la section "Chiffres Creative Fair".
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+  const monthStartIso = monthStart.toISOString()
+
+  const { count: plansCount } = await supabase
+    .from('programmes')
+    .select('id', { count: 'exact', head: true })
+    .gte('created_at', monthStartIso)
+  const { count: postsCount } = await supabase
+    .from('posts')
+    .select('id', { count: 'exact', head: true })
+    .gte('created_at', monthStartIso)
+  const { count: conversationsCount } = await supabase
+    .from('conseiller_conversations')
+    .select('id', { count: 'exact', head: true })
+    .gte('created_at', monthStartIso)
+  const { count: libraryDocsCount } = await supabase
+    .from('library_documents')
+    .select('id', { count: 'exact', head: true })
+
+  const appMetrics = {
+    plansCount: plansCount ?? 0,
+    postsCount: postsCount ?? 0,
+    conversationsCount: conversationsCount ?? 0,
+    libraryDocsCount: libraryDocsCount ?? 0,
+  }
+
   return (
     <main style={{ minHeight: '100vh', position: 'relative' }}>
       <div className="bg-halo bg-halo-1" aria-hidden="true" />
@@ -105,6 +136,9 @@ export default async function RetombeesPage() {
           gap: 28,
         }}
       >
+        {/* Sprint 37.E (F50) — ProgrammeTabs en haut de la sous-page. */}
+        <ProgrammeTabs activeTab="retombees" />
+
         {/* Breadcrumb local Mon Programme › Retombées */}
         <nav
           aria-label="Fil d'ariane"
@@ -174,6 +208,11 @@ export default async function RetombeesPage() {
         <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <SectionHeader>Indicateurs éditoriaux</SectionHeader>
           <RetombeesQuantitativesGrid latestByType={Object.fromEntries(latestByType)} />
+        </section>
+
+        {/* Sprint 37.E (F52) — Chiffres app (plans, posts, conversations, biblio). */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <AppMetricsSection metrics={appMetrics} />
         </section>
       </div>
     </main>

@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { ProgrammeCreateForm } from '@/components/programme-create/ProgrammeCreateForm'
 import { checkJalonStatus } from '@/lib/jalons/check-jalons'
 import { MarqueIncompleteWarning } from '@/components/programme-create/MarqueIncompleteWarning'
+import { ProgrammeTabs } from '@/components/programme/ProgrammeTabs'
 import type { BusinessCalendar } from '@/types/business-calendar'
 import type { PilierNarratif } from '@/types/programme'
 
@@ -102,6 +103,9 @@ export default async function CreateProgrammePage() {
             gap: 24,
           }}
         >
+          {/* Sprint 37.E (F50) — ProgrammeTabs segmented control. */}
+          <ProgrammeTabs activeTab="create" />
+
           {/* Sprint 37.E (F44) — Alerte si jalon marque non-atteint. */}
           {!jalonStatus.marque.complete ? <MarqueIncompleteWarning /> : null}
 

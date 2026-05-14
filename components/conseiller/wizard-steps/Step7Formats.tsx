@@ -19,14 +19,51 @@ const FORMATS: ReadonlyArray<{
   value: CanonicalFormat
   label: string
   description: string
+  example: string
   color: string
 }> = [
-  { value: 'anecdote',  label: 'Anecdote',  description: 'Raconter une histoire qui sert un pilier.', color: '#007AFF' },
-  { value: 'produit',   label: 'Produit',   description: 'Mettre en avant une création avec son histoire.', color: '#34C759' },
-  { value: 'evenement', label: 'Événement', description: 'Annoncer une date qui compte.', color: '#FF9500' },
-  { value: 'coulisses', label: 'Coulisses', description: 'Montrer le geste, l’atelier, la fabrication.', color: '#AF52DE' },
-  { value: 'manifeste', label: 'Manifeste', description: 'Affirmer une position forte.', color: '#FF3B30' },
-  { value: 'question',  label: 'Question',  description: 'Faire réagir la communauté.', color: '#5856D6' },
+  {
+    value: 'anecdote',
+    label: 'Anecdote',
+    description: 'Raconter une histoire qui sert un pilier.',
+    example: 'Ex. "Comment le logo Nike a failli ne jamais exister."',
+    color: '#007AFF',
+  },
+  {
+    value: 'produit',
+    label: 'Produit',
+    description: 'Mettre en avant une création avec son histoire.',
+    example: 'Ex. "Cette pièce est née d\'un accident d\'atelier en 1984."',
+    color: '#34C759',
+  },
+  {
+    value: 'evenement',
+    label: 'Événement',
+    description: 'Annoncer une date qui compte.',
+    example: 'Ex. "Vernissage galerie Maillol jeudi 7 mars, 18h."',
+    color: '#FF9500',
+  },
+  {
+    value: 'coulisses',
+    label: 'Coulisses',
+    description: 'Montrer le geste, l\'atelier, la fabrication.',
+    example: 'Ex. Reel 20s d\'un sertissage à la main.',
+    color: '#AF52DE',
+  },
+  {
+    value: 'manifeste',
+    label: 'Manifeste',
+    description: 'Affirmer une position forte.',
+    example: 'Ex. "Pourquoi on refuse les pierres synthétiques."',
+    color: '#FF3B30',
+  },
+  {
+    value: 'question',
+    label: 'Question',
+    description: 'Faire réagir la communauté.',
+    example: 'Ex. "Quelle pièce d\'archives tu aimerais voir relancée ?"',
+    color: '#5856D6',
+  },
 ]
 
 const MAX_SELECT = 3
@@ -120,6 +157,18 @@ export function Step7Formats({ initial, onBack, onSave, saving }: Props) {
                 }}
               >
                 {f.description}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-system)',
+                  fontSize: 11,
+                  lineHeight: 1.45,
+                  color: 'var(--color-tertiary-label)',
+                  fontStyle: 'italic',
+                  marginTop: 2,
+                }}
+              >
+                {f.example}
               </span>
             </button>
           )
