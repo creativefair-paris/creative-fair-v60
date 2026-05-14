@@ -48,15 +48,60 @@ export default async function PostDetailPage({ params }: PageProps) {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: rawPost } = await supabase
+  // Sprint 37.I (F77) — Cause 404 identifiée : le SELECT précédent incluait
+  // caption_complete + visuel_url (colonnes migration 024 Sprint 37.E F58).
+  // Si la migration n'est pas appliquée au runtime, Supabase retourne data:null
+  // ET error.code='42703'. Le code ignorait error et appelait notFound() → 404.
+  //
+  // Fix : SELECT défensif sur colonnes garanties + fetch optionnel des colonnes
+  // récentes en tolérant l'erreur + log structuré pour diagnostic futur.
+  const { data: rawPostBase, error: errBase } = await supabase
     .from('posts')
     .select(
-      'id, programme_id, pilier_nom, date_prevue, format, structure_type, objectif_editorial, angle, caption_complete, visuel_url, statut, titre',
+      'id, programme_id, pilier_nom, date_prevue, format, structure_type, objectif_editorial, angle, statut, titre',
     )
     .eq('id', postId)
     .maybeSingle()
-  const post = rawPost as PostRow | null
-  if (!post) notFound()
+
+  if (errBase) {
+    console.error('[posts/[postId]] select_base_failed', {
+      code: errBase.code,
+      message: errBase.message,
+      postId,
+    })
+  }
+  if (!rawPostBase) {
+    console.warn('[posts/[postId]] no_row_found', { postId, errBase: errBase?.message })
+    notFound()
+  }
+
+  // Optionnel : tentative de charger caption_complete + visuel_url. Si la
+  // migration 024 n'est pas appliquée, on retombe sur null sans casser.
+  let captionComplete: string | null = null
+  let visuelUrl: string | null = null
+  try {
+    const { data: rawExtras } = await supabase
+      .from('posts')
+      .select('caption_complete, visuel_url')
+      .eq('id', postId)
+      .maybeSingle()
+    if (rawExtras && typeof rawExtras === 'object') {
+      const extras = rawExtras as { caption_complete?: string | null; visuel_url?: string | null }
+      captionComplete = extras.caption_complete ?? null
+      visuelUrl = extras.visuel_url ?? null
+    }
+  } catch (err) {
+    console.warn('[posts/[postId]] extras_select_failed', {
+      message: err instanceof Error ? err.message : String(err),
+      postId,
+    })
+  }
+
+  const post: PostRow = {
+    ...(rawPostBase as Omit<PostRow, 'caption_complete' | 'visuel_url'>),
+    caption_complete: captionComplete,
+    visuel_url: visuelUrl,
+  }
 
   // Sidebar : tous les posts du même programme.
   const { data: rawAllPosts } = await supabase
