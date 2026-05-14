@@ -155,127 +155,185 @@ const FORMAT_PREVIEWS: ReadonlyArray<{ label: string; color: string; desc: strin
   { label: 'Coulisses', color: '#AF52DE', desc: 'Reel 20s' },
 ]
 
-// Sprint 37.H (F71) — Mockup Post Creator = preview Instagram iOS.
-// Remplace les cards de format empilées Sprint 37.D F28. Format vertical
-// 280×400 environ avec header brand, image carrée stylisée, row icons
-// like/comment/share/bookmark, caption courte avec timestamp.
+// Sprint 37.I (F79) — Vrai mockup Instagram iOS 2026 (refonte F71).
+// Spécificités iOS 2026 vs Android :
+// - Format 4:5 portrait (pas 1:1 carré)
+// - Story ring dégradé orange→rose→violet (#F58529→#DD2A7B→#8134AF)
+// - Font SF Pro
+// - Icons SF Symbols style thin outline (PAS emoji)
+// - Séparateurs subtils 1px rgba(0,0,0,0.04)
 function PostCreatorMockup() {
   return (
     <div
       aria-hidden="true"
       style={{
         width: '100%',
-        maxWidth: 280,
+        maxWidth: 300,
         background: '#FFFFFF',
-        borderRadius: 16,
+        borderRadius: 14,
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
-        fontFamily: '-apple-system, BlinkMacSystemFont, system-ui',
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
-      {/* Header Instagram : avatar + nom + bouton more */}
+      {/* Header iOS : story ring + nom + ⋯ */}
       <header
         style={{
           display: 'flex',
           alignItems: 'center',
           padding: '10px 12px',
           gap: 10,
-          borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.04)',
         }}
       >
+        {/* Story ring dégradé Instagram official */}
         <div
           style={{
-            width: 26,
-            height: 26,
+            width: 32,
+            height: 32,
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #FFAA5A, #AF52DE)',
+            padding: 2,
+            background:
+              'linear-gradient(135deg, #F58529 0%, #DD2A7B 50%, #8134AF 100%)',
             flexShrink: 0,
+            display: 'flex',
           }}
-        />
+        >
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: '50%',
+              background: '#FFFFFF',
+              padding: 2,
+              display: 'flex',
+            }}
+          >
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #FBFAF7 0%, #C9B898 100%)',
+              }}
+            />
+          </div>
+        </div>
         <span
           style={{
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 600,
             color: '#000000',
             flex: 1,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            letterSpacing: '-0.01em',
           }}
         >
           tamarque.paris
         </span>
         <span
+          aria-hidden="true"
           style={{
-            fontSize: 14,
-            color: 'rgba(0, 0, 0, 0.5)',
-            letterSpacing: 1,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 16,
+            color: 'rgba(0, 0, 0, 0.85)',
+            letterSpacing: 2,
+            lineHeight: 1,
           }}
         >
           ⋯
         </span>
       </header>
 
-      {/* Image carrée stylisée (dégradé subtle pour évoquer un visuel) */}
+      {/* Image 4:5 portrait — pas 1:1 carré */}
       <div
         style={{
-          aspectRatio: '1 / 1',
+          aspectRatio: '4 / 5',
           background:
-            'linear-gradient(135deg, rgba(251, 250, 247, 1) 0%, rgba(0, 122, 255, 0.12) 100%)',
+            'linear-gradient(135deg, #FBFAF7 0%, #E8DFD0 30%, #C9B898 100%)',
           position: 'relative',
         }}
       >
         <div
           style={{
             position: 'absolute',
-            inset: '50% 50%',
+            top: '50%',
+            left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 56,
-            height: 56,
-            borderRadius: 12,
-            background: 'rgba(255, 255, 255, 0.6)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(0, 0, 0, 0.05)',
+            width: 64,
+            height: 64,
+            borderRadius: 14,
+            background: 'rgba(255, 255, 255, 0.55)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.6)',
           }}
         />
       </div>
 
-      {/* Row icons like / comment / share / bookmark */}
+      {/* Row icons SF Symbols style thin outline */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          padding: '10px 12px 4px',
-          gap: 14,
-          fontSize: 18,
+          padding: '10px 12px 6px',
+          gap: 16,
           color: '#000',
         }}
       >
-        <span aria-hidden="true">♡</span>
-        <span aria-hidden="true">💬</span>
-        <span aria-hidden="true">📤</span>
-        <span aria-hidden="true" style={{ marginLeft: 'auto' }}>🔖</span>
+        {/* Heart outline */}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        </svg>
+        {/* Comment outline */}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+        </svg>
+        {/* Direct paper plane */}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
+        {/* Bookmark à droite */}
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ marginLeft: 'auto' }}
+        >
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        </svg>
       </div>
 
-      {/* Caption Instagram */}
-      <div style={{ padding: '4px 12px 12px', color: '#000' }}>
+      {/* Caption iOS pattern */}
+      <div style={{ padding: '2px 12px 12px', color: '#000' }}>
         <p
           style={{
             margin: 0,
-            fontSize: 12,
+            fontSize: 13,
             lineHeight: 1.4,
+            letterSpacing: '-0.01em',
           }}
         >
-          <span style={{ fontWeight: 600, marginRight: 5 }}>tamarque.paris</span>
-          <span>L&apos;histoire derrière ta création préférée…</span>
+          <span style={{ fontWeight: 600 }}>tamarque.paris</span>{' '}
+          <span style={{ fontWeight: 400 }}>L&apos;histoire derrière ta création préférée…</span>
         </p>
         <p
           style={{
-            margin: '4px 0 0',
-            fontSize: 10,
-            color: 'rgba(0, 0, 0, 0.4)',
+            margin: '6px 0 0',
+            fontSize: 11,
+            color: 'rgba(60, 60, 67, 0.6)',
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
           }}
