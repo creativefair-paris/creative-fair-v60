@@ -13,6 +13,8 @@ import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { MaMarqueDashboard } from '@/components/ma-marque/MaMarqueDashboard'
 import { BrandOnboardingTrigger } from '@/components/onboarding-marque/BrandOnboardingTrigger'
+import { BrandOnboardingHeaderCta } from '@/components/onboarding-marque/BrandOnboardingHeaderCta'
+import { getResumableBrandOnboardingSession } from '@/app/_actions/brand-onboarding'
 import type { BrandSnapshot14 } from '@/lib/ma-marque/completude'
 import type {
   MomentBusiness,
@@ -138,6 +140,10 @@ export default async function MaMarquePage() {
     archivesCount: archives.length,
   }
 
+  // Sprint 37.D (F35a) — détecte si une session d'onboarding IN_PROGRESS
+  // est en cours pour adapter le label du bouton header.
+  const resumableOnboarding = await getResumableBrandOnboardingSession()
+
   return (
     <div
       className="min-h-screen"
@@ -170,6 +176,20 @@ export default async function MaMarquePage() {
             flexDirection: 'column',
           }}
         >
+          {/* Sprint 37.D (F35a) — Bouton optionnel pour lancer l'onboarding
+              guidé (chemin assisté). La page native reste éditable directement
+              (chemin manuel). Anti-paternalisme Apple : on guide, on n'oblige pas. */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              padding: '0 var(--space-5)',
+              marginBottom: 16,
+            }}
+          >
+            <BrandOnboardingHeaderCta hasResumable={resumableOnboarding !== null} />
+          </div>
+
           <MaMarqueDashboard
             snapshot={snapshot}
             archives={archives}
