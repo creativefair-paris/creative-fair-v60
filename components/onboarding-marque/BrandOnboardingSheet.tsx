@@ -118,9 +118,11 @@ export function BrandOnboardingSheet({ session: initial, onClose }: Props) {
         zIndex: 1200,
         display: 'flex',
         flexDirection: 'column',
-        background: 'rgba(251, 250, 247, 0.98)',
-        backdropFilter: 'blur(40px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+        // Sprint 37.I (F81) — Dégradé crème opaque cohérent avec le wizard
+        // programme. L'ancien `rgba(...) + backdrop-filter` rendait du gris
+        // par dessus le body sombre. Gradient dégradé donne le rendu Liquid
+        // Glass crème authentique.
+        background: 'linear-gradient(135deg, #FBFAF7 0%, #F5F0E8 100%)',
         animation: 'cfs-wizard-in 280ms ease-out',
       }}
     >
@@ -133,10 +135,12 @@ export function BrandOnboardingSheet({ session: initial, onClose }: Props) {
           alignItems: 'center',
           gap: 16,
           padding: '18px 22px',
-          background: 'rgba(251, 250, 247, 0.95)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+          // Sprint 37.I (F81) — Header semi-translucide sur le gradient
+          // (rgba blanc-cassé léger + blur subtle pour effet liquid glass).
+          background: 'rgba(251, 250, 247, 0.85)',
+          backdropFilter: 'blur(20px) saturate(1.5)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
         }}
       >
         <button
