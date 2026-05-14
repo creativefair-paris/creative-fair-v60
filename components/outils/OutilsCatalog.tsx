@@ -466,91 +466,121 @@ function CatalogRow({
 function OutilPreview({ outil }: { outil: Outil }) {
   return (
     <article
-      className="glass-regular"
+      className="glass-regular cfs-outil-preview"
       style={{
         borderRadius: 20,
-        padding: '32px 32px 28px 32px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 24,
+        padding: '32px 36px',
         background: 'rgba(251, 250, 247, 0.7)',
         border: '1px solid rgba(0, 0, 0, 0.05)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.04)',
       }}
     >
-      <header style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-        <span
-          aria-hidden="true"
-          style={{
-            flexShrink: 0,
-            width: 48,
-            height: 48,
-            borderRadius: 12,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#007AFF',
-            background: 'rgba(0, 122, 255, 0.08)',
-            border: '1px solid rgba(0, 0, 0, 0.05)',
-          }}
-        >
-          <span style={{ transform: 'scale(1.2)' }}>{outil.icon}</span>
-        </span>
-        <h2
-          style={{
-            flex: 1,
-            fontFamily: 'var(--font-system)',
-            fontSize: 26,
-            fontWeight: 700,
-            color: 'var(--color-label)',
-            margin: 0,
-            letterSpacing: '-0.015em',
-            lineHeight: 1.2,
-          }}
-        >
-          {outil.title}
-        </h2>
-      </header>
+      <div className="cfs-outil-preview-grid">
+        {/* Mockup à gauche — taille fixe, ne déborde plus. */}
+        <div className="cfs-outil-preview-visual">
+          <ToolMockup toolType={outilToMockupType(outil.id)} />
+        </div>
 
-      <p
-        style={{
-          fontFamily: 'var(--font-system)',
-          fontSize: 15,
-          lineHeight: 1.55,
-          color: 'var(--color-label)',
-          margin: 0,
-        }}
-      >
-        {outil.longDescription}
-      </p>
+        {/* Contenu à droite — titre + description + CTA empilés. */}
+        <div className="cfs-outil-preview-content">
+          <header style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+            <span
+              aria-hidden="true"
+              style={{
+                flexShrink: 0,
+                width: 44,
+                height: 44,
+                borderRadius: 11,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#007AFF',
+                background: 'rgba(0, 122, 255, 0.08)',
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+              }}
+            >
+              <span style={{ transform: 'scale(1.1)' }}>{outil.icon}</span>
+            </span>
+            <h2
+              style={{
+                flex: 1,
+                fontFamily: 'var(--font-system)',
+                fontSize: 22,
+                fontWeight: 700,
+                color: 'var(--color-label)',
+                margin: 0,
+                letterSpacing: '-0.015em',
+                lineHeight: 1.2,
+              }}
+            >
+              {outil.title}
+            </h2>
+          </header>
 
-      {/* Sprint 37.D (F28) — mockup spécifique par outil au lieu du
-          placeholder générique. */}
-      <ToolMockup toolType={outilToMockupType(outil.id)} />
+          <p
+            style={{
+              fontFamily: 'var(--font-system)',
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: 'var(--color-label)',
+              margin: 0,
+            }}
+          >
+            {outil.longDescription}
+          </p>
 
-      {outil.available ? (
-        <Link
-          href={outil.href}
-          className="btn-primary"
-          style={{
-            alignSelf: 'flex-start',
-            textDecoration: 'none',
-          }}
-        >
-          {outil.ctaLabel}
-        </Link>
-      ) : (
-        <span
-          style={{
-            alignSelf: 'flex-start',
-            fontSize: 13,
-            color: 'var(--color-tertiary-label)',
-            fontStyle: 'italic',
-          }}
-        >
-          Bientôt disponible dans Creative Fair.
-        </span>
-      )}
+          {outil.available ? (
+            <Link
+              href={outil.href}
+              className="btn-primary"
+              style={{ alignSelf: 'flex-start', textDecoration: 'none' }}
+            >
+              {outil.ctaLabel}
+            </Link>
+          ) : (
+            <span
+              style={{
+                alignSelf: 'flex-start',
+                fontSize: 13,
+                color: 'var(--color-tertiary-label)',
+                fontStyle: 'italic',
+              }}
+            >
+              Bientôt disponible dans Creative Fair.
+            </span>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        .cfs-outil-preview-grid {
+          display: grid;
+          grid-template-columns: 300px 1fr;
+          gap: 32px;
+          align-items: center;
+        }
+        .cfs-outil-preview-visual {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .cfs-outil-preview-content {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          min-width: 0;
+        }
+        @media (max-width: 768px) {
+          .cfs-outil-preview-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          .cfs-outil-preview-visual {
+            max-width: 320px;
+            margin: 0 auto;
+          }
+        }
+      `}</style>
     </article>
   )
 }
