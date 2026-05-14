@@ -752,7 +752,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .cfs-user-menu-item {
   display: block;
-  padding: 10px 12px;
+  /* Sprint 37.D (F31) — padding vertical uniforme 12px sur toutes
+     les rangées du popover (Mes Outils / Ma Marque / Mon Programme /
+     Mon Compte / Déconnexion). */
+  padding: 12px 16px;
   border-radius: 12px;
   font-family: var(--font-system);
   font-size: 17px;
@@ -775,12 +778,13 @@ h1, h2, h3, h4, h5, h6 {
   color: #007AFF;
 }
 
-/* Sprint 37.C (F27) — items en rangées avec icône + label + raccourci. */
+/* Sprint 37.C (F27) — items en rangées avec icône + label + raccourci.
+   Sprint 37.D (F31) — padding uniformisé à 12px 16px (cf. .cfs-user-menu-item). */
 .cfs-menu-row {
   display: flex !important;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 12px 16px;
 }
 .cfs-menu-row .cfs-menu-icon {
   flex-shrink: 0;

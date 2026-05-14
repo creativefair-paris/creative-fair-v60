@@ -90,6 +90,15 @@ function FilmIcon() {
     </svg>
   )
 }
+function MegaphoneIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 9V15L6 16L12 21V3L6 8L3 9Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M16 8C17.5 9.5 17.5 14.5 16 16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M19 5C22 8 22 16 19 19" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
 
 // ── Données ──────────────────────────────────────────────────────────────
 
@@ -221,6 +230,17 @@ const A_VENIR: ReadonlyArray<Outil> = [
     href: '#',
     ctaLabel: '',
     icon: <FilmIcon />,
+    available: false,
+  },
+  {
+    id: 'ads',
+    title: 'Ads',
+    shortDescription: 'Campagnes paid social et performance.',
+    longDescription:
+      'Conçois et pilote tes campagnes paid social (Meta Ads). A/B test, ciblage, audience saving, lookalike. Sub-prompt TF Ads (Sofia P.) avec garde-fous d’intégrité de marque.',
+    href: '#',
+    ctaLabel: '',
+    icon: <MegaphoneIcon />,
     available: false,
   },
 ]
