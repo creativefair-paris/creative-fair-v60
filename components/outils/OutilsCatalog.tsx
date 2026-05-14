@@ -16,6 +16,7 @@
 
 import { useState, type ReactNode } from 'react'
 import Link from 'next/link'
+import { ToolMockup } from './ToolMockup'
 
 // ── Icônes ───────────────────────────────────────────────────────────────
 
@@ -523,7 +524,9 @@ function OutilPreview({ outil }: { outil: Outil }) {
         {outil.longDescription}
       </p>
 
-      <MockupPlaceholder outil={outil} />
+      {/* Sprint 37.D (F28) — mockup spécifique par outil au lieu du
+          placeholder générique. */}
+      <ToolMockup toolType={outilToMockupType(outil.id)} />
 
       {outil.available ? (
         <Link
@@ -552,42 +555,26 @@ function OutilPreview({ outil }: { outil: Outil }) {
   )
 }
 
-// ── Mockup placeholder ──────────────────────────────────────────────────
-
-function MockupPlaceholder({ outil }: { outil: Outil }) {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        width: '100%',
-        aspectRatio: '16 / 9',
-        borderRadius: 14,
-        border: '1px solid rgba(0, 0, 0, 0.05)',
-        background: `linear-gradient(135deg, rgba(0, 122, 255, 0.05), rgba(88, 86, 214, 0.03))`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <span
-        style={{
-          width: 96,
-          height: 96,
-          borderRadius: 24,
-          background: 'rgba(255, 255, 255, 0.85)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#007AFF',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
-        }}
-      >
-        <span style={{ transform: 'scale(2.2)' }}>{outil.icon}</span>
-      </span>
-    </div>
-  )
+// Sprint 37.D (F28) — Map id outil → type de mockup ToolMockup.
+function outilToMockupType(
+  id: string,
+):
+  | 'conseiller'
+  | 'bibliotheque'
+  | 'post-creator'
+  | 'moodboard'
+  | 'variations'
+  | 'reviews'
+  | 'generic' {
+  switch (id) {
+    case 'conseiller':
+    case 'bibliotheque':
+    case 'post-creator':
+    case 'moodboard':
+    case 'variations':
+    case 'reviews':
+      return id
+    default:
+      return 'generic'
+  }
 }
