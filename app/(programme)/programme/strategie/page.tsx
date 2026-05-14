@@ -1,17 +1,26 @@
 // Sprint 37.F (F61) — Vue Stratégie du programme courant.
-//
-// V1 minimaliste : affiche l'arc narratif du programme actif, la liste
-// des piliers de la marque, et un aperçu de l'audit éditorial (équilibre
-// des formats sur le programme). Sprint 37.G enrichira avec audits
-// chiffrés (TF Analytics côté serveur).
+// Sprint 37.H (F73) — Refondue avec 3 sections : Events business (intention),
+// Indicateurs éditoriaux (calcul déterministe), Résultats anticipés (sub-prompt
+// fourchettes avec warning + limites obligatoires).
 
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdmin } from '@/lib/supabase/admin'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { computeIndicateursEditoriaux } from '@/lib/programme/compute-indicateurs-editoriaux'
+import { generateStrategieEventsIntention } from '@/app/_actions/strategie-events-intention'
+import { estimateProgrammeOutcomes } from '@/app/_actions/estimate-programme-outcomes'
+import { EventIntentionCard } from '@/components/strategie/EventIntentionCard'
+import { IndicateursEditorialsList } from '@/components/strategie/IndicateursEditorialsList'
+import { EstimationsList } from '@/components/strategie/EstimationsList'
 
 export const dynamic = 'force-dynamic'
+// Sprint 37.H (F73) — Sub-prompts Anthropic (events intention + estimations)
+// peuvent prendre 30-60s. Élève maxDuration pour éviter le timeout Next.
+export const maxDuration = 90
 
 type ProgrammeRow = {
   id: string
@@ -25,25 +34,6 @@ type PilierRaw = { nom?: string } | string
 type BrandRow = {
   id: string
   piliers_narratifs: unknown
-}
-
-type PostFormatRow = { format: string | null }
-
-const FORMAT_COLOR: Record<string, string> = {
-  anecdote: '#007AFF',
-  produit: '#34C759',
-  evenement: '#FF9500',
-  coulisses: '#AF52DE',
-  manifeste: '#FF3B30',
-  question: '#5856D6',
-}
-const FORMAT_LABEL: Record<string, string> = {
-  anecdote: 'Anecdote',
-  produit: 'Produit',
-  evenement: 'Événement',
-  coulisses: 'Coulisses',
-  manifeste: 'Manifeste',
-  question: 'Question',
 }
 
 export default async function StrategiePage() {
@@ -86,27 +76,21 @@ export default async function StrategiePage() {
       .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
   })()
 
-  // Compte les formats du programme actif (audit éditorial).
-  let formatsCount: Record<string, number> = {}
-  if (programme) {
-    const { data: rawFormats } = await supabase
-      .from('posts')
-      .select('format')
-      .eq('programme_id', programme.id)
-    const rows = (rawFormats as PostFormatRow[] | null) ?? []
-    for (const r of rows) {
-      if (r.format) {
-        formatsCount[r.format] = (formatsCount[r.format] ?? 0) + 1
-      }
-    }
-  }
-  const totalPosts = Object.values(formatsCount).reduce((s, n) => s + n, 0)
-
   const arcNarratif = ((): string | null => {
     if (!programme?.arc_narratif || typeof programme.arc_narratif !== 'object') return null
     const obj = programme.arc_narratif as { semaines?: Array<{ theme?: string }> }
     return obj.semaines?.[0]?.theme ?? null
   })()
+
+  // Sprint 37.H (F73) — Charge les 3 sections en parallèle si programme actif.
+  const admin = createAdmin() as unknown as SupabaseClient
+  const [eventsResult, indicateurs, estimationsResult] = programme
+    ? await Promise.all([
+        generateStrategieEventsIntention(programme.id),
+        computeIndicateursEditoriaux(admin, programme.id),
+        estimateProgrammeOutcomes(programme.id),
+      ])
+    : [null, null, null]
 
   return (
     <ProgrammeSplitShell activeItem="strategie">
@@ -117,7 +101,7 @@ export default async function StrategiePage() {
           cta={{ label: 'Créer un programme', href: '/programme/create' }}
         />
       ) : (
-        <article style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+        <article style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
           <header style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <h2
               style={{
@@ -144,6 +128,7 @@ export default async function StrategiePage() {
             </p>
           </header>
 
+          {/* Fil rouge */}
           {arcNarratif ? (
             <section
               className="glass-thin"
@@ -156,45 +141,16 @@ export default async function StrategiePage() {
                 gap: 6,
               }}
             >
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'var(--color-tertiary-label)',
-                }}
-              >
-                Fil rouge de la période
-              </span>
-              <p
-                style={{
-                  margin: 0,
-                  fontFamily: 'var(--font-system)',
-                  fontSize: 16,
-                  fontWeight: 500,
-                  color: 'var(--color-label)',
-                  lineHeight: 1.4,
-                }}
-              >
+              <span style={sectionLabelStyle}>Fil rouge de la période</span>
+              <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: 'var(--color-label)', lineHeight: 1.4 }}>
                 {arcNarratif}
               </p>
             </section>
           ) : null}
 
-          <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <h3
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: 'var(--color-tertiary-label)',
-                margin: 0,
-              }}
-            >
-              Piliers mobilisés
-            </h3>
+          {/* Piliers mobilisés */}
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <span style={sectionLabelStyle}>Piliers mobilisés</span>
             {piliers.length === 0 ? (
               <p style={{ fontSize: 13, color: 'var(--color-secondary-label)' }}>
                 Tes piliers narratifs ne sont pas encore posés.{' '}
@@ -225,82 +181,106 @@ export default async function StrategiePage() {
             )}
           </section>
 
+          {/* Section 1 — Events business : intention et couverture */}
           <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <h3
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: 'var(--color-tertiary-label)',
-                margin: 0,
-              }}
-            >
-              Audit éditorial — répartition des formats
-            </h3>
-            {totalPosts === 0 ? (
-              <p style={{ fontSize: 13, color: 'var(--color-secondary-label)' }}>
-                Aucun post généré pour le moment.
-              </p>
+            <span style={sectionLabelStyle}>Events business — Intention et couverture</span>
+            {eventsResult && eventsResult.ok && eventsResult.events.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {eventsResult.events.map((event) => (
+                  <EventIntentionCard key={`${event.event_name}-${event.event_date}`} event={event} />
+                ))}
+              </div>
             ) : (
-              <ul
-                style={{
-                  listStyle: 'none',
-                  margin: 0,
-                  padding: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 8,
-                }}
-              >
-                {Object.entries(formatsCount)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([format, count]) => {
-                    const pct = Math.round((count / totalPosts) * 100)
-                    return (
-                      <li
-                        key={format}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 12,
-                          padding: '10px 14px',
-                          borderRadius: 10,
-                          background: 'rgba(255, 255, 255, 0.5)',
-                          border: '1px solid rgba(0, 0, 0, 0.05)',
-                        }}
-                      >
-                        <span
-                          style={{
-                            padding: '3px 9px',
-                            borderRadius: 6,
-                            fontFamily: 'var(--font-system)',
-                            fontSize: 11,
-                            fontWeight: 600,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.06em',
-                            color: '#FFFFFF',
-                            background: FORMAT_COLOR[format] ?? '#8E8E93',
-                          }}
-                        >
-                          {FORMAT_LABEL[format] ?? format}
-                        </span>
-                        <span style={{ flex: 1, fontSize: 13, color: 'var(--color-label)' }}>
-                          {count} post{count > 1 ? 's' : ''}
-                        </span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-secondary-label)' }}>
-                          {pct}%
-                        </span>
-                      </li>
-                    )
-                  })}
-              </ul>
+              <EmptyState
+                title="Pas d'event business sur cette période"
+                description="Tu peux en ajouter dans Ma Marque › Calendrier business."
+                cta={{ label: 'Ouvrir Ma Marque', href: '/ma-marque?section=calendrier-business' }}
+              />
+            )}
+          </section>
+
+          {/* Section 2 — Indicateurs éditoriaux */}
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <span style={sectionLabelStyle}>Indicateurs éditoriaux</span>
+            {indicateurs ? (
+              <IndicateursEditorialsList indicateurs={indicateurs} />
+            ) : (
+              <p style={{ fontSize: 13, color: 'var(--color-secondary-label)' }}>
+                Indicateurs indisponibles.
+              </p>
+            )}
+          </section>
+
+          {/* Section 3 — Résultats anticipés */}
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <span style={sectionLabelStyle}>Résultats anticipés</span>
+            {estimationsResult?.ok ? (
+              <>
+                <p
+                  style={{
+                    margin: 0,
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    background: 'rgba(255, 149, 0, 0.06)',
+                    border: '1px solid rgba(255, 149, 0, 0.2)',
+                    fontFamily: 'var(--font-system)',
+                    fontSize: 13,
+                    lineHeight: 1.55,
+                    color: 'var(--color-label)',
+                  }}
+                >
+                  <span aria-hidden="true" style={{ marginRight: 6 }}>⚠️</span>
+                  {estimationsResult.warning}
+                </p>
+                {estimationsResult.estimations.length > 0 ? (
+                  <EstimationsList estimations={estimationsResult.estimations} />
+                ) : (
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: 'var(--color-secondary-label)',
+                      padding: '10px 14px',
+                      borderRadius: 10,
+                      background: 'rgba(0, 0, 0, 0.02)',
+                      border: '1px solid rgba(0, 0, 0, 0.05)',
+                      margin: 0,
+                    }}
+                  >
+                    Renseigne tes chiffres marque pour activer les estimations.{' '}
+                    <Link href="/programme/retombees" style={{ color: '#007AFF' }}>
+                      Renseigner mes chiffres →
+                    </Link>
+                  </p>
+                )}
+                {estimationsResult.limites ? (
+                  <p
+                    style={{
+                      margin: 0,
+                      padding: '10px 14px',
+                      borderRadius: 10,
+                      background: 'rgba(0, 0, 0, 0.02)',
+                      border: '1px solid rgba(0, 0, 0, 0.05)',
+                      fontFamily: 'var(--font-system)',
+                      fontSize: 12,
+                      lineHeight: 1.55,
+                      color: 'var(--color-secondary-label)',
+                    }}
+                  >
+                    <span style={{ fontWeight: 600 }}>Ce que je ne peux pas prédire : </span>
+                    {estimationsResult.limites}
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <p style={{ fontSize: 13, color: 'var(--color-secondary-label)' }}>
+                Estimations indisponibles pour le moment.
+              </p>
             )}
           </section>
 
           <footer style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Link
-              href="/outils/conseiller?scenario=A7"
+              href="/outils/conseiller?scenario=A2"
               className="btn-primary"
               style={{ textDecoration: 'none' }}
             >
@@ -311,4 +291,13 @@ export default async function StrategiePage() {
       )}
     </ProgrammeSplitShell>
   )
+}
+
+const sectionLabelStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-system)',
+  fontSize: 11,
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+  color: 'var(--color-tertiary-label)',
 }
