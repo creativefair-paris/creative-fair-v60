@@ -305,147 +305,15 @@ export function ConseillerAccess({
           </div>
         ) : null}
 
-        {/* CTA primaire dominant */}
-        <button
-          type="button"
-          onClick={openCreatePlan}
-          className="glass-regular cfs-conseiller-cta-primary"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: 8,
-            padding: '20px 24px',
-            borderRadius: 16,
-            border: 'none',
-            background: 'rgba(31, 73, 55, 0.04)',
-            cursor: 'pointer',
-            textAlign: 'left',
-            fontFamily: 'var(--font-system)',
-            color: 'var(--color-label)',
-            transition: 'transform 200ms ease-out, box-shadow 200ms ease-out',
-          }}
-        >
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              color: 'var(--color-accent)',
-            }}
-          >
-            Avec le conseiller
-          </span>
-          <span style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.3 }}>
-            Créer mon prochain plan sur mesure
-          </span>
-          <span
-            style={{
-              fontSize: 13,
-              color: 'var(--color-secondary-label)',
-              lineHeight: 1.45,
-            }}
-          >
-            Tu choisis la période, le conseiller construit avec toi un plan
-            aligné sur tes piliers et ton calendrier business.
-          </span>
-        </button>
-
-        {/* CTAs secondaires */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 12,
-            flexWrap: 'wrap',
-          }}
-        >
-          <button
-            type="button"
-            onClick={openBilan}
-            className="cfs-conseiller-cta-secondary"
-            style={{
-              flex: 1,
-              minWidth: 220,
-              padding: '12px 18px',
-              borderRadius: 12,
-              border: '1px solid var(--color-separator)',
-              background: 'transparent',
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontFamily: 'var(--font-system)',
-              color: 'var(--color-label)',
-              fontSize: 14,
-              fontWeight: 500,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              transition: 'background-color 200ms ease-out',
-            }}
-          >
-            <span>Faire le point</span>
-            <span
-              style={{
-                fontSize: 12,
-                color: 'var(--color-tertiary-label)',
-                fontWeight: 400,
-              }}
-            >
-              Bilan exportable pour la direction
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={openReunion}
-            className="cfs-conseiller-cta-secondary"
-            style={{
-              flex: 1,
-              minWidth: 220,
-              padding: '12px 18px',
-              borderRadius: 12,
-              border: '1px solid var(--color-separator)',
-              background: 'transparent',
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontFamily: 'var(--font-system)',
-              color: 'var(--color-label)',
-              fontSize: 14,
-              fontWeight: 500,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              transition: 'background-color 200ms ease-out',
-            }}
-          >
-            <span>Préparer ma réunion</span>
-            <span
-              style={{
-                fontSize: 12,
-                color: 'var(--color-tertiary-label)',
-                fontWeight: 400,
-              }}
-            >
-              3 réponses prêtes à parler
-            </span>
-          </button>
-        </div>
-
-        <style>{`
-          .cfs-conseiller-cta-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.10);
-          }
-          .cfs-conseiller-cta-secondary:hover {
-            background-color: rgba(0,0,0,0.03);
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .cfs-conseiller-cta-primary,
-            .cfs-conseiller-cta-secondary {
-              transition: none !important;
-              transform: none !important;
-            }
-          }
-        `}</style>
+        {/* Sprint 37.G (F63) — CTAs primary + 2 secondaires retirés.
+            Désormais redondants avec la ProgrammeSidebar Sprint 37.F :
+            - 'Créer mon prochain plan sur mesure' → sidebar 'Refaire un programme'
+            - 'Faire le point' → sidebar Actions Rapides
+            - 'Préparer ma réunion' → sidebar Actions Rapides
+            Seule la bannière régénération <14j est préservée (info contextuelle).
+            Les helpers openCreatePlan/openBilan/openReunion restent disponibles
+            pour les voies d'accès autres (auto-open via ?action=create-plan,
+            par exemple). */}
       </section>
 
       {phase.kind === 'period' ? (
