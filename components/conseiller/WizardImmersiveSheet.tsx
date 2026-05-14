@@ -27,6 +27,7 @@ import {
   updateProgrammeCreationSessionStep,
   completeProgrammeCreationSession,
 } from '@/app/_actions/wizard-session'
+import { generatePlanFromWizardSession } from '@/app/_actions/generate-plan-from-wizard'
 import {
   WIZARD_TOTAL_STEPS,
   type DominantFormat,
@@ -117,24 +118,31 @@ export function WizardImmersiveSheet({
     setGenerating(true)
     setError(null)
     try {
-      const result = await completeProgrammeCreationSession(session.id)
-      if (!result.ok) {
-        setError(result.reason ?? 'Échec de la finalisation')
+      // Sprint 37.D (F34+F36) — pipeline complet :
+      // (1) appelle Anthropic + parse JSON + insert programme/posts
+      const genRes = await generatePlanFromWizardSession(session.id)
+      if (!genRes.ok) {
+        setError(genRes.reason)
         setGenerating(false)
         return
       }
-      // Sprint 37.D (F36) — redirige vers /programme SANS action=create-plan
-      // (qui ré-ouvrait le wizard en boucle infinie). La génération du
-      // plan via Anthropic est déclenchée Sprint 37.D F34.
-      router.push('/programme')
+      // (2) marque la session COMPLETED
+      const result = await completeProgrammeCreationSession(session.id)
+      if (!result.ok) {
+        setError(result.reason ?? 'Échec de la finalisation de la session')
+        setGenerating(false)
+        return
+      }
+      // (3) redirige vers /programme avec newPlan en query param
+      router.push(`/programme?newPlan=${genRes.programmeId}`)
       onClose()
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : 'Impossible de finaliser le brief. Réessaie dans quelques secondes.',
+          : 'Impossible de générer le plan. Réessaie dans quelques secondes.',
       )
-      console.error('[wizard] complete session failed:', err)
+      console.error('[wizard] generate plan failed:', err)
     } finally {
       setGenerating(false)
     }
@@ -275,7 +283,53 @@ export function WizardImmersiveSheet({
         }}
       >
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
-          {error ? (
+          {generating ? (
+            <section
+              role="status"
+              aria-live="polite"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 16,
+                padding: '60px 20px',
+                textAlign: 'center',
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  border: '3px solid rgba(0, 122, 255, 0.15)',
+                  borderTopColor: '#007AFF',
+                  animation: 'cfs-spin 800ms linear infinite',
+                }}
+              />
+              <p
+                style={{
+                  fontFamily: 'var(--font-system)',
+                  fontSize: 16,
+                  fontWeight: 500,
+                  color: 'var(--color-label)',
+                  margin: 0,
+                  maxWidth: 320,
+                  lineHeight: 1.5,
+                }}
+              >
+                Je construis ton plan. Ça peut prendre 30 secondes.
+              </p>
+              <style>{`
+                @keyframes cfs-spin { to { transform: rotate(360deg); } }
+                @media (prefers-reduced-motion: reduce) {
+                  [role="status"] span { animation: none !important; }
+                }
+              `}</style>
+            </section>
+          ) : null}
+
+          {!generating && error ? (
             <p
               role="alert"
               style={{
@@ -292,7 +346,7 @@ export function WizardImmersiveSheet({
             </p>
           ) : null}
 
-          {renderStep({
+          {!generating ? renderStep({
             session,
             pillarsCatalog,
             businessAnchorSuggestions,
@@ -313,7 +367,7 @@ export function WizardImmersiveSheet({
             // Format passe de l'index 5 à l'index 6.
             onSaveFormat: (format) => saveStep(6, '6', { format }),
             onGenerate: handleGenerate,
-          })}
+          }) : null}
         </div>
       </main>
 
