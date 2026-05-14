@@ -14,6 +14,7 @@ import { ProgrammeDashboard } from '@/components/programme/ProgrammeDashboard'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
 import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
 import { PlanPreview } from '@/components/programme/PlanPreview'
+import { NewPlanPedagogyOverlay } from '@/components/programme/NewPlanPedagogyOverlay'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
 import { checkJalonStatus } from '@/lib/jalons/check-jalons'
 import type { BusinessCalendar } from '@/types/business-calendar'
@@ -289,6 +290,11 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
               periodEnd={newPlanRow?.date_fin}
             />
           ) : null}
+
+          {/* Sprint 37.E (F47+F53) — Sheet de pédagogie post-génération
+              en overlay. S'affiche au mount si ?newPlan=ID, disparaît
+              au clic du pilote pour révéler le PlanPreview. */}
+          {newPlanId ? <NewPlanPedagogyOverlay programmeId={newPlanId} /> : null}
 
           {/* Sprint 37 Lot 4 — Voies d'accès au conseiller (1 CTA primaire +
               2 secondaires + bannière régénération <14j). Affiché au-dessus
