@@ -17,6 +17,7 @@
 import { useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { ToolMockup } from './ToolMockup'
+import { PostCreatorHubPreview } from './previews/PostCreatorHubPreview'
 
 // ── Icônes ───────────────────────────────────────────────────────────────
 
@@ -279,7 +280,13 @@ export function OutilsCatalog() {
       </aside>
 
       <section className="cfs-outils-preview" aria-live="polite">
-        <OutilPreview outil={selected} />
+        {/* Sprint 37.I (F78) — Post Creator rendu en hub dans la preview
+            (plus de route /outils/post-creator séparée). */}
+        {selected.id === 'post-creator' ? (
+          <PostCreatorHubPreview />
+        ) : (
+          <OutilPreview outil={selected} />
+        )}
       </section>
 
       <style>{`
