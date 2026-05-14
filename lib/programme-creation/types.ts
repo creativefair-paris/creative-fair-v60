@@ -1,8 +1,19 @@
 // Sprint 37.B (F16) — Types partagés pour le wizard immersif A1.
+// Sprint 37.E — Refonte wizard (F39+F40+F42+F43+F44+F45+F46).
+//
+// Structure V3 (8 étapes fixes + 1 étape conditionnelle insérée après
+// Sujets sensibles si piliers de la marque vides — F46) :
+//   0  Période
+//   1  Mix CF / externe              (F45 nouveau)
+//   2  Ancres business
+//   3  Sujets sensibles
+//   4  Définir tes piliers           (F46 conditionnel, sinon skip)
+//   5  Rythme + niveau d'engagement  (F39+F40 fusion)
+//   6  Objectifs éditorial + business (F42+F43 fusion)
+//   7  Formats dominants
+//   8  Confirmation
 
-// Sprint 37.C (F19) — passage à 8 étapes : ajout d'une étape Objectifs
-// éditoriaux entre Curseur de risque (idx 4) et Format préféré.
-export type WizardStepIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+export type WizardStepIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 
 export type WizardState =
   | 'IN_PROGRESS'
@@ -10,12 +21,19 @@ export type WizardState =
   | 'ABANDONED'
   | 'EXPIRED'
 
+// Sprint 37.E (F39) — "Niveau d'engagement" remplace "Curseur de risque".
+export type EngagementLevel = 'prudent' | 'pose' | 'engage'
+
+// Sprint 37.E (F40) — Cadence de publication (alignée curseur fréquence).
+export type Cadence = 'discreet' | 'balanced' | 'dense'
+
+// Sprint 37.E (F45) — Mode de construction du programme.
+export type MixMode = 'full_cf' | 'mixed'
+
+// Legacy retenu pour compat lecture sessions IN_PROGRESS ancien wizard.
 export type RiskCursor = 'safe' | 'moderate' | 'risky'
 
 // Sprint 37.D (F29) — Les 6 formats canoniques de Creative Fair V1.
-// Vocabulaire EXACT (TF Communication, Hélène M.). Ce sont des intentions
-// éditoriales, pas des types structurels (qui restent carrousel/photo/reel
-// gérés dans posts.structure_type).
 export type CanonicalFormat =
   | 'anecdote'
   | 'produit'
@@ -24,30 +42,42 @@ export type CanonicalFormat =
   | 'manifeste'
   | 'question'
 
-// Legacy type retained for backwards compat. À retirer Sprint 38+.
+// Legacy retenu pour compat lecture sessions IN_PROGRESS.
 export type DominantFormat = 'carousel' | 'reel' | 'post' | 'mix'
 
-// Sprint 37.C (F19) — type des objectifs éditoriaux (multi-select 1-2).
+// Sprint 37.C (F19) — type des objectifs éditoriaux.
 export type ObjectifEditorial = {
   value: string
   type: 'qualitatif' | 'quantitatif'
   source: 'pilier_principal' | 'calendar' | 'current_rhythm' | 'current_metrics' | 'custom'
 }
 
-// Réponses indexées par stepIndex (string pour la sérialisation JSONB).
-// Schéma libre côté DB, typage côté UI pour valider à l'écriture.
+// Sprint 37.E (F42+F43) — Combo objectif éditorial + objectif business.
+export type ObjectifBusiness = {
+  value: string
+  source: 'preset' | 'custom'
+}
+
+// Sprint 37.E — Pilier défini à la volée (F46 conditionnel).
+export type PilierLite = { id: string; nom: string }
+
+// Réponses indexées par stepIndex string (JSONB).
 export type WizardResponses = {
   '0'?: { period_start: string; period_end: string }
-  '1'?: { business_anchors: string[] }
-  '2'?: { sensitive_topics: string }
-  '3'?: { pillars: Record<string, number> }
-  '4'?: { risk_cursor: RiskCursor }
-  // Sprint 37.C (F19) — nouvelle étape Objectifs éditoriaux.
-  '5'?: { objectifs_editoriaux: ReadonlyArray<ObjectifEditorial> }
-  // Sprint 37.D (F29) — l'étape 7 (idx 6) prend désormais 1 à 3 formats
-  // canoniques en multi-select. Le legacy "format: DominantFormat" reste
-  // accepté en lecture pour les sessions anciennes (compat IN_PROGRESS).
-  '6'?: { formats: ReadonlyArray<CanonicalFormat> } | { format: DominantFormat }
+  // Sprint 37.E (F45) — étape 1 = Mix CF/externe.
+  '1'?: { mix_mode: MixMode }
+  // Étape 2 = Ancres business (était '1' dans l'ancien wizard).
+  '2'?: { business_anchors: string[] }
+  // Étape 3 = Sujets sensibles (était '2').
+  '3'?: { sensitive_topics: string }
+  // Étape 4 = Définir tes piliers (F46 conditionnel).
+  '4'?: { piliers_definis: ReadonlyArray<PilierLite>; skipped?: boolean }
+  // Sprint 37.E (F39+F40) — étape 5 = Rythme + niveau d'engagement.
+  '5'?: { cadence: Cadence; engagement: EngagementLevel }
+  // Sprint 37.E (F42+F43) — étape 6 = Objectifs éditorial + business.
+  '6'?: { objectif_editorial?: ObjectifEditorial; objectif_business?: ObjectifBusiness }
+  // Sprint 37.D (F29) — étape 7 = Formats canoniques 1-3.
+  '7'?: { formats: ReadonlyArray<CanonicalFormat> } | { format: DominantFormat }
 }
 
 export type WizardSessionRow = {
@@ -65,7 +95,6 @@ export type WizardSessionRow = {
   completed_at: string | null
 }
 
-// Suggestion pré-remplie pour les steps 2 (anchors) et 3 (sensitive).
 export type WizardSuggestion = {
   value: string
   source: 'calendar' | 'external' | 'history'
@@ -75,14 +104,16 @@ export type WizardSuggestionsPayload = {
   suggestions: ReadonlyArray<WizardSuggestion>
 }
 
+// Sprint 37.E — Labels actualisés.
 export const WIZARD_STEP_LABELS = [
   'Période',
+  'Mode de construction',
   'Ancres business',
   'Sujets sensibles',
-  'Piliers à mobiliser',
-  'Curseur de risque',
-  'Objectifs éditoriaux',
-  'Format préféré',
+  'Définir tes piliers',
+  'Rythme et engagement',
+  'Tes objectifs',
+  'Formats dominants',
   'Confirmation',
 ] as const
 

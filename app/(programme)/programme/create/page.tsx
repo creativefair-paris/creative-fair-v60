@@ -8,6 +8,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ProgrammeCreateForm } from '@/components/programme-create/ProgrammeCreateForm'
+import { checkJalonStatus } from '@/lib/jalons/check-jalons'
+import { MarqueIncompleteWarning } from '@/components/programme-create/MarqueIncompleteWarning'
 import type { BusinessCalendar } from '@/types/business-calendar'
 import type { PilierNarratif } from '@/types/programme'
 
@@ -39,6 +41,9 @@ export default async function CreateProgrammePage() {
   if (!brand || brand.brand_book_status !== 'complete') {
     redirect('/onboarding/analyse-marque')
   }
+
+  // Sprint 37.E (F44) — Check jalon marque pour afficher l'alerte.
+  const jalonStatus = await checkJalonStatus(supabase, tenantId)
 
   // Récupère piliers + business calendar pour les suggestions.
   const brandRow = brand as unknown as {
@@ -97,6 +102,9 @@ export default async function CreateProgrammePage() {
             gap: 24,
           }}
         >
+          {/* Sprint 37.E (F44) — Alerte si jalon marque non-atteint. */}
+          {!jalonStatus.marque.complete ? <MarqueIncompleteWarning /> : null}
+
           <ProgrammeCreateForm
             pillarsCatalog={piliers.map((p, i) => ({
               id: `pilier-${i}`,

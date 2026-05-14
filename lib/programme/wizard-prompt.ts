@@ -75,17 +75,18 @@ export function buildWizardPlanUserPrompt(opts: {
   responses: WizardResponses
   publicationFrequency: 'discret' | 'equilibre' | 'dense' | null
 }): string {
+  // Sprint 37.E — Nouvelle structure 9 étapes.
   const r = opts.responses
   const period = r['0']
-  const anchors = r['1']?.business_anchors ?? []
-  const sensitive = r['2']?.sensitive_topics ?? ''
-  const pillarsWeights = r['3']?.pillars ?? {}
-  const risk = r['4']?.risk_cursor ?? 'moderate'
-  const objectifs = r['5']?.objectifs_editoriaux ?? []
+  const mixMode = r['1']?.mix_mode ?? 'full_cf'
+  const anchors = r['2']?.business_anchors ?? []
+  const sensitive = r['3']?.sensitive_topics ?? ''
+  const cadence = r['5']?.cadence
+  const engagement = r['5']?.engagement ?? 'pose'
+  const objEdito = r['6']?.objectif_editorial
+  const objBiz = r['6']?.objectif_business
 
-  // Sprint 37.D (F29) — étape 7 = 1-3 formats canoniques. Compat legacy
-  // sessions ancien wizard avec ?.format single.
-  const formatsRaw = r['6']
+  const formatsRaw = r['7']
   const canonicalFormats: ReadonlyArray<string> =
     formatsRaw && 'formats' in formatsRaw && Array.isArray(formatsRaw.formats)
       ? formatsRaw.formats
@@ -94,14 +95,12 @@ export function buildWizardPlanUserPrompt(opts: {
     ? `Formats canoniques à privilégier (1-3) : ${canonicalFormats.join(', ')}.`
     : ''
 
-  const pillarsLines = opts.pillarsCatalog.map((p) => {
-    const weight = pillarsWeights[p.id]
-    return `- ${p.nom}${typeof weight === 'number' ? ` (${weight}%)` : ''}`
-  }).join('\n')
+  const pillarsLines = opts.pillarsCatalog.map((p) => `- ${p.nom}`).join('\n')
 
-  const objectifsLines = objectifs.length > 0
-    ? objectifs.map((o) => `- ${o.value} (${o.type})`).join('\n')
-    : 'Aucun objectif explicite, laisse le conseiller proposer.'
+  const objectifsLines = [
+    objEdito ? `- Éditorial : ${objEdito.value}` : null,
+    objBiz ? `- Business : ${objBiz.value}` : null,
+  ].filter(Boolean).join('\n') || 'Aucun objectif explicite, laisse le conseiller proposer.'
 
   const anchorsLines = anchors.length > 0
     ? anchors.map((a) => `- ${a}`).join('\n')
@@ -124,19 +123,21 @@ ${anchorsLines}
 SUJETS SENSIBLES À ÉVITER :
 ${sensitive.trim() || 'Aucun.'}
 
-PILIERS À MOBILISER (poids 0-100% si fourni) :
+MODE DE CONSTRUCTION : ${mixMode === 'full_cf' ? '100% Creative Fair (génère tout le plan)' : 'Mix avec contenu externe (laisse de la place au contenu off-app du pilote)'}
+
+PILIERS DE LA MARQUE :
 ${pillarsLines || 'Aucun pilier explicite, déduis depuis le contexte de la marque.'}
 
-CURSEUR DE RISQUE : ${risk} (safe=80% confort / moderate=mixte / risky=exploration assumée)
+NIVEAU D'ENGAGEMENT ÉDITORIAL : ${engagement} (prudent=évite les clivages / pose=prend position calmement / engage=assume les prises fortes)
 
-OBJECTIFS ÉDITORIAUX :
+OBJECTIFS :
 ${objectifsLines}
 
 ${formatsLine}
 
-FRÉQUENCE DE PUBLICATION : ${opts.publicationFrequency ?? 'equilibre'}
-- discret  : 1 à 2 posts par semaine
-- equilibre : 2 à 4 posts par semaine
+CADENCE : ${cadence ?? opts.publicationFrequency ?? 'balanced'}
+- discreet : 1 à 2 posts par semaine
+- balanced : 2 à 4 posts par semaine
 - dense    : 5 à 7 posts par semaine
 
 Produis le JSON selon le schéma exact.`

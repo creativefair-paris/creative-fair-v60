@@ -7,15 +7,26 @@
 'use client'
 
 import type {
-  RiskCursor,
+  Cadence,
   CanonicalFormat,
+  EngagementLevel,
+  MixMode,
   WizardResponses,
 } from '@/lib/programme-creation/types'
 
-const RISK_LABEL: Record<RiskCursor, string> = {
-  safe: 'Safe',
-  moderate: 'Modéré',
-  risky: 'Risqué',
+const MIX_MODE_LABEL: Record<MixMode, string> = {
+  full_cf: '100% Creative Fair',
+  mixed: 'Mix avec contenu externe',
+}
+const CADENCE_LABEL: Record<Cadence, string> = {
+  discreet: 'Discret (1-2/sem)',
+  balanced: 'Équilibré (2-4/sem)',
+  dense: 'Dense (5-7/sem)',
+}
+const ENGAGEMENT_LABEL: Record<EngagementLevel, string> = {
+  prudent: 'Prudent',
+  pose: 'Posé',
+  engage: 'Engagé',
 }
 const CANONICAL_FORMAT_LABEL: Record<CanonicalFormat, string> = {
   anecdote: 'Anecdote',
@@ -43,16 +54,15 @@ export function Step7Confirmation({
   onGenerate,
   generating,
 }: Props) {
+  // Sprint 37.E — Nouvelle structure 9 étapes.
   const period = responses['0']
-  const anchors = responses['1']?.business_anchors ?? []
-  const sensitive = responses['2']?.sensitive_topics ?? ''
-  const pillars = responses['3']?.pillars ?? {}
-  const risk = responses['4']?.risk_cursor
-  // Sprint 37.C (F19) — réponse étape 5 = objectifs ; format passe à idx 6.
-  const objectifs = responses['5']?.objectifs_editoriaux ?? []
-  // Sprint 37.D (F29) — étape 7 = 1-3 formats canoniques. Compat legacy
-  // sessions ancien wizard avec ?.format single.
-  const formatsRaw = responses['6']
+  const mixMode = responses['1']?.mix_mode
+  const anchors = responses['2']?.business_anchors ?? []
+  const sensitive = responses['3']?.sensitive_topics ?? ''
+  // Step 4 (Définir piliers) : skip V1 (F46 différé).
+  const rythme = responses['5']
+  const objectifs6 = responses['6']
+  const formatsRaw = responses['7']
   const formats: ReadonlyArray<CanonicalFormat> =
     formatsRaw && 'formats' in formatsRaw && Array.isArray(formatsRaw.formats)
       ? formatsRaw.formats
@@ -70,6 +80,10 @@ export function Step7Confirmation({
       <dl style={{ display: 'flex', flexDirection: 'column', gap: 16, margin: 0 }}>
         <RecapRow label="Période" value={period ? `${period.period_start} → ${period.period_end}` : '—'} />
         <RecapRow
+          label="Mode de construction"
+          value={mixMode ? MIX_MODE_LABEL[mixMode] : '—'}
+        />
+        <RecapRow
           label="Ancres business"
           value={anchors.length > 0 ? anchors.join(' · ') : 'Aucune ancre renseignée'}
         />
@@ -78,26 +92,20 @@ export function Step7Confirmation({
           value={sensitive.trim().length > 0 ? sensitive : 'Aucun'}
         />
         <RecapRow
-          label="Piliers mobilisés"
-          value={
-            Object.keys(pillars).length > 0
-              ? Object.entries(pillars)
-                  .map(([id, w]) => {
-                    const p = pillarsCatalog.find((c) => c.id === id)
-                    return `${p?.nom ?? id} (${w}%)`
-                  })
-                  .join(' · ')
-              : 'Choix laissé au conseiller'
-          }
+          label="Rythme"
+          value={rythme?.cadence ? CADENCE_LABEL[rythme.cadence] : '—'}
         />
-        <RecapRow label="Curseur de risque" value={risk ? RISK_LABEL[risk] : '—'} />
         <RecapRow
-          label="Objectifs éditoriaux"
-          value={
-            objectifs.length > 0
-              ? objectifs.map((o) => o.value).join(' · ')
-              : 'Aucun objectif renseigné'
-          }
+          label="Niveau d’engagement"
+          value={rythme?.engagement ? ENGAGEMENT_LABEL[rythme.engagement] : '—'}
+        />
+        <RecapRow
+          label="Objectif éditorial"
+          value={objectifs6?.objectif_editorial?.value ?? 'Aucun'}
+        />
+        <RecapRow
+          label="Objectif business"
+          value={objectifs6?.objectif_business?.value ?? 'Aucun'}
         />
         <RecapRow
           label="Formats dominants"

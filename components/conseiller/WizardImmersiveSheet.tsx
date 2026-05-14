@@ -18,9 +18,9 @@ import { ExitConfirmDialog } from './ExitConfirmDialog'
 import { Step1Period } from './wizard-steps/Step1Period'
 import { Step2BusinessAnchors } from './wizard-steps/Step2BusinessAnchors'
 import { Step3SensitiveTopics } from './wizard-steps/Step3SensitiveTopics'
-import { Step4Pillars } from './wizard-steps/Step4Pillars'
-import { Step5RiskCursor } from './wizard-steps/Step5RiskCursor'
-import { Step6Objectifs } from './wizard-steps/Step6Objectifs'
+import { Step2MixMode } from './wizard-steps/Step2MixMode'
+import { Step5RythmeEngagement } from './wizard-steps/Step5RythmeEngagement'
+import { Step6ObjectifsCombined } from './wizard-steps/Step6ObjectifsCombined'
 import { Step7Formats } from './wizard-steps/Step7Formats'
 import { Step7Confirmation } from './wizard-steps/Step7Confirmation'
 import {
@@ -30,9 +30,12 @@ import {
 import { generatePlanFromWizardSession } from '@/app/_actions/generate-plan-from-wizard'
 import {
   WIZARD_TOTAL_STEPS,
+  type Cadence,
   type CanonicalFormat,
+  type EngagementLevel,
+  type MixMode,
+  type ObjectifBusiness,
   type ObjectifEditorial,
-  type RiskCursor,
   type WizardResponses,
   type WizardSessionRow,
   type WizardStepIndex,
@@ -367,17 +370,17 @@ export function WizardImmersiveSheet({
             saving,
             generating,
             onBack: goBack,
+            // Sprint 37.E — Nouvelle structure 9 étapes.
             onSavePeriod: (params) =>
               saveStep(0, '0', { period_start: params.start, period_end: params.end }),
-            onSaveAnchors: (anchors) => saveStep(1, '1', { business_anchors: anchors }),
-            onSaveSensitive: (topics) => saveStep(2, '2', { sensitive_topics: topics }),
-            onSavePillars: (pillars) => saveStep(3, '3', { pillars }),
-            onSaveRisk: (cursor) => saveStep(4, '4', { risk_cursor: cursor }),
-            // Sprint 37.C (F19) — Étape 5 = Objectifs éditoriaux.
-            onSaveObjectifs: (objectifs) =>
-              saveStep(5, '5', { objectifs_editoriaux: objectifs }),
-            // Sprint 37.D (F29) — 1-3 formats canoniques en multi-select.
-            onSaveFormats: (formats) => saveStep(6, '6', { formats }),
+            onSaveMixMode: (mix_mode) => saveStep(1, '1', { mix_mode }),
+            onSaveAnchors: (anchors) => saveStep(2, '2', { business_anchors: anchors }),
+            onSaveSensitive: (topics) => saveStep(3, '3', { sensitive_topics: topics }),
+            // L'étape 4 (Définir piliers, F46 conditionnel) est skip V1 — le
+            // wizard saute directement à l'étape 5 si piliers déjà posés.
+            onSaveRythme: (params) => saveStep(5, '5', params),
+            onSaveObjectifsCombined: (params) => saveStep(6, '6', params),
+            onSaveFormats: (formats) => saveStep(7, '7', { formats }),
             onGenerate: handleGenerate,
           }) : null}
         </div>
@@ -417,15 +420,18 @@ type RenderStepArgs = {
   generating: boolean
   onBack: () => void
   onSavePeriod: (params: { start: string; end: string }) => void
+  onSaveMixMode: (mode: MixMode) => void
   onSaveAnchors: (anchors: string[]) => void
   onSaveSensitive: (topics: string) => void
-  onSavePillars: (pillars: Record<string, number>) => void
-  onSaveRisk: (cursor: RiskCursor) => void
-  onSaveObjectifs: (objectifs: ReadonlyArray<ObjectifEditorial>) => void
+  onSaveRythme: (params: { cadence: Cadence; engagement: EngagementLevel }) => void
+  onSaveObjectifsCombined: (params: { objectif_editorial?: ObjectifEditorial; objectif_business?: ObjectifBusiness }) => void
   onSaveFormats: (formats: ReadonlyArray<CanonicalFormat>) => void
   onGenerate: () => void
 }
 
+// Sprint 37.E — Nouvelle structure wizard 9 étapes :
+//   0 Période | 1 MixMode | 2 Ancres | 3 Sensibles | 4 (skip V1)
+//   5 Rythme+Engagement | 6 Objectifs | 7 Formats | 8 Confirmation
 function renderStep(args: RenderStepArgs) {
   const r = args.session.responses ?? {}
   switch (args.currentStep) {
@@ -440,57 +446,63 @@ function renderStep(args: RenderStepArgs) {
       )
     case 1:
       return (
-        <Step2BusinessAnchors
-          suggestions={args.businessAnchorSuggestions}
-          initialAnchors={r['1']?.business_anchors ?? []}
+        <Step2MixMode
+          initial={r['1']?.mix_mode ?? null}
           onBack={args.onBack}
-          onSave={args.onSaveAnchors}
+          onSave={args.onSaveMixMode}
           saving={args.saving}
         />
       )
     case 2:
       return (
-        <Step3SensitiveTopics
-          initialTopics={r['2']?.sensitive_topics ?? ''}
+        <Step2BusinessAnchors
+          suggestions={args.businessAnchorSuggestions}
+          initialAnchors={r['2']?.business_anchors ?? []}
           onBack={args.onBack}
-          onSave={args.onSaveSensitive}
+          onSave={args.onSaveAnchors}
           saving={args.saving}
         />
       )
     case 3:
       return (
-        <Step4Pillars
-          piliers={args.pillarsCatalog}
-          initialWeights={r['3']?.pillars ?? {}}
+        <Step3SensitiveTopics
+          initialTopics={r['3']?.sensitive_topics ?? ''}
           onBack={args.onBack}
-          onSave={args.onSavePillars}
+          onSave={args.onSaveSensitive}
           saving={args.saving}
         />
       )
     case 4:
-      return (
-        <Step5RiskCursor
-          initial={r['4']?.risk_cursor ?? null}
-          onBack={args.onBack}
-          onSave={args.onSaveRisk}
-          saving={args.saving}
-        />
-      )
+      // Sprint 37.E F46 conditionnel — skip V1 (sera ajouté Sprint 37.F).
+      // L'index 4 est réservé pour cette étape, le wizard saute directement
+      // à l'index 5 (Rythme+Engagement) en pratique.
+      return null
     case 5:
-      // Sprint 37.C (F19) — nouvelle étape Objectifs éditoriaux.
       return (
-        <Step6Objectifs
-          initial={r['5']?.objectifs_editoriaux ?? []}
-          suggestions={args.objectifsSuggestions}
+        <Step5RythmeEngagement
+          initialCadence={r['5']?.cadence ?? null}
+          initialEngagement={r['5']?.engagement ?? null}
           onBack={args.onBack}
-          onSave={args.onSaveObjectifs}
+          onSave={args.onSaveRythme}
           saving={args.saving}
         />
       )
-    case 6: {
-      // Sprint 37.D (F29) — Step7Formats. On lit 'formats' (nouveau) ou
-      // legacy 'format' single (compat IN_PROGRESS sessions ancien wizard).
-      const raw = r['6']
+    case 6:
+      return (
+        <Step6ObjectifsCombined
+          initial={{
+            objectif_editorial: r['6']?.objectif_editorial,
+            objectif_business: r['6']?.objectif_business,
+          }}
+          editorialSuggestions={args.objectifsSuggestions}
+          onBack={args.onBack}
+          onSave={args.onSaveObjectifsCombined}
+          saving={args.saving}
+        />
+      )
+    case 7: {
+      // Compat lecture sessions IN_PROGRESS ancien wizard avec clé '6'.
+      const raw = r['7']
       let initialFormats: ReadonlyArray<CanonicalFormat> = []
       if (raw && 'formats' in raw && Array.isArray(raw.formats)) {
         initialFormats = raw.formats
@@ -504,7 +516,7 @@ function renderStep(args: RenderStepArgs) {
         />
       )
     }
-    case 7:
+    case 8:
       return (
         <Step7Confirmation
           responses={r}

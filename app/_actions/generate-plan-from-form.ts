@@ -64,16 +64,27 @@ export async function generatePlanFromForm(
 
   const admin = createAdmin() as unknown as SupabaseClient
 
-  // Construit les réponses au format WizardResponses pour réutiliser
-  // le pipeline existant.
+  // Sprint 37.E — Mapping form natif → nouvelle structure 9 étapes.
+  // V1 : le formulaire natif F35b n'expose pas encore Mix mode / objectif
+  // business / cadence séparée. On utilise des défauts.
+  const cadence: 'discreet' | 'balanced' | 'dense' =
+    profile?.publication_frequency === 'discret' ? 'discreet'
+    : profile?.publication_frequency === 'dense' ? 'dense'
+    : 'balanced'
+  const engagement: 'prudent' | 'pose' | 'engage' =
+    input.riskCursor === 'safe' ? 'prudent'
+    : input.riskCursor === 'risky' ? 'engage'
+    : 'pose'
   const responses: WizardResponses = {
     '0': { period_start: input.periodStart, period_end: input.periodEnd },
-    '1': { business_anchors: [...input.businessAnchors] },
-    '2': { sensitive_topics: input.sensitiveTopics },
-    '3': { pillars: input.pillarsWeights },
-    '4': { risk_cursor: input.riskCursor },
-    '5': { objectifs_editoriaux: input.objectifs },
-    '6': { formats: input.formats },
+    '1': { mix_mode: 'full_cf' },
+    '2': { business_anchors: [...input.businessAnchors] },
+    '3': { sensitive_topics: input.sensitiveTopics },
+    '5': { cadence, engagement },
+    '6': {
+      objectif_editorial: input.objectifs[0],
+    },
+    '7': { formats: input.formats },
   }
 
   // 1. Créer une session implicite COMPLETED
