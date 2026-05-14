@@ -15,6 +15,13 @@ import type {
   RiskCursor,
 } from '@/lib/programme-creation/types'
 
+// Sprint 37.G (F68) — Types des nouvelles étapes (alignés sur le wizard
+// immersif Sprint 37.E). On les redéclare localement pour éviter d'imposer
+// des imports lourds sur le client.
+type MixMode = 'full_cf' | 'mixed'
+type Cadence = 'discreet' | 'balanced' | 'dense'
+type Engagement = 'prudent' | 'pose' | 'engage'
+
 type PilierLite = { id: string; nom: string }
 
 type Props = {
@@ -83,18 +90,33 @@ export function ProgrammeCreateForm({
   const [sensitiveCustom, setSensitiveCustom] = useState('')
   const [sensitiveMode, setSensitiveMode] = useState<'quick' | 'custom'>('quick')
 
-  // Pillars
-  const [pillarsWeights, setPillarsWeights] = useState<Record<string, number>>(() => {
+  // Sprint 37.G (F68) — Nouvelles étapes alignées wizard immersif :
+
+  // MixMode (NEW étape 2 — F45 Sprint 37.E)
+  const [mixMode, setMixMode] = useState<MixMode>('full_cf')
+
+  // Pillars weights (legacy gardé pour le backend qui s'attend à ce format ;
+  // les sliders ne sont plus affichés en V1 page native, on envoie l'équilibre
+  // par défaut. Sprint 37.H si besoin de granularité côté page native.)
+  const [pillarsWeights] = useState<Record<string, number>>(() => {
     const out: Record<string, number> = {}
-    pillarsCatalog.forEach((p) => { out[p.id] = Math.floor(100 / Math.max(1, pillarsCatalog.length)) })
+    pillarsCatalog.forEach((p) => {
+      out[p.id] = Math.floor(100 / Math.max(1, pillarsCatalog.length))
+    })
     return out
   })
 
-  // Risk
-  const [risk, setRisk] = useState<RiskCursor>('moderate')
+  // Rythme + Engagement (NEW étape 5 — F39+F40 fusion Sprint 37.E)
+  const [cadence, setCadence] = useState<Cadence>('balanced')
+  const [engagement, setEngagement] = useState<Engagement>('pose')
 
-  // Objectifs
-  const [objectifText, setObjectifText] = useState('')
+  // Mapping engagement → riskCursor legacy pour la server action existante.
+  const risk: RiskCursor =
+    engagement === 'prudent' ? 'safe' : engagement === 'engage' ? 'risky' : 'moderate'
+
+  // Objectif éditorial + business (NEW étape 6 — F42+F43 fusion Sprint 37.E)
+  const [objectifEditoText, setObjectifEditoText] = useState('')
+  const [objectifBusinessText, setObjectifBusinessText] = useState('')
 
   // Formats
   const [formats, setFormats] = useState<ReadonlyArray<CanonicalFormat>>([])
@@ -145,9 +167,17 @@ export function ProgrammeCreateForm({
         ? sensitiveCustom.trim()
         : sensitiveChoice ?? ''
 
-      const objectifs: ReadonlyArray<ObjectifEditorial> = objectifText.trim().length > 0
-        ? [{ value: objectifText.trim(), type: 'qualitatif', source: 'custom' }]
-        : []
+      // Sprint 37.G (F68) — concatène objectif édito + business dans le
+      // tableau objectifs (la server action existante n'a qu'un seul champ
+      // legacy ; les 2 sont préservés pour le sub-prompt).
+      const objs: ObjectifEditorial[] = []
+      if (objectifEditoText.trim().length > 0) {
+        objs.push({ value: objectifEditoText.trim(), type: 'qualitatif', source: 'custom' })
+      }
+      if (objectifBusinessText.trim().length > 0) {
+        objs.push({ value: objectifBusinessText.trim(), type: 'quantitatif', source: 'custom' })
+      }
+      const objectifs: ReadonlyArray<ObjectifEditorial> = objs
 
       const result = await generatePlanFromForm({
         periodStart,
@@ -321,7 +351,78 @@ export function ProgrammeCreateForm({
         ) : null}
       </Fieldset>
 
-      {/* 2. Ancres business */}
+      {/* Sprint 37.G (F68) — Étape 2 Mix CF / externe (F45 Sprint 37.E). */}
+      <Fieldset legend="Comment veux-tu construire ce programme ?">
+        <p style={hintStyle}>
+          100% Creative Fair (rapide, efficace) ou mixé avec contenu externe
+          (complexe, ultra efficace).
+        </p>
+        <div
+          className="cfs-mix-grid"
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginTop: 12 }}
+        >
+          {([
+            {
+              value: 'full_cf' as MixMode,
+              title: '100% Creative Fair',
+              tag: 'Rapide et efficace',
+              desc: 'Le conseiller génère tout le programme à partir de ta marque et ta bibliothèque.',
+            },
+            {
+              value: 'mixed' as MixMode,
+              title: 'Mix avec contenu externe',
+              tag: 'Complexe mais ultra efficace',
+              desc: "Tu intègres tes propres créations (off-app) dans le programme.",
+            },
+          ]).map((opt) => {
+            const sel = mixMode === opt.value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setMixMode(opt.value)}
+                aria-pressed={sel}
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: 12,
+                  border: sel ? '1px solid rgba(0, 122, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.06)',
+                  background: sel ? 'rgba(0, 122, 255, 0.06)' : 'rgba(255, 255, 255, 0.6)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    color: '#007AFF',
+                  }}
+                >
+                  {opt.tag}
+                </span>
+                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-label)' }}>
+                  {opt.title}
+                </span>
+                <span style={{ fontSize: 12, lineHeight: 1.5, color: 'rgba(0, 0, 0, 0.7)' }}>
+                  {opt.desc}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <style>{`
+          @media (max-width: 560px) {
+            .cfs-mix-grid { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
+      </Fieldset>
+
+      {/* 3. Ancres business */}
       <Fieldset legend="As-tu des événements business sur cette période ?">
         {businessAnchorSuggestions.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -408,58 +509,92 @@ export function ProgrammeCreateForm({
         ) : null}
       </Fieldset>
 
-      {/* 4. Piliers */}
-      <Fieldset legend="Quels piliers veux-tu mettre en avant ?">
-        {pillarsCatalog.length === 0 ? (
-          <p style={{ fontSize: 13, color: 'var(--color-secondary-label)', margin: 0 }}>
-            Pas de piliers définis. Le conseiller proposera des piliers depuis le contexte de ta marque.
-          </p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {pillarsCatalog.map((p) => (
-              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>{p.nom}</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={pillarsWeights[p.id] ?? 0}
-                  onChange={(e) => setPillarsWeights({ ...pillarsWeights, [p.id]: Number(e.target.value) })}
-                  style={{ flex: 2 }}
-                />
-                <span style={{ minWidth: 50, textAlign: 'right', fontSize: 13, color: 'var(--color-secondary-label)' }}>
-                  {pillarsWeights[p.id] ?? 0}%
-                </span>
-              </div>
-            ))}
+      {/* Sprint 37.G (F68) — Étape 5 Rythme + niveau d'engagement (F39+F40
+          fusion Sprint 37.E). Remplace l'ancienne étape "Curseur de risque". */}
+      <Fieldset legend="Rythme et niveau d'engagement">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <span style={subTitleStyle}>Cadence de publication</span>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+              {([
+                { value: 'discreet', label: 'Discret', desc: '1-2 / sem' },
+                { value: 'balanced', label: 'Équilibré', desc: '2-4 / sem' },
+                { value: 'dense', label: 'Dense', desc: '5-7 / sem' },
+              ] as const).map((opt) => (
+                <label key={opt.value} style={radioRowStyle(cadence === opt.value)}>
+                  <input
+                    type="radio"
+                    name="cadence"
+                    checked={cadence === opt.value}
+                    onChange={() => setCadence(opt.value)}
+                  />
+                  <span style={{ flex: 1 }}>
+                    <span style={{ fontSize: 14, fontWeight: 500, display: 'block' }}>{opt.label}</span>
+                    <span style={{ fontSize: 12, color: 'var(--color-secondary-label)' }}>{opt.desc}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
-        )}
-      </Fieldset>
 
-      {/* 5. Risque */}
-      <Fieldset legend="Quel curseur de risque éditorial ?">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {RISK_OPTIONS.map((opt) => (
-            <label key={opt.value} style={radioRowStyle(risk === opt.value)}>
-              <input type="radio" name="risk" checked={risk === opt.value} onChange={() => setRisk(opt.value)} />
-              <span style={{ flex: 1 }}>
-                <span style={{ fontSize: 14, fontWeight: 500, display: 'block' }}>{opt.label}</span>
-                <span style={{ fontSize: 12, color: 'var(--color-secondary-label)' }}>{opt.desc}</span>
-              </span>
-            </label>
-          ))}
+          <div>
+            <span style={subTitleStyle}>Niveau d&apos;engagement éditorial</span>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+              {([
+                { value: 'prudent', label: 'Prudent', desc: 'On évite les clivages.' },
+                { value: 'pose', label: 'Posé', desc: 'On prend position calmement.' },
+                { value: 'engage', label: 'Engagé', desc: 'On assume les prises fortes.' },
+              ] as const).map((opt) => (
+                <label key={opt.value} style={radioRowStyle(engagement === opt.value)}>
+                  <input
+                    type="radio"
+                    name="engagement"
+                    checked={engagement === opt.value}
+                    onChange={() => setEngagement(opt.value)}
+                  />
+                  <span style={{ flex: 1 }}>
+                    <span style={{ fontSize: 14, fontWeight: 500, display: 'block' }}>{opt.label}</span>
+                    <span style={{ fontSize: 12, color: 'var(--color-secondary-label)' }}>{opt.desc}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
       </Fieldset>
 
-      {/* 6. Objectifs */}
-      <Fieldset legend="Quel est ton objectif éditorial principal ? (optionnel)">
-        <input
-          type="text"
-          value={objectifText}
-          onChange={(e) => setObjectifText(e.target.value)}
-          placeholder="Ex. Renforcer la perception expertise sur le pilier Coulisses."
-          style={inputStyle}
-        />
+      {/* Sprint 37.G (F68) — Étape 6 Objectifs combinés (F42+F43 fusion). */}
+      <Fieldset legend="Tes objectifs sur cette période">
+        <p style={{ fontSize: 13, color: 'var(--color-secondary-label)', margin: '0 0 12px 0' }}>
+          Choisis ou rédige tes objectifs. Les deux dimensions comptent.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }} className="cfs-objectifs-grid">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={subTitleStyle}>Objectif éditorial</label>
+            <input
+              type="text"
+              value={objectifEditoText}
+              onChange={(e) => setObjectifEditoText(e.target.value)}
+              placeholder="Ex. Renforcer la perception expertise sur le pilier Coulisses."
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={subTitleStyle}>Objectif business</label>
+            <input
+              type="text"
+              value={objectifBusinessText}
+              onChange={(e) => setObjectifBusinessText(e.target.value)}
+              placeholder="Ex. Obtenir 3 demandes presse."
+              style={inputStyle}
+            />
+          </div>
+        </div>
+        <style>{`
+          @media (max-width: 720px) {
+            .cfs-objectifs-grid { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
       </Fieldset>
 
       {/* 7. Formats */}
@@ -580,4 +715,14 @@ const hintStyle: React.CSSProperties = {
   fontFamily: 'var(--font-system)',
   fontSize: 13,
   color: 'var(--color-secondary-label)',
+}
+
+// Sprint 37.G (F68) — Style sous-titre dans les fieldsets multi-sections.
+const subTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-system)',
+  fontSize: 11,
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+  color: 'var(--color-tertiary-label)',
 }
