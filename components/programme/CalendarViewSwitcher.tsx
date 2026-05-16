@@ -1,5 +1,7 @@
-// Sprint 37.G (F64) — Toggle segmented control iOS pour les 3 vues du
-// calendrier : Semaine / Mois / Liste.
+// Sprint 37.G (F64) — Toggle 3 vues du calendrier (Semaine / Mois / Liste).
+// Sprint 37.J (F84) — Refonte en vrai Segmented Control Apple iOS :
+// background gris natif iOS rgba(120,120,128,0.12), padding 2px, option
+// active en blanc avec box-shadow + bold, transition cubic-bezier Apple.
 
 'use client'
 
@@ -21,13 +23,7 @@ export function CalendarViewSwitcher({ active, onChange }: Props) {
     <div
       role="tablist"
       aria-label="Type de vue calendrier"
-      style={{
-        display: 'inline-flex',
-        background: 'rgba(120, 120, 128, 0.08)',
-        borderRadius: 10,
-        padding: 2,
-        gap: 2,
-      }}
+      className="ios-segmented"
     >
       {OPTIONS.map((opt) => {
         const isActive = active === opt.id
@@ -38,24 +34,52 @@ export function CalendarViewSwitcher({ active, onChange }: Props) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(opt.id)}
-            style={{
-              padding: '6px 16px',
-              background: isActive ? '#FFFFFF' : 'transparent',
-              border: 'none',
-              borderRadius: 8,
-              fontFamily: 'var(--font-system)',
-              fontSize: 13,
-              fontWeight: isActive ? 600 : 500,
-              color: isActive ? 'rgba(0, 0, 0, 0.95)' : 'rgba(0, 0, 0, 0.7)',
-              cursor: 'pointer',
-              boxShadow: isActive ? '0 1px 3px rgba(0, 0, 0, 0.08)' : 'none',
-              transition: 'background 180ms ease-out, color 180ms ease-out',
-            }}
+            className={`ios-segmented__opt${isActive ? ' is-active' : ''}`}
           >
             {opt.label}
           </button>
         )
       })}
+
+      <style>{`
+        .ios-segmented {
+          display: inline-flex;
+          background: rgba(120, 120, 128, 0.12);
+          padding: 2px;
+          border-radius: 9px;
+          gap: 0;
+        }
+        .ios-segmented__opt {
+          background: transparent;
+          border: none;
+          padding: 6px 16px;
+          font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui;
+          font-size: 13px;
+          font-weight: 500;
+          line-height: 1.2;
+          letter-spacing: -0.1px;
+          color: rgba(0, 0, 0, 0.85);
+          cursor: pointer;
+          border-radius: 7px;
+          transition: background 200ms cubic-bezier(0.32, 0.72, 0, 1),
+                      color 200ms,
+                      box-shadow 200ms;
+        }
+        .ios-segmented__opt:not(.is-active):hover {
+          color: rgba(0, 0, 0, 0.65);
+        }
+        .ios-segmented__opt.is-active {
+          background: #FFFFFF;
+          color: rgba(0, 0, 0, 0.95);
+          font-weight: 600;
+          box-shadow:
+            0 3px 8px rgba(0, 0, 0, 0.04),
+            0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ios-segmented__opt { transition: none !important; }
+        }
+      `}</style>
     </div>
   )
 }

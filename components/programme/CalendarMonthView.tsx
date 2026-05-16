@@ -211,15 +211,18 @@ export function CalendarMonthView({ posts, onSelectPost, refDate }: Props) {
           min-height: 80px;
           padding: 4px 6px;
           border-radius: 6px;
-          background: rgba(255, 255, 255, 0.55);
+          /* Sprint 37.J (F84) — Cellules transparentes pour laisser passer
+             les halos signature. Bordure subtile uniquement. */
+          background: transparent;
           border: 1px solid rgba(0, 0, 0, 0.04);
           display: flex;
           flex-direction: column;
           gap: 4px;
         }
         .cfs-cal-month-cell.is-other-month {
-          opacity: 0.4;
-          background: rgba(255, 255, 255, 0.25);
+          opacity: 0.35;
+          background: transparent;
+          border-color: rgba(0, 0, 0, 0.02);
         }
         .cfs-cal-month-cell-day {
           font-family: var(--font-system);
