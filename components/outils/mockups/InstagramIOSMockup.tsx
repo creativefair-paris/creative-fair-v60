@@ -25,6 +25,9 @@ type Size = 'sm' | 'md' | 'lg'
 export type InstagramIOSMockupProps = {
   username?: string
   isVerified?: boolean
+  // Sprint 37.M (F86.3) — Default false : pas de halo, juste contour gris fin
+  // (cohérent capture iOS référence Le Monde).
+  hasStory?: boolean
   location?: string
   timestamp?: string
   avatarUrl?: string
@@ -68,6 +71,7 @@ function formatCount(n: number): string {
 export function InstagramIOSMockup({
   username = 'creativefair.paris',
   isVerified = true,
+  hasStory = false,
   location,
   timestamp = '4 h',
   avatarUrl,
@@ -98,6 +102,7 @@ export function InstagramIOSMockup({
       <Header
         username={username}
         isVerified={isVerified}
+        hasStory={hasStory}
         location={location}
         timestamp={timestamp}
         avatarUrl={avatarUrl}
@@ -132,6 +137,7 @@ export function InstagramIOSMockup({
 function Header({
   username,
   isVerified,
+  hasStory,
   location,
   timestamp,
   avatarUrl,
@@ -139,14 +145,21 @@ function Header({
 }: {
   username: string
   isVerified: boolean
+  hasStory: boolean
   location: string | undefined
   timestamp: string
   avatarUrl: string | undefined
   size: Size
 }) {
+  // Sprint 37.M (F86.3) — Si pas d'avatarUrl, on injecte un <DefaultBrandAvatar>
+  // brandé CF (gradient bleu→violet→orange + initiale). Sinon, l'image avatar
+  // est rendue dans le ring directement via la prop avatarUrl.
+  const initial = username.trim().charAt(0).toUpperCase() || 'C'
   return (
     <header className="ig-ios-mockup__header">
-      <InstagramStoryRing size={size} avatarUrl={avatarUrl} />
+      <InstagramStoryRing size={size} hasStory={hasStory} avatarUrl={avatarUrl}>
+        {avatarUrl ? null : <DefaultBrandAvatar initial={initial} />}
+      </InstagramStoryRing>
       <div className="ig-ios-mockup__brand-block">
         <div className="ig-ios-mockup__brand-line">
           <span className="ig-ios-mockup__brand">{username}</span>
@@ -205,7 +218,7 @@ function ImageBlock({
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         ) : (
-          <HalosPlaceholder />
+          <CFGradientPlaceholder />
         )}
 
         {hasCarousel ? (
@@ -233,17 +246,50 @@ function ImageBlock({
   )
 }
 
-// Placeholder : 6 halos pastels signature Creative Fair (statiques).
-function HalosPlaceholder(): ReactNode {
+// Sprint 37.M (F86.3) — Placeholder image brandé CF.
+// Quand imageUrl est absente, on rend un gradient diagonal saturé (PAS une
+// zone blanche vide). Bleu CF #007AFF en premier stop pour cohérence design
+// system v60.
+function CFGradientPlaceholder(): ReactNode {
   return (
-    <>
-      <span className="ig-ios-mockup__halo ig-ios-mockup__halo--1" aria-hidden="true" />
-      <span className="ig-ios-mockup__halo ig-ios-mockup__halo--2" aria-hidden="true" />
-      <span className="ig-ios-mockup__halo ig-ios-mockup__halo--3" aria-hidden="true" />
-      <span className="ig-ios-mockup__halo ig-ios-mockup__halo--4" aria-hidden="true" />
-      <span className="ig-ios-mockup__halo ig-ios-mockup__halo--5" aria-hidden="true" />
-      <span className="ig-ios-mockup__halo ig-ios-mockup__halo--6" aria-hidden="true" />
-    </>
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        background:
+          'linear-gradient(135deg, #007AFF 0%, #A78BFA 50%, #FB923C 100%)',
+      }}
+    />
+  )
+}
+
+// Sprint 37.M (F86.3) — Avatar par défaut brandé CF.
+// Affiché dans le ring quand avatarUrl n'est pas fourni : gradient diagonal
+// + initiale blanche (première lettre du username).
+function DefaultBrandAvatar({ initial }: { initial: string }): ReactNode {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        width: '100%',
+        height: '100%',
+        background:
+          'linear-gradient(135deg, #007AFF 0%, #A78BFA 50%, #FB923C 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#FFFFFF',
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui',
+        fontWeight: 600,
+        fontSize: 14,
+        lineHeight: 1,
+        letterSpacing: '-0.01em',
+      }}
+    >
+      {initial}
+    </span>
   )
 }
 
@@ -329,6 +375,11 @@ function ActionWithCount({
 // Caption + "Voir la traduction" sous le caption
 // ─────────────────────────────────────────────────────────────────────────
 
+// Sprint 37.M (F86.3) — Caption Instagram avec troncature "… plus".
+// Si caption.length > maxChars, on slice et ajoute "… plus" en gris #737373
+// (visuellement présent, non cliquable — mockup statique).
+const CAPTION_MAX_CHARS = 70
+
 function Caption({
   username,
   isVerified,
@@ -340,6 +391,8 @@ function Caption({
   caption: string
   showTranslateButton: boolean
 }) {
+  const isTruncated = caption.length > CAPTION_MAX_CHARS
+  const visibleText = isTruncated ? caption.slice(0, CAPTION_MAX_CHARS).trimEnd() : caption
   return (
     <div className="ig-ios-mockup__caption">
       <p className="ig-ios-mockup__caption-line">
@@ -350,7 +403,15 @@ function Caption({
           </span>
         ) : null}
         {' '}
-        <span className="ig-ios-mockup__caption-text">{caption}</span>
+        <span className="ig-ios-mockup__caption-text">
+          {visibleText}
+          {isTruncated ? (
+            <>
+              {'… '}
+              <span className="ig-ios-mockup__caption-more">plus</span>
+            </>
+          ) : null}
+        </span>
       </p>
       {showTranslateButton ? (
         <p className="ig-ios-mockup__translate-bottom">Voir la traduction</p>
@@ -471,44 +532,6 @@ function Styles() {
         overflow: hidden;
         border-radius: 12px;
       }
-      .ig-ios-mockup__halo {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(40px);
-        opacity: 0.6;
-        pointer-events: none;
-      }
-      .ig-ios-mockup__halo--1 {
-        width: 180px; height: 180px;
-        background: radial-gradient(circle, rgba(255, 200, 220, 0.7) 0%, transparent 70%);
-        top: -40px; left: -30px;
-      }
-      .ig-ios-mockup__halo--2 {
-        width: 160px; height: 160px;
-        background: radial-gradient(circle, rgba(200, 180, 255, 0.6) 0%, transparent 70%);
-        top: 40px; right: -30px;
-      }
-      .ig-ios-mockup__halo--3 {
-        width: 140px; height: 140px;
-        background: radial-gradient(circle, rgba(180, 210, 255, 0.6) 0%, transparent 70%);
-        bottom: -20px; left: 30%;
-      }
-      .ig-ios-mockup__halo--4 {
-        width: 100px; height: 100px;
-        background: radial-gradient(circle, rgba(255, 220, 180, 0.5) 0%, transparent 70%);
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-      }
-      .ig-ios-mockup__halo--5 {
-        width: 80px; height: 80px;
-        background: radial-gradient(circle, rgba(220, 200, 255, 0.5) 0%, transparent 70%);
-        bottom: 20%; right: 15%;
-      }
-      .ig-ios-mockup__halo--6 {
-        width: 120px; height: 120px;
-        background: radial-gradient(circle, rgba(180, 230, 200, 0.4) 0%, transparent 70%);
-        top: 20%; left: 30%;
-      }
       .ig-ios-mockup__chevron {
         position: absolute;
         right: 12px;
@@ -603,6 +626,10 @@ function Styles() {
         line-height: 0;
       }
       .ig-ios-mockup__caption-text {
+        font-weight: 400;
+      }
+      .ig-ios-mockup__caption-more {
+        color: #737373;
         font-weight: 400;
       }
       .ig-ios-mockup__translate-bottom {
