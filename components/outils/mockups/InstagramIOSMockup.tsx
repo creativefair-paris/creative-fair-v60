@@ -246,10 +246,13 @@ function ImageBlock({
   )
 }
 
-// Sprint 37.M (F86.3) — Placeholder image brandé CF.
-// Quand imageUrl est absente, on rend un gradient diagonal saturé (PAS une
-// zone blanche vide). Bleu CF #007AFF en premier stop pour cohérence design
-// system v60.
+// Sprint 37.N (F86.3) — Placeholder image crème ton sur ton (rollback
+// saturation 37.M). Le gradient accent CTA (#007AFF → #A78BFA → #FB923C)
+// utilisé en remplissage massif violait la doctrine v60 :
+// `#007AFF` est un token d'accent CTA, pas un fond. Retour à une crème
+// ton sur ton ultra-discrète (différence luminosité ~3-5%, effet "papier
+// teinté"). Direction 135deg conservée pour cohérence structurelle.
+// Subtraction-first : sur les éléments par défaut, sobriété > expression.
 function CFGradientPlaceholder(): ReactNode {
   return (
     <div
@@ -257,8 +260,7 @@ function CFGradientPlaceholder(): ReactNode {
       style={{
         position: 'absolute',
         inset: 0,
-        background:
-          'linear-gradient(135deg, #007AFF 0%, #A78BFA 50%, #FB923C 100%)',
+        background: 'linear-gradient(135deg, #FBFAF7 0%, #F5F0EA 100%)',
       }}
     />
   )
