@@ -92,12 +92,28 @@ function BibliothequeMockup() {
 
 // ── Post Creator ─────────────────────────────────────────────────────────
 
-// Sprint 37.K (F86) — Délégué au composant factorisé InstagramIOSMockup.
-// L'ancien rendu inline (Sprint 37.I F79 + 37.J) utilisait tamarque.paris
-// et un gradient subtle dans l'image — remplacé par @creativefair.paris
-// + halos pastels signature Creative Fair (statiques).
+// Sprint 37.M (F86.3) — Câblage complet des props CF pour aligner sur la
+// capture iOS référence (Le Monde 'L'asthme une maladie banalisée…') :
+// hasStory false par défaut (pas de halo dans la ref), 8 slides carousel,
+// caption longue pour déclencher la troncature "… plus".
 function PostCreatorMockup() {
-  return <InstagramIOSMockup />
+  return (
+    <InstagramIOSMockup
+      username="creativefair.paris"
+      isVerified={true}
+      hasStory={false}
+      timestamp="4 h"
+      hasCarousel={true}
+      slidesCount={8}
+      activeSlide={0}
+      likes={330}
+      comments={2}
+      reposts={11}
+      caption="L'histoire derrière ta création préférée, racontée avec les mots que tu n'oses pas dire en public mais qui résonnent."
+      showTranslateButton={false}
+      size="md"
+    />
+  )
 }
 
 
