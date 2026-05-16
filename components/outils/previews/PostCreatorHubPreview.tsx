@@ -98,16 +98,20 @@ export function PostCreatorHubPreview() {
           </section>
         </div>
 
-        {/* Mockup Instagram à droite (refondu F79) */}
-        <div
+        {/* Sprint 37.K (F87) — Mockup en sticky top:24 pour rester visible
+            quand la liste de FormatCards défile en flex column. */}
+        <aside
           style={{
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'center',
+            position: 'sticky',
+            top: 24,
+            alignSelf: 'start',
           }}
         >
           <ToolMockup toolType="post-creator" />
-        </div>
+        </aside>
       </div>
 
       <style>{`
@@ -117,18 +121,18 @@ export function PostCreatorHubPreview() {
           gap: 32px;
           align-items: start;
         }
+        /* Sprint 37.K (F87) — Stack vertical à 1 colonne pour les
+           FormatCard. Le grid 2×2 cachait visuellement les boutons
+           derrière le mockup. */
         .cfs-format-cards-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
         @media (max-width: 900px) {
           .cfs-pc-hub-grid {
             grid-template-columns: 1fr;
             gap: 24px;
-          }
-          .cfs-format-cards-grid {
-            grid-template-columns: 1fr;
           }
         }
       `}</style>
