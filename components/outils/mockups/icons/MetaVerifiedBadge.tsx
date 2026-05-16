@@ -1,11 +1,11 @@
-// Sprint 37.L (F86.3) — Badge vérifié Meta forme "stamp" 8 pointes arrondies.
+// Sprint 37.M (F86.3) — Badge vérifié Meta SVG officiel 8 lobes arrondis.
 //
-// PAS un simple cercle bleu — la forme officielle Meta combine 4 grandes
-// pointes (top/right/bottom/left) + 4 petites pointes diagonales (corners),
-// le tout arrondi. Fond #0095F6, checkmark blanc stroke 2px centré.
+// Remplace l'approximation Sprint 37.L (2 rects à 45° → étoile carrée
+// pointue). Forme stamp "scalloped" canonique Meta : 8 lobes arrondis
+// distincts visibles dès 14px. Fond #0095F6, checkmark blanc centré.
 //
-// Path inspiré du badge Meta officiel (approximation pixel-fidèle pour un
-// mockup statique, ne tente pas de cloner le SVG breveté).
+// Path fourni par Lead (réplique pixel-près de la capture Instagram iOS
+// mai 2026). NE PAS approximer — copier tel quel.
 
 type Props = {
   size?: number
@@ -14,47 +14,20 @@ type Props = {
 export function MetaVerifiedBadge({ size = 14 }: Props) {
   return (
     <svg
-      aria-hidden="true"
+      viewBox="0 0 40 40"
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
       style={{ flexShrink: 0, display: 'inline-block' }}
     >
-      {/*
-        Forme stamp : on combine deux carrés (un droit + un rotated 45°) avec
-        des coins très arrondis. Le résultat visuel : 8 pointes arrondies
-        (4 cardinales + 4 diagonales), proche du badge Meta officiel.
-        Approche par compositing CSS via 2 paths SVG superposés.
-      */}
-      <g>
-        <rect
-          x="3"
-          y="3"
-          width="18"
-          height="18"
-          rx="6"
-          ry="6"
-          fill="#0095F6"
-        />
-        <rect
-          x="3"
-          y="3"
-          width="18"
-          height="18"
-          rx="6"
-          ry="6"
-          fill="#0095F6"
-          transform="rotate(45 12 12)"
-        />
-      </g>
-      {/* Checkmark blanc centré, stroke 2px. */}
       <path
-        d="M8.2 12.4 L10.8 15 L15.8 9.5"
-        fill="none"
-        stroke="#FFFFFF"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M19.998.32a3.464 3.464 0 0 1 2.453 1.016l1.61 1.611a3.473 3.473 0 0 0 2.453 1.016h2.278a3.469 3.469 0 0 1 3.469 3.469v2.278a3.473 3.473 0 0 0 1.016 2.453l1.61 1.61a3.469 3.469 0 0 1 0 4.906l-1.61 1.61a3.473 3.473 0 0 0-1.016 2.453v2.278a3.469 3.469 0 0 1-3.469 3.469h-2.278a3.473 3.473 0 0 0-2.453 1.016l-1.61 1.61a3.469 3.469 0 0 1-4.906 0l-1.61-1.61a3.473 3.473 0 0 0-2.453-1.016H11.21a3.469 3.469 0 0 1-3.469-3.469v-2.278a3.473 3.473 0 0 0-1.016-2.453l-1.61-1.61a3.469 3.469 0 0 1 0-4.906l1.61-1.61a3.473 3.473 0 0 0 1.016-2.453V7.432a3.469 3.469 0 0 1 3.469-3.469h2.278a3.473 3.473 0 0 0 2.453-1.016l1.61-1.611A3.464 3.464 0 0 1 19.998.32z"
+        fill="#0095F6"
+      />
+      <path
+        d="M27.114 14.114l-9.114 9.114-5.114-5.114 1.886-1.886 3.228 3.228 7.228-7.228 1.886 1.886z"
+        fill="#FFFFFF"
       />
     </svg>
   )
