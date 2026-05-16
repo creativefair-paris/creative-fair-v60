@@ -15,6 +15,8 @@ import { MaMarqueDashboard } from '@/components/ma-marque/MaMarqueDashboard'
 import { BrandOnboardingTrigger } from '@/components/onboarding-marque/BrandOnboardingTrigger'
 import { BrandOnboardingHeaderCta } from '@/components/onboarding-marque/BrandOnboardingHeaderCta'
 import { getResumableBrandOnboardingSession } from '@/app/_actions/brand-onboarding'
+import { PillarsManager } from '@/components/pillars/PillarsManager'
+import type { PillarRow } from '@/lib/pillars/types'
 import type { BrandSnapshot14 } from '@/lib/ma-marque/completude'
 import type {
   MomentBusiness,
@@ -122,6 +124,25 @@ export default async function MaMarquePage() {
     archives = []
   }
 
+  // Sprint 37.K (F89) — Piliers persistés (table `pillars`, migration 025).
+  // RLS appliqué automatiquement via tenant_id. Si la table n'existe pas
+  // (migration pas encore appliquée), on tombe sur un tableau vide et le
+  // PillarsManager affiche l'onboarding "Définir mon premier pilier".
+  let pillars: ReadonlyArray<PillarRow> = []
+  try {
+    const { data: rawPillars } = await supabase
+      .from('pillars')
+      .select(
+        'id, tenant_id, brand_id, title, description, color_hex, position, questions_answers, generation_model, archived_at, created_at, updated_at',
+      )
+      .eq('brand_id', brand.id)
+      .is('archived_at', null)
+      .order('position', { ascending: true })
+    if (Array.isArray(rawPillars)) pillars = rawPillars as PillarRow[]
+  } catch {
+    pillars = []
+  }
+
   const snapshot: BrandSnapshot14 = {
     nom: extras?.name ?? brand.name ?? '',
     secteur: extras?.secteur ?? '',
@@ -188,6 +209,17 @@ export default async function MaMarquePage() {
             archives={archives}
             {...(user.email ? { userEmail: user.email } : {})}
           />
+
+          {/* Sprint 37.K (F89) — Piliers narratifs persistés (table `pillars`).
+              Vit en parallèle de l'ancien bloc brand.piliers_narratifs JSONB
+              (encore exposé dans MaMarqueDashboard ci-dessus) le temps de la
+              migration progressive. */}
+          <div
+            className="cfs-page-container"
+            style={{ marginTop: 24, display: 'flex', flexDirection: 'column' }}
+          >
+            <PillarsManager brandId={brand.id} initialPillars={pillars} />
+          </div>
 
           {/* Sprint 37.C (F18) — Wizard guidé Ma Marque. Trigger via
               ?onboarding=true (deep-link depuis /aujourd-hui ou CTA
