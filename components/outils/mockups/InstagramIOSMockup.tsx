@@ -266,9 +266,11 @@ function CFGradientPlaceholder(): ReactNode {
   )
 }
 
-// Sprint 37.M (F86.3) — Avatar par défaut brandé CF.
-// Affiché dans le ring quand avatarUrl n'est pas fourni : gradient diagonal
-// + initiale blanche (première lettre du username).
+// Sprint 37.N (F86.3) — Avatar par défaut adouci (rollback brandé 37.M).
+// Le gradient accent CTA + initiale blanche weight 600 était trop affirmé
+// pour un état par défaut. Retour à une crème ton sur ton + initiale gris
+// pâle medium weight (effet "avatar discret, pas affirmé"). Cohérent avec
+// la sobriété Floriane.
 function DefaultBrandAvatar({ initial }: { initial: string }): ReactNode {
   return (
     <span
@@ -276,15 +278,14 @@ function DefaultBrandAvatar({ initial }: { initial: string }): ReactNode {
       style={{
         width: '100%',
         height: '100%',
-        background:
-          'linear-gradient(135deg, #007AFF 0%, #A78BFA 50%, #FB923C 100%)',
+        background: '#FBFAF7',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#FFFFFF',
+        color: '#A0A0A0',
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui',
-        fontWeight: 600,
+        fontWeight: 500,
         fontSize: 14,
         lineHeight: 1,
         letterSpacing: '-0.01em',

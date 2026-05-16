@@ -47,20 +47,23 @@ export function InstagramStoryRing({ size = 'md', hasStory = false, children, av
     children
   )
 
-  // ─── Cas 1 : pas de story → contour gris fin 1px, pas de halo ───────
+  // ─── Cas 1 : pas de story → contour gris très fin, pas de halo ──────
+  // Sprint 37.N (F86.3) — Contour allégé de #DBDBDB à #F0F0F0
+  // (presque imperceptible) + fond crème par défaut. Cohérent avec
+  // l'adoucissement du DefaultBrandAvatar (rollback saturation 37.M).
   if (!hasStory) {
     const noStoryStyle: CSSProperties = {
       width: dim,
       height: dim,
       borderRadius: '50%',
-      border: '1px solid #DBDBDB',
+      border: '1px solid #F0F0F0',
       overflow: 'hidden',
       boxSizing: 'border-box',
       flexShrink: 0,
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: avatarUrl ? 'transparent' : '#FFFFFF',
+      background: avatarUrl ? 'transparent' : '#FBFAF7',
     }
     return (
       <span aria-hidden="true" style={noStoryStyle}>
