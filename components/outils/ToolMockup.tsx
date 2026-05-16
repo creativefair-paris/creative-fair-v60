@@ -6,6 +6,7 @@
 
 import type { ReactNode } from 'react'
 import { InstagramIOSMockup } from './mockups/InstagramIOSMockup'
+import { ConseillerIPhoneMockup } from './mockups/ConseillerIPhoneMockup'
 
 type ToolMockupProps = {
   toolType:
@@ -39,70 +40,11 @@ export function ToolMockup({ toolType }: ToolMockupProps) {
 
 // ── Conseiller ───────────────────────────────────────────────────────────
 
+// Sprint 37.K (F88) — Délégué à ConseillerIPhoneMockup (style iOS Messages
+// avec avatar dégradé halos + 3 bulles alternées user/assistant + input bar
+// décorative). Remplace l'ancien rendu bulle bleu plate + boutons-choix.
 function ConseillerMockup() {
-  return (
-    <MockupShell>
-      <div
-        style={{
-          padding: '14px 14px',
-          background: 'rgba(0, 122, 255, 0.06)',
-          borderRadius: 12,
-          border: '1px solid rgba(0, 122, 255, 0.12)',
-          marginBottom: 10,
-          display: 'flex',
-          gap: 8,
-          alignItems: 'flex-start',
-        }}
-      >
-        <span
-          aria-hidden="true"
-          style={{
-            flexShrink: 0,
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            background: '#007AFF',
-            marginTop: 4,
-          }}
-        />
-        <p
-          style={{
-            margin: 0,
-            fontFamily: 'var(--font-system)',
-            fontSize: 12,
-            lineHeight: 1.5,
-            color: 'var(--color-label)',
-          }}
-        >
-          Pour ton plan du 23 jan au 5 mars, je propose 12 posts répartis sur 6 semaines…
-        </p>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {[
-          'Anecdote sourcée — pilier détail',
-          'Coulisses — pilier accident',
-          'Manifeste — pilier querelles',
-        ].map((c) => (
-          <span
-            key={c}
-            style={{
-              padding: '8px 12px',
-              border: '1px solid rgba(0, 122, 255, 0.18)',
-              borderRadius: 8,
-              fontFamily: 'var(--font-system)',
-              fontSize: 11,
-              fontWeight: 500,
-              color: '#007AFF',
-              background: 'rgba(0, 122, 255, 0.06)',
-              textAlign: 'left',
-            }}
-          >
-            {c}
-          </span>
-        ))}
-      </div>
-    </MockupShell>
-  )
+  return <ConseillerIPhoneMockup />
 }
 
 // ── Bibliothèque ─────────────────────────────────────────────────────────
