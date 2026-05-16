@@ -118,14 +118,26 @@ export function BrandOnboardingSheet({ session: initial, onClose }: Props) {
         zIndex: 1200,
         display: 'flex',
         flexDirection: 'column',
-        // Sprint 37.I (F81) — Dégradé crème opaque cohérent avec le wizard
-        // programme. L'ancien `rgba(...) + backdrop-filter` rendait du gris
-        // par dessus le body sombre. Gradient dégradé donne le rendu Liquid
-        // Glass crème authentique.
-        background: 'linear-gradient(135deg, #FBFAF7 0%, #F5F0E8 100%)',
+        // Sprint 37.J (F83) — Background crème uniforme + halos signature
+        // Creative Fair (rose+lilas+bleu+orange pastels) injectés DANS le
+        // wizard pour qu'ils soient visibles malgré le z-index 1200.
+        // Sprint 37.I (F81) gradient plat est conservé en fallback derrière
+        // les halos via une couleur de fond crème.
+        background: '#FBFAF7',
+        overflow: 'hidden',
         animation: 'cfs-wizard-in 280ms ease-out',
       }}
     >
+      {/* Sprint 37.J (F83) — Halos signature Creative Fair injectés DANS
+          le wizard. Les classes .bg-halo-1..6 sont définies dans
+          styles/liquid-glass.css (position: fixed, z-index: 0). Le contenu
+          ci-dessous a z-index: 1 ou 2 pour passer au-dessus. */}
+      <div className="bg-halo bg-halo-1" aria-hidden="true" />
+      <div className="bg-halo bg-halo-2" aria-hidden="true" />
+      <div className="bg-halo bg-halo-3" aria-hidden="true" />
+      <div className="bg-halo bg-halo-4" aria-hidden="true" />
+      <div className="bg-halo bg-halo-5" aria-hidden="true" />
+      <div className="bg-halo bg-halo-6" aria-hidden="true" />
       <header
         style={{
           position: 'sticky',
@@ -184,6 +196,10 @@ export function BrandOnboardingSheet({ session: initial, onClose }: Props) {
 
       <main
         style={{
+          // Sprint 37.J (F83) — position: relative + zIndex: 1 pour passer
+          // au-dessus des halos signature (z-index: 0).
+          position: 'relative',
+          zIndex: 1,
           flex: 1,
           overflowY: 'auto',
           padding: '40px 28px 80px',

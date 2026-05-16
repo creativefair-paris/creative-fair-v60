@@ -189,12 +189,22 @@ export function WizardImmersiveSheet({
         zIndex: 1200,
         display: 'flex',
         flexDirection: 'column',
-        // Sprint 37.I (F81) — Background dégradé crème opaque, cohérent
-        // avec le wizard onboarding (BrandOnboardingSheet).
-        background: 'linear-gradient(135deg, #FBFAF7 0%, #F5F0E8 100%)',
+        // Sprint 37.J (F83) — Background crème uniforme + halos signature
+        // Creative Fair injectés DANS le wizard. Cohérence parfaite avec
+        // BrandOnboardingSheet et toutes les pages auth.
+        background: '#FBFAF7',
+        overflow: 'hidden',
         animation: 'cfs-wizard-in 280ms ease-out',
       }}
     >
+      {/* Sprint 37.J (F83) — Halos signature (rose+lilas+bleu+orange pastels). */}
+      <div className="bg-halo bg-halo-1" aria-hidden="true" />
+      <div className="bg-halo bg-halo-2" aria-hidden="true" />
+      <div className="bg-halo bg-halo-3" aria-hidden="true" />
+      <div className="bg-halo bg-halo-4" aria-hidden="true" />
+      <div className="bg-halo bg-halo-5" aria-hidden="true" />
+      <div className="bg-halo bg-halo-6" aria-hidden="true" />
+
       {/* Header sticky : croix gauche + titre centre + step indicator */}
       <header
         style={{
@@ -301,6 +311,10 @@ export function WizardImmersiveSheet({
 
       <main
         style={{
+          // Sprint 37.J (F83) — position relative + zIndex 1 pour passer
+          // au-dessus des halos signature (z-index: 0).
+          position: 'relative',
+          zIndex: 1,
           flex: 1,
           minHeight: 0,
           overflowY: 'auto',
