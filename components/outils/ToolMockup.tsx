@@ -5,6 +5,7 @@
 // Dimensions : ~280-320px de large, ~180-220px de haut.
 
 import type { ReactNode } from 'react'
+import { InstagramIOSMockup } from './mockups/InstagramIOSMockup'
 
 type ToolMockupProps = {
   toolType:
@@ -149,201 +150,14 @@ function BibliothequeMockup() {
 
 // ── Post Creator ─────────────────────────────────────────────────────────
 
-const FORMAT_PREVIEWS: ReadonlyArray<{ label: string; color: string; desc: string }> = [
-  { label: 'Anecdote', color: '#007AFF', desc: 'Carrousel 5 slides' },
-  { label: 'Produit', color: '#34C759', desc: 'Photo unique' },
-  { label: 'Coulisses', color: '#AF52DE', desc: 'Reel 20s' },
-]
-
-// Sprint 37.I (F79) — Vrai mockup Instagram iOS 2026 (refonte F71).
-// Spécificités iOS 2026 vs Android :
-// - Format 4:5 portrait (pas 1:1 carré)
-// - Story ring dégradé orange→rose→violet (#F58529→#DD2A7B→#8134AF)
-// - Font SF Pro
-// - Icons SF Symbols style thin outline (PAS emoji)
-// - Séparateurs subtils 1px rgba(0,0,0,0.04)
+// Sprint 37.K (F86) — Délégué au composant factorisé InstagramIOSMockup.
+// L'ancien rendu inline (Sprint 37.I F79 + 37.J) utilisait tamarque.paris
+// et un gradient subtle dans l'image — remplacé par @creativefair.paris
+// + halos pastels signature Creative Fair (statiques).
 function PostCreatorMockup() {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        width: '100%',
-        maxWidth: 300,
-        background: '#FFFFFF',
-        borderRadius: 14,
-        overflow: 'hidden',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Header iOS : story ring + nom + ⋯ */}
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '10px 12px',
-          gap: 10,
-          borderBottom: '1px solid rgba(0, 0, 0, 0.04)',
-        }}
-      >
-        {/* Story ring dégradé Instagram official */}
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            padding: 2,
-            background:
-              'linear-gradient(135deg, #F58529 0%, #DD2A7B 50%, #8134AF 100%)',
-            flexShrink: 0,
-            display: 'flex',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              background: '#FFFFFF',
-              padding: 2,
-              display: 'flex',
-            }}
-          >
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #FBFAF7 0%, #C9B898 100%)',
-              }}
-            />
-          </div>
-        </div>
-        <span
-          style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: '#000000',
-            flex: 1,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          tamarque.paris
-        </span>
-        <span
-          aria-hidden="true"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 16,
-            color: 'rgba(0, 0, 0, 0.85)',
-            letterSpacing: 2,
-            lineHeight: 1,
-          }}
-        >
-          ⋯
-        </span>
-      </header>
-
-      {/* Image 4:5 portrait — pas 1:1 carré */}
-      <div
-        style={{
-          aspectRatio: '4 / 5',
-          background:
-            'linear-gradient(135deg, #FBFAF7 0%, #E8DFD0 30%, #C9B898 100%)',
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 64,
-            height: 64,
-            borderRadius: 14,
-            background: 'rgba(255, 255, 255, 0.55)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.6)',
-          }}
-        />
-      </div>
-
-      {/* Row icons SF Symbols style thin outline */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '10px 12px 6px',
-          gap: 16,
-          color: '#000',
-        }}
-      >
-        {/* Heart outline */}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-        </svg>
-        {/* Comment outline */}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-        </svg>
-        {/* Direct paper plane */}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13" />
-          <polygon points="22 2 15 22 11 13 2 9 22 2" />
-        </svg>
-        {/* Bookmark à droite */}
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ marginLeft: 'auto' }}
-        >
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-        </svg>
-      </div>
-
-      {/* Caption iOS pattern */}
-      <div style={{ padding: '2px 12px 12px', color: '#000' }}>
-        <p
-          style={{
-            margin: 0,
-            fontSize: 13,
-            lineHeight: 1.4,
-            letterSpacing: '-0.01em',
-          }}
-        >
-          <span style={{ fontWeight: 600 }}>tamarque.paris</span>{' '}
-          <span style={{ fontWeight: 400 }}>L&apos;histoire derrière ta création préférée…</span>
-        </p>
-        <p
-          style={{
-            margin: '6px 0 0',
-            fontSize: 11,
-            color: 'rgba(60, 60, 67, 0.6)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-          }}
-        >
-          Il y a 2 h
-        </p>
-      </div>
-    </div>
-  )
+  return <InstagramIOSMockup />
 }
+
 
 // ── Moodboard ────────────────────────────────────────────────────────────
 
