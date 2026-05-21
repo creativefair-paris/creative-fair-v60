@@ -6,11 +6,11 @@
 
 import type { ReactNode } from 'react'
 import { InstagramIOSMockup } from './mockups/InstagramIOSMockup'
-import { ConseillerIPhoneMockup } from './mockups/ConseillerIPhoneMockup'
+// Sprint 40 Phase 2B — import ConseillerIPhoneMockup retiré (Bloc 9 :
+// concept Conseiller standalone dégagé, fusionné dans Messages V2.0).
 
 type ToolMockupProps = {
   toolType:
-    | 'conseiller'
     | 'bibliotheque'
     | 'post-creator'
     | 'moodboard'
@@ -21,8 +21,6 @@ type ToolMockupProps = {
 
 export function ToolMockup({ toolType }: ToolMockupProps) {
   switch (toolType) {
-    case 'conseiller':
-      return <ConseillerMockup />
     case 'bibliotheque':
       return <BibliothequeMockup />
     case 'post-creator':
@@ -38,14 +36,7 @@ export function ToolMockup({ toolType }: ToolMockupProps) {
   }
 }
 
-// ── Conseiller ───────────────────────────────────────────────────────────
-
-// Sprint 37.K (F88) — Délégué à ConseillerIPhoneMockup (style iOS Messages
-// avec avatar dégradé halos + 3 bulles alternées user/assistant + input bar
-// décorative). Remplace l'ancien rendu bulle bleu plate + boutons-choix.
-function ConseillerMockup() {
-  return <ConseillerIPhoneMockup />
-}
+// Sprint 40 Phase 2B — fonction ConseillerMockup retirée (Bloc 9).
 
 // ── Bibliothèque ─────────────────────────────────────────────────────────
 

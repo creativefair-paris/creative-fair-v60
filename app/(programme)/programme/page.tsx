@@ -9,9 +9,9 @@ import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { Button } from '@/components/ui/Button'
 import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
-import { ConseillerAccess } from '@/components/programme/ConseillerAccess'
+// Sprint 40 Phase 2B — import ConseillerAccess retiré (Bloc 8 proposed-deletions).
 import { PlanPreview } from '@/components/programme/PlanPreview'
-import { NewPlanPedagogyOverlay } from '@/components/programme/NewPlanPedagogyOverlay'
+// Sprint 40 Phase 2B — import NewPlanPedagogyOverlay retiré (Bloc 8 proposed-deletions).
 import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
 import { ProgrammeCalendarView } from '@/components/programme/ProgrammeCalendarView'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
@@ -242,18 +242,9 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
             />
           ) : null}
 
-          {/* Sprint 37.E (F47+F53) — Pédagogie post-génération en overlay. */}
-          {newPlanId ? <NewPlanPedagogyOverlay programmeId={newPlanId} /> : null}
-
-          {/* Sprint 37 Lot 4 — Voies d'accès au conseiller. */}
-          <ConseillerAccess
-            currentProgrammeEnd={programme?.date_fin ?? null}
-            publicationFrequency={publicationFrequency}
-            autoOpenCreatePlan={autoOpenCreatePlan}
-            pillarsCatalog={piliersForWizard}
-            businessAnchorSuggestions={businessAnchorSuggestions}
-            marqueComplete={jalonStatus.marque.complete}
-          />
+          {/* Sprint 40 Phase 2B — NewPlanPedagogyOverlay supprimé (Bloc 8 :
+              méthode pédagogique 4 mois dégagée doctrine §14) + ConseillerAccess
+              supprimé (Bloc 8 : 4 voies d'accès au Conseiller V1 dégagé). */}
 
           {hasProgramme ? (
             // Sprint 37.F (F48) — Vue Calendrier interactive avec mini chat.

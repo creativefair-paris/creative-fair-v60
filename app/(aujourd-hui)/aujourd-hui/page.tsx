@@ -1,15 +1,18 @@
 // Sprint 36.G — Refonte V3 /aujourd-hui sous doctrine "Tranquillité du pilote".
+// Sprint 40 Phase 2B — purge legacy : retrait imports DemarrerCard (Bloc 15
+// proposed-deletions), JalonHero + checkJalonStatus (Bloc 14). Refactor
+// structurel sub-sidebar + 3 widgets + Roadmap d'Hélène laissé Sprint 43+.
 //
-// Structure :
+// Structure actuelle (à refondre Sprint 43+ selon doctrine 01-ARCHITECTURE.md §3.1) :
 //   * Header full-width (date + avatar)
 //   * Zone Critique conditionnelle (alerts actives)
 //   * Split Brief 40/60 :
 //     - Gauche 40% : Bloc 1 Prochaine action · Bloc 2 État programme · Bloc 3 État Ma Marque
 //     - Droite 60% : Bloc A Aujourd'hui · Bloc B Cette semaine · Bloc C Suggéré
 //
-// Pas de compteur gamifié (Pattern A migre vers /mon-programme — sprint séparé).
-// Pas de copy "il te reste N gestes". Pas de "5/14 FONDATIONS POSÉES".
-// Avatar conservé tel quel (PageHeader.tsx existant).
+// Pas de compteur gamifié. Pas de copy "il te reste N gestes".
+// Pas de DemarrerCard onboarding visible (anti-pilier 8 — pré-remplissage Lead).
+// Pas de JalonHero (méthode pédagogique 4 mois dégagée doctrine §14).
 
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -19,15 +22,12 @@ import { CriticalBanner } from '@/components/today/CriticalBanner'
 import { TaskRow } from '@/components/today/TaskRow'
 import { BlocCetteSemaine } from '@/components/today/BlocCetteSemaine'
 import { AFaireCetteSemaine } from '@/components/today/AFaireCetteSemaine'
-import { DemarrerCard, type DemarrerStep } from '@/components/today/DemarrerCard'
 import { loadAujourdhuiData } from '@/lib/aujourd-hui/load-data'
 import { computeSuggestions } from '@/lib/aujourd-hui/suggestions'
 import { mapStatutToState } from '@/lib/types/post'
 import { jourCourantFr, nomDuJourFr, semaineRangeFr } from '@/lib/aujourd-hui/dates-fr'
 import { startOfWeek, endOfWeek } from '@/lib/calendar/dates'
 import { createClient } from '@/lib/supabase/server'
-import { checkJalonStatus } from '@/lib/jalons/check-jalons'
-import { JalonHero } from '@/components/jalons/JalonHero'
 import type { BusinessCalendar } from '@/types/business-calendar'
 
 export const dynamic = 'force-dynamic'
@@ -81,19 +81,9 @@ export default async function AujourdhuiPage() {
   // de la suggestion "Préparer ton prochain plan" (<14j de la fin).
   const supabaseSuggestions = await createClient()
 
-  // Sprint 37.C (F26) — jalon courant (marque/programme/production).
-  const { data: rawProfileTenant } = await supabaseSuggestions
-    .from('profiles')
-    .select('tenant_id')
-    .limit(1)
-    .maybeSingle()
-  const jalonTenantId =
-    (rawProfileTenant as { tenant_id?: string | null } | null)?.tenant_id ?? null
-  const jalonStatus = jalonTenantId
-    ? await checkJalonStatus(supabaseSuggestions, jalonTenantId)
-    : null
-  const showJalonHero =
-    jalonStatus !== null && jalonStatus.current !== 'production'
+  // Sprint 40 Phase 2B — Bloc 14 Jalons supprimé (méthode pédagogique 4 mois
+  // dégagée doctrine 00-CONCEPT.md §14). Le calcul jalonStatus + showJalonHero
+  // n'a plus lieu.
 
   const { data: rawSugProgramme } = await supabaseSuggestions
     .from('programmes')
@@ -156,33 +146,10 @@ export default async function AujourdhuiPage() {
       )
     }
   }
-  const showDemarrerCard = tenantAgeDays < 7
-  const demarrerSteps: DemarrerStep[] = []
-  if (showDemarrerCard) {
-    const brandIncomplete = data.questionsAnswered < 14
-    const noActiveProgramme = currentProgrammeEnd === null
-    if (brandIncomplete) {
-      demarrerSteps.push({
-        label: 'Vérifier ta marque',
-        href: '/ma-marque',
-        description: 'Tes piliers narratifs ne sont pas posés.',
-      })
-    }
-    if (noActiveProgramme) {
-      demarrerSteps.push({
-        label: 'Créer ton premier plan',
-        href: '/programme?action=create-plan',
-        description:
-          'Le conseiller construit avec toi un plan éditorial sur la période de ton choix.',
-      })
-    }
-    demarrerSteps.push({
-      label: 'Pose une question au conseiller',
-      href: '/outils/conseiller',
-      description:
-        'Test sur un sujet réel. Une opportunité, un bad buzz, une idée de la direction.',
-    })
-  }
+  // Sprint 40 Phase 2B — Bloc 15 DemarrerCard supprimé (onboarding visible
+  // en home = anti-pilier 8 doctrine 00-CONCEPT.md §6 ; pré-remplissage Lead
+  // est la voie canonique V2.0). Variables tenantAgeDays, showDemarrerCard
+  // et demarrerSteps retirées avec leur composant consommateur.
 
   return (
     <div
@@ -221,28 +188,12 @@ export default async function AujourdhuiPage() {
           {/* Zone Critique conditionnelle (full-width, au-dessus du Split Brief). */}
           <CriticalBanner alerts={data.alerts} />
 
-          {/* Sprint 37.C (F26) — Hero jalon. Affiché quand le pilote
-              n'a pas encore atteint le jalon "production". Remplace le
-              dashboard split-brief tant que les fondations critiques
-              ne sont pas posées. */}
-          {showJalonHero && jalonStatus !== null ? (
-            <JalonHero jalon={jalonStatus.current as 'marque' | 'programme'} />
-          ) : null}
-
-          {!showJalonHero ? (
+          {/* Sprint 40 Phase 2B — JalonHero retiré (Bloc 14) +
+              DemarrerCard retirée (Bloc 15). SplitBrief direct sans
+              wrap conditionnel. */}
           <SplitBrief
             leftColumn={
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {/* Sprint 37.A F10 — Carte "Démarrer cette semaine"
-                    affichée pendant les 7 premiers jours du tenant
-                    (au-dessus de Prochaine action). Effacée auto au 8e
-                    jour, pas de bouton "Ignorer" — anti-friction Apple. */}
-                {showDemarrerCard && demarrerSteps.length > 0 ? (
-                  <div className="cfs-stagger cfs-stagger-1">
-                    <DemarrerCard steps={demarrerSteps} />
-                  </div>
-                ) : null}
-
                 {/* ── Bloc 1 — Prochaine action (Liquid Glass niveau 2) ── */}
                 <section
                   className="glass-regular cfs-bloc-prochaine cfs-stagger cfs-stagger-2"
@@ -564,7 +515,6 @@ export default async function AujourdhuiPage() {
               </div>
             }
           />
-          ) : null}
         </div>
       </div>
     </div>

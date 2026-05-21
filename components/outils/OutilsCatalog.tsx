@@ -116,31 +116,11 @@ type Outil = {
   available: boolean
 }
 
-const PILOTER: ReadonlyArray<Outil> = [
-  {
-    id: 'conseiller',
-    title: 'Conseiller',
-    shortDescription: 'Ton assistant éditorial disponible en continu.',
-    longDescription:
-      "Ton assistant éditorial disponible en continu. Pour affiner un pilier, recadrer un post, trancher une opportunité, ou préparer ta réunion.",
-    href: '/outils/conseiller',
-    ctaLabel: 'Poser une question',
-    icon: <BubbleIcon />,
-    hero: true,
-    available: true,
-  },
-  {
-    id: 'bibliotheque',
-    title: 'Bibliothèque',
-    shortDescription: 'Tout ce que tu as, en un seul endroit.',
-    longDescription:
-      'Tout ce que tu as, en un seul endroit. Brand book, posts publiés, conversations conseiller, reviews, programmes, accessibles depuis une seule vue avec recherche et filtres.',
-    href: '/outils/bibliotheque',
-    ctaLabel: 'Voir mes documents',
-    icon: <BookIcon />,
-    available: true,
-  },
-]
+// Sprint 40 Phase 2B — section PILOTER retirée :
+//   - Item Conseiller dégagé (Bloc 1-9 proposed-deletions, fusionné dans Messages V2.0).
+//   - Item Bibliothèque promu au top-level Travail (cf. 06-bibliotheque.md §5.3).
+// Le catalogue cible Sprint 43+ aligne sur 4 outils Créer uniquement.
+const PILOTER: ReadonlyArray<Outil> = []
 
 const CREER: ReadonlyArray<Outil> = [
   {
@@ -189,91 +169,31 @@ const CREER: ReadonlyArray<Outil> = [
   },
 ]
 
-const A_VENIR: ReadonlyArray<Outil> = [
-  {
-    id: 'messages',
-    title: 'Messages',
-    shortDescription: 'DM et commentaires Instagram.',
-    longDescription:
-      'Gère tes DM clients et commentaires Instagram avec le conseiller, sans quitter Creative Fair.',
-    href: '#',
-    ctaLabel: '',
-    icon: <BubbleIcon />,
-    available: false,
-  },
-  {
-    id: 'emailing',
-    title: 'Emailing',
-    shortDescription: 'Newsletters et emails de marque.',
-    longDescription:
-      'Rédige et programme tes newsletters et emails de marque, alignés sur tes piliers narratifs.',
-    href: '#',
-    ctaLabel: '',
-    icon: <MailIcon />,
-    available: false,
-  },
-  {
-    id: 'reels',
-    title: 'Reels',
-    shortDescription: 'Scripts et storyboards Reels.',
-    longDescription:
-      'Génère des scripts et storyboards Reels alignés sur ta signature éditoriale.',
-    href: '#',
-    ctaLabel: '',
-    icon: <PlayIcon />,
-    available: false,
-  },
-  {
-    id: 'films',
-    title: 'Films',
-    shortDescription: 'Films de marque format long.',
-    longDescription:
-      'Co-construis tes films de marque format long. Brief, structure narrative, repérage références.',
-    href: '#',
-    ctaLabel: '',
-    icon: <FilmIcon />,
-    available: false,
-  },
-  {
-    id: 'ads',
-    title: 'Ads',
-    shortDescription: 'Campagnes paid social et performance.',
-    longDescription:
-      'Conçois et pilote tes campagnes paid social (Meta Ads). A/B test, ciblage, audience saving, lookalike. Sub-prompt TF Ads (Sofia P.) avec garde-fous d’intégrité de marque.',
-    href: '#',
-    ctaLabel: '',
-    icon: <MegaphoneIcon />,
-    available: false,
-  },
-]
+// Sprint 40 Phase 2B — section "À venir" retirée intégralement.
+// Doctrine 00-CONCEPT.md §6 pilier 6 Uncompromising Polish : "Zéro 'bientôt',
+// zéro 'à venir', zéro fonctionnalité visible mais désactivée sans raison claire.
+// Si ce n'est pas prêt, ce n'est pas montré." + §9 vocabulaire interdit "bientôt,
+// à venir, coming soon — Si quelqu'un (humain ou IA) écrit l'un de ces mots dans
+// une copie utilisateur : recalé immédiatement."
+const A_VENIR: ReadonlyArray<Outil> = []
 
 const ALL_OUTILS: ReadonlyArray<Outil> = [...PILOTER, ...CREER, ...A_VENIR]
 
 // ── Composant principal ──────────────────────────────────────────────────
 
 export function OutilsCatalog() {
-  // Au chargement : Conseiller sélectionné par défaut.
-  const [selectedId, setSelectedId] = useState<string>('conseiller')
-  const selected: Outil = ALL_OUTILS.find((o) => o.id === selectedId) ?? PILOTER[0]!
+  // Sprint 40 Phase 2B — Conseiller retiré, Post Creator sélectionné par défaut.
+  const [selectedId, setSelectedId] = useState<string>('post-creator')
+  const selected: Outil = ALL_OUTILS.find((o) => o.id === selectedId) ?? CREER[0]!
 
   return (
     <div className="cfs-outils-catalog">
       <aside className="cfs-outils-sidebar" aria-label="Catalogue des outils">
-        <CatalogSection
-          title="Piloter"
-          outils={PILOTER}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-        />
+        {/* Sprint 40 Phase 2B — sections Piloter (vidée) et "À venir" (vidée)
+            retirées du rendu. Catalogue cible 4 outils Créer. */}
         <CatalogSection
           title="Créer"
           outils={CREER}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-        />
-        <CatalogSection
-          title="À venir"
-          outils={A_VENIR}
           selectedId={selectedId}
           onSelect={setSelectedId}
         />
@@ -593,10 +513,10 @@ function OutilPreview({ outil }: { outil: Outil }) {
 }
 
 // Sprint 37.D (F28) — Map id outil → type de mockup ToolMockup.
+// Sprint 40 Phase 2B — id 'conseiller' retiré du type union (Bloc 9).
 function outilToMockupType(
   id: string,
 ):
-  | 'conseiller'
   | 'bibliotheque'
   | 'post-creator'
   | 'moodboard'
@@ -604,7 +524,6 @@ function outilToMockupType(
   | 'reviews'
   | 'generic' {
   switch (id) {
-    case 'conseiller':
     case 'bibliotheque':
     case 'post-creator':
     case 'moodboard':
