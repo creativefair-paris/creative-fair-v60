@@ -22,7 +22,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 1 — Conseiller V1, prompt système + types core
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14 décisions abandonnées — "Conseiller comme page séparée (fusionné dans Messages avec Hélène M. pinned)"`. `10-SACRED.md` "L'ancienne nav 4 destinations (Aujourd'hui / Calendrier / Ma Marque / Conseiller) est caduque depuis le 20 mai 2026."
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/lib-core/`
 **Nombre de fichiers :** 8
@@ -53,7 +53,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 2 — Conseiller V1, scénarios A/B/C/D/E (architecture par scénario, abandonnée au profit de l'architecture par Expert nommé)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `02-EXPERTS.md §10 "Pour éviter la dilution conceptuelle, certaines fonctions IA de Creative Fair ne sont pas portées par un Expert nommé. Le Post Creator… Le Moodboard… L'onboarding F89… Cette discipline évite l'inflation : on ne crée pas un treizième Expert chaque fois qu'on a besoin d'une nouvelle skill."`. L'architecture A/B/C/D/E ≠ architecture Hélène + 12 Experts canonique V2.0. `00-CONCEPT.md §14 — "Onboarding 10 questions (remplacé par F89 wizard piliers 5 questions)"` confirme l'abandon des wizards A1.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/scenarios/`
 **Nombre de fichiers :** 16
@@ -90,7 +90,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 3 — Conseiller V1, wizard immersif A1 (création de plan)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14 — "Onboarding 10 questions (remplacé par F89 wizard piliers 5 questions)"` + `"Méthode pédagogique 4 mois (V60-pre)"` abandonnée. Le wizard immersif A1 est l'incarnation UI de ces deux décisions caduques.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/wizard-immersif/`
 **Nombre de fichiers :** 15
@@ -127,7 +127,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 4 — Conseiller V1, composants UI conversation (sheets, bulles, sidebars)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14 — "Conseiller comme page séparée (fusionné dans Messages avec Hélène M. pinned)"`. `02-EXPERTS.md §2 + §4` — la conversation V2.0 vit dans Messages avec Hélène pinned, pas dans une sheet Conseiller dédiée.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/components-ui/`
 **Nombre de fichiers :** 16
@@ -165,7 +165,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 5 — Conseiller V1, composants UI outils (déjà signalés "SUPPRESSION CANDIDATE Sprint 36")
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14`. Note opérationnelle : ces 3 composants portent eux-mêmes la mention "SUPPRESSION CANDIDATE Sprint 36" dans leur commentaire d'en-tête — confirmation interne de leur statut Recalé depuis 5 sprints.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/components-outils/`
 **Nombre de fichiers :** 3
@@ -188,7 +188,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 6 — Conseiller V1, server actions
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14` + `04-MULTI_TENANT.md` (ces actions utilisent toutes `createAdmin()` côté user → faille P0 multi-tenant, résolue par dégagement).
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/actions/`
 **Nombre de fichiers :** 5
@@ -219,7 +219,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 7 — Conseiller V1, route + page historique
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14` + `01-ARCHITECTURE.md §1` (Conseiller n'est pas une page top-level V2.0).
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/route/`
 **Nombre de fichiers :** 1
@@ -245,7 +245,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 8 — Conseiller V1, entrées dans Programme (4 voies d'accès)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14`. Les 4 entrées (CTA Créer plan A1, bannière A2 régénération, CTA Faire le point A7, CTA Préparer réunion E1) sont rattachées au modèle Conseiller V1.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/programme-entries/`
 **Nombre de fichiers :** 2
@@ -269,7 +269,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 9 — Conseiller V1, mockup iPhone Messages style
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14`. Un mockup d'un Conseiller standalone n'a plus d'objet — Sprint 43+ produira un mockup Messages avec Hélène pinned si nécessaire.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/conseiller/mockup/`
 **Nombre de fichiers :** 1
@@ -290,7 +290,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 10 — Placeholder /outils/messages (route "Reporté V2 avec API Meta")
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §6 pilier 6 Uncompromising Polish — "Zéro 'bientôt', zéro 'à venir', zéro fonctionnalité visible mais désactivée sans raison claire. Si ce n'est pas prêt, ce n'est pas montré."` + `01-ARCHITECTURE.md §1` (Messages = destination top-level Travail, pas sous Outils).
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/outils-messages-placeholder/`
 **Nombre de fichiers :** 1
@@ -312,7 +312,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 11 — Route AI test exposée en prod
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §6 pilier 6 Uncompromising Polish — "Zéro 'bientôt', zéro 'à venir', zéro fonctionnalité visible mais désactivée sans raison claire."` Une route `/api/ai/test` exposée en prod = anti-pilier 6.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/api-test/`
 **Nombre de fichiers :** 1
@@ -334,7 +334,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 12 — Coaching daily (anti-doctrine Headspace)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §3 — "Lecture erronée à éviter : tranquillité comme minimalisme contemplatif, Apple Health passif, méditation, slow design poétique. Ce n'est pas Headspace. Ce n'est pas Calm. Lecture correcte : tranquillité du pilote en cockpit."`. Le coaching daily = anti-doctrine.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/coaching/`
 **Nombre de fichiers :** 4
@@ -362,7 +362,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 13 — Retombées V1 (vanity metrics hors V1 §8)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §8 — "Pas dans V1 : Pas d'analyse de performance des publications passées (vanity metrics, engagement rate, etc.). Ces données sont du bruit non-actionnable au stade V1."`
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/retombees/`
 **Nombre de fichiers :** 6
@@ -394,7 +394,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 14 — Jalons fondations (méthode pédagogique 4 mois dégagée §14)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14 — "Méthode pédagogique 4 mois (V60-pre)"` abandonnée. `10-SACRED.md — "Pas de gamification, jamais. Pas de streaks. Pas de badges. Pas de XP. Pas de quêtes."`. Le système jalons fondations est une mécanique de progression forcée = gamification soft.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/jalons/`
 **Nombre de fichiers :** 3
@@ -421,7 +421,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 15 — DemarrerCard (onboarding visible en home, anti-pilier 8)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §6 pilier 8 Out of the Box Experience — "Au premier login, Floriane voit déjà sa marque, ses piliers, son calendrier — pré-remplis intelligemment par l'onboarding initial."` + `01-ARCHITECTURE.md §3.1 densité α stricte minimale "Trois widgets visibles uniquement : Calendrier, Rappels, Messages. Un bloc Roadmap visible uniquement."`. Pas de card d'onboarding en home.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/today/`
 **Nombre de fichiers :** 1
@@ -443,7 +443,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 16 — OnboardingFlow legacy + ConseillerIntro
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14 — "Onboarding 10 questions (remplacé par F89 wizard piliers 5 questions)"` + `"Conseiller comme page séparée (fusionné dans Messages avec Hélène M. pinned)"`. Note opérationnelle : `OnboardingFlow.legacy-sprint34.tsx` porte explicitement `.legacy-sprint34` dans son nom.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/onboarding-legacy/`
 **Nombre de fichiers :** 2
@@ -465,7 +465,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 17 — Compte > ma-marque sous-arbre obsolète (§4 doctrine Compte ≠ Ma Marque)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `01-ARCHITECTURE.md §4 — "Pas de sélecteur de marque dans le header. Pas de switch. Compte > Marques n'affiche pas de liste — il y a un bloc unique 'Ma Marque' qui renvoie vers la page Ma Marque."`. Le sous-arbre `/compte/ma-marque/*` duplique la page Ma Marque top-level Éditorial = anti-doctrine §4.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/compte-ma-marque/`
 **Nombre de fichiers :** 3 + dossier
@@ -491,7 +491,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 18 — Route demo dev split-brief (anti-pilier 6 Polish)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §6 pilier 6 Uncompromising Polish — "Zéro 'bientôt', zéro 'à venir', zéro fonctionnalité visible mais désactivée sans raison claire. Si ce n'est pas prêt, ce n'est pas montré."`. Une route demo dev exposée en prod = anti-pilier 6.
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/dev/`
 **Nombre de fichiers :** 3
@@ -516,7 +516,7 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 ## Bloc 19 — Documentation utilisateur conseiller (doctrine V2.0 = Conseiller dégagé)
 
-**Statut Lead :** [   ]
+**Statut Lead :** [VALIDÉ]
 **Justification doctrinale :** `00-CONCEPT.md §14 — "Conseiller comme page séparée (fusionné dans Messages avec Hélène M. pinned)"`. Une doc user qui décrit le Conseiller est trompeuse pour Floriane (qui ne le verra plus dans Messages V2.0).
 **Type d'action :** suppression avec backup dans `archive/v1-leftovers/docs/`
 **Nombre de fichiers :** 1
@@ -540,28 +540,28 @@ Sur arbitrage Lead amendement §3 et §4, les fichiers suivants **ne sont pas li
 
 | # | Bloc | Fichiers | Statut |
 |---|---|---|---|
-| 1 | Conseiller V1, prompt système + types core | 8 | [   ] |
-| 2 | Conseiller V1, scénarios A/B/C/D/E | 16 | [   ] |
-| 3 | Conseiller V1, wizard immersif A1 | 15 | [   ] |
-| 4 | Conseiller V1, composants UI conversation | 16 | [   ] |
-| 5 | Conseiller V1, composants UI outils ("SUPPRESSION CANDIDATE Sprint 36") | 3 | [   ] |
-| 6 | Conseiller V1, server actions | 5 | [   ] |
-| 7 | Conseiller V1, route + page historique | 1 | [   ] |
-| 8 | Conseiller V1, entrées dans Programme (4 voies d'accès) | 2 | [   ] |
-| 9 | Conseiller V1, mockup iPhone Messages style | 1 | [   ] |
-| 10 | Placeholder /outils/messages (route "Reporté V2") | 1 | [   ] |
-| 11 | Route AI test exposée en prod | 1 | [   ] |
-| 12 | Coaching daily (anti-doctrine Headspace) | 4 | [   ] |
-| 13 | Retombées V1 (vanity metrics hors V1 §8) | 6 | [   ] |
-| 14 | Jalons fondations (méthode pédagogique 4 mois dégagée §14) | 3 | [   ] |
-| 15 | DemarrerCard (onboarding visible en home, anti-pilier 8) | 1 | [   ] |
-| 16 | OnboardingFlow legacy + ConseillerIntro | 2 | [   ] |
-| 17 | Compte > ma-marque sous-arbre obsolète (§4 doctrine) | 3 | [   ] |
-| 18 | Route demo dev split-brief (anti-pilier 6 Polish) | 3 | [   ] |
-| 19 | Documentation utilisateur conseiller | 1 | [   ] |
+| 1 | Conseiller V1, prompt système + types core | 8 | [VALIDÉ] |
+| 2 | Conseiller V1, scénarios A/B/C/D/E | 16 | [VALIDÉ] |
+| 3 | Conseiller V1, wizard immersif A1 | 15 | [VALIDÉ] |
+| 4 | Conseiller V1, composants UI conversation | 16 | [VALIDÉ] |
+| 5 | Conseiller V1, composants UI outils ("SUPPRESSION CANDIDATE Sprint 36") | 3 | [VALIDÉ] |
+| 6 | Conseiller V1, server actions | 5 | [VALIDÉ] |
+| 7 | Conseiller V1, route + page historique | 1 | [VALIDÉ] |
+| 8 | Conseiller V1, entrées dans Programme (4 voies d'accès) | 2 | [VALIDÉ] |
+| 9 | Conseiller V1, mockup iPhone Messages style | 1 | [VALIDÉ] |
+| 10 | Placeholder /outils/messages (route "Reporté V2") | 1 | [VALIDÉ] |
+| 11 | Route AI test exposée en prod | 1 | [VALIDÉ] |
+| 12 | Coaching daily (anti-doctrine Headspace) | 4 | [VALIDÉ] |
+| 13 | Retombées V1 (vanity metrics hors V1 §8) | 6 | [VALIDÉ] |
+| 14 | Jalons fondations (méthode pédagogique 4 mois dégagée §14) | 3 | [VALIDÉ] |
+| 15 | DemarrerCard (onboarding visible en home, anti-pilier 8) | 1 | [VALIDÉ] |
+| 16 | OnboardingFlow legacy + ConseillerIntro | 2 | [VALIDÉ] |
+| 17 | Compte > ma-marque sous-arbre obsolète (§4 doctrine) | 3 | [VALIDÉ] |
+| 18 | Route demo dev split-brief (anti-pilier 6 Polish) | 3 | [VALIDÉ] |
+| 19 | Documentation utilisateur conseiller | 1 | [VALIDÉ] |
 
 **Total fichiers proposés : 92**
-**Total fichiers validés Lead : à remplir après validation**
+**Total fichiers validés Lead : 92 (tous les 19 blocs validés)**
 
 ---
 
