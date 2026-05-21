@@ -1,8 +1,8 @@
-# Creative Fair — Concept v2.0.1
+# Creative Fair — Concept v2.0
 
 > Document doctrinal source de vérité.
 > Toute décision contradictoire avec ce document doit être contestée ou ce document doit être amendé.
-> Mis à jour le 21 mai 2026 (Sprint 39, tranchage stratégique post-pivot).
+> Mis à jour le 20 mai 2026 (Sprint 39, tranchage stratégique post-pivot).
 
 ---
 
@@ -53,24 +53,12 @@ Les anti-références — ce que Creative Fair n'est jamais :
 
 - Pas de gamification, jamais. Pas de streaks, pas de badges, pas de XP, pas de quêtes.
 - Pas de métriques inventées qui simulent un contrôle (Cohérence/Équilibre/Densité/Profondeur sont retirées du produit).
-- Pas de vocabulaire growth-hacking ou ad-tech (voir vocabulaire interdit, §9).
+- Pas de vocabulaire growth-hacking ou ad-tech (voir vocabulaire interdit, §7).
 - Pas de surcharge décorative, pas de dégradés gratuits, pas de mascotte, pas d'animation qui n'apporte rien.
 
 ---
 
-## 4. La règle d'or
-
-**Quand on hésite : on enlève.**
-
-La soustraction précède toujours l'addition. Apple n'ajoute pas — Apple retire. Si tu es sur le point d'ajouter quelque chose, demande-toi d'abord ce que tu peux retirer à la place.
-
-Cette règle s'applique à tous les niveaux : un mot dans une interface, un composant dans un écran, une feature dans un sprint, une page dans le produit. Le doute est le signal du retrait, pas de l'ajout.
-
-C'est la règle la plus difficile à tenir parce qu'elle va contre l'instinct du fondateur, contre l'instinct du designer, contre l'instinct du développeur. C'est précisément pour cette raison qu'elle doit être écrite ici, en tête de doctrine.
-
----
-
-## 5. Les huit promesses produit
+## 4. Les huit promesses produit
 
 Creative Fair tient huit promesses concrètes envers Floriane :
 
@@ -92,31 +80,7 @@ Creative Fair tient huit promesses concrètes envers Floriane :
 
 ---
 
-## 6. Les huit piliers Apple — filtre de toute décision
-
-Toute décision produit, design, ou feature passe par les huit piliers Apple. Si une décision échoue sur un pilier majeur, elle est recalée ou retravaillée.
-
-**1. Human Interface & Craftsmanship.** L'interface est artisanale, pas générée. Chaque pixel, chaque transition, chaque microcopie a été pensée. Le produit donne l'impression d'avoir été poli par une main humaine experte.
-
-**2. Frictionless Ecosystem & State Management.** L'utilisateur ne se demande jamais où il en est. L'état du système est lisible immédiatement. Pas d'écran de chargement long sans feedback, pas de modal qui apparaît sans raison, pas de bouton retour qui mène à un état différent de celui qu'on a quitté.
-
-**3. Time-to-Wow & Delight.** En moins de deux minutes après le premier login, Floriane doit avoir vécu son premier moment "wow" — une suggestion d'Hélène pertinente, une roadmap du jour qui sonne juste, un widget qui montre exactement la bonne information. Pas de tunnel d'onboarding lourd qui repousse le moment de magie.
-
-**4. Aspirational Storytelling & Clarity.** Le produit raconte une histoire claire et désirable. Chaque écran a un objet identifiable, chaque copie élève au lieu d'expliquer. La clarté n'est pas la simplicité — c'est la précision.
-
-**5. Transparent Value Exchange.** Floriane sait toujours pourquoi elle utilise Creative Fair et ce qu'elle obtient en retour. Pas de feature opaque, pas de "magie" sans explication. Quand Hélène fait quelque chose, on peut savoir ce qu'elle a fait et pourquoi.
-
-**6. Uncompromising Polish.** Zéro "bientôt", zéro "à venir", zéro fonctionnalité visible mais désactivée sans raison claire. Si ce n'est pas prêt, ce n'est pas montré. Le produit livré est entier, à son périmètre. La finition est non-négociable.
-
-**7. Native Synergy.** Le produit ressemble et se comporte comme une app native iPadOS/macOS. Patterns iOS 26 (Liquid Glass, squircles, sheets, typographie SF). Pas de divergence stylistique gratuite avec le système hôte. L'utilisateur se sent à la maison.
-
-**8. Out of the Box Experience.** L'expérience à l'ouverture est immédiate. Pas de configuration laborieuse, pas de vide initial décourageant. Au premier login, Floriane voit déjà sa marque, ses piliers, son calendrier — pré-remplis intelligemment par l'onboarding initial.
-
-Chaque sprint produit doit, dans son audit final, passer chaque livrable au filtre des huit piliers. Le verdict est binaire : **Validé** ou **Recalé**.
-
----
-
-## 7. Le modèle conceptuel
+## 5. Le modèle conceptuel
 
 Creative Fair s'organise autour de trois territoires distincts mais reliés :
 
@@ -128,12 +92,13 @@ Creative Fair s'organise autour de trois territoires distincts mais reliés :
 
 **Aujourd'hui** est le hub central, le point d'entrée systématique chaque matin. Les autres pages sont des espaces de travail dédiés, accessibles depuis Aujourd'hui ou via le fil d'Ariane de retour.
 
-L'architecture détaillée est documentée dans `01-ARCHITECTURE.md`.
-Le modèle d'orchestration intelligente est documenté dans `02-EXPERTS.md`.
+L'architecture détaillée (navigation, sub-sidebars, pattern de retour) est documentée dans `01-ARCHITECTURE.md`.
+
+Le modèle d'orchestration intelligente (Hélène + Experts) est documenté dans `02-EXPERTS.md`.
 
 ---
 
-## 8. Le périmètre V1
+## 6. Le périmètre V1
 
 **Ce qui est dans V1 :**
 
@@ -148,13 +113,13 @@ Le modèle d'orchestration intelligente est documenté dans `02-EXPERTS.md`.
 - Pas de multi-marque, pas de gestion d'équipe avancée (rôles Owner/Editor/Viewer = V2).
 - Pas de publication automatique sur les réseaux sociaux. Creative Fair prépare, valide, programme. La publication reste manuelle ou via les outils tiers existants.
 - Pas d'analyse de performance des publications passées (vanity metrics, engagement rate, etc.). Ces données sont du bruit non-actionnable au stade V1.
-- Pas de routing LLM dynamique. Hélène et chaque Expert ont un modèle figé (voir `02-EXPERTS.md`).
+- Pas de routing LLM dynamique. Hélène et chaque Expert ont un modèle figé (Opus 4.7 ou Sonnet 4.6 selon le rôle). Le routing intelligent est exploré en V2+ (voir `02-EXPERTS.md`).
 - Pas de gamification. Jamais.
 - Pas d'espace administrateur public. L'admin Lead est interne, prévu Sprint 42.
 
 ---
 
-## 9. Le vocabulaire interdit
+## 7. Le vocabulaire interdit
 
 Ces mots et expressions sont interdits dans l'interface, la communication produit, les contenus marketing, et les noms de variables qui se retrouvent en UI :
 
@@ -172,68 +137,41 @@ Ces mots et expressions sont interdits dans l'interface, la communication produi
 | KPI (en UI visible) | jargon corporate | indicateur, repère |
 | ROI (en UI visible) | jargon finance | impact, résultat |
 | onboarding (en UI visible) | jargon SaaS | premiers pas, mise en route |
-| bientôt, à venir, coming soon | viole pilier Uncompromising Polish | retirer le composant si pas prêt |
-| tokens (sauf contexte technique pur) | jargon API | crédits, ressources |
-| radar | jargon militaire | suivi, veille |
 
 Cette liste évolue. Si Floriane apprenait un de ces mots **par Creative Fair**, l'app aurait échoué.
 
 ---
 
-## 10. Le vocabulaire encouragé
-
-À l'inverse, certaines formulations incarnent l'esprit du produit et doivent être privilégiées :
-
-| Au lieu de | Préférer |
-|---|---|
-| ton contenu | ce que tu publies |
-| ton profil | ton Instagram (ou LinkedIn, etc.) |
-| tes followers | ta communauté |
-| communiquer | raconter |
-| ton ton | ta voix |
-| le user, l'utilisateur | Floriane, la dirigeante, le pilote |
-| la cible | la communauté, les lecteurs |
-| publier du contenu | publier |
-
-Sentence case partout. Pas d'emoji dans les copies d'interface. Pas de point d'exclamation. La tranquillité passe par la mesure du verbe.
-
----
-
-## 11. La signature visuelle
+## 8. La signature visuelle
 
 La doctrine visuelle complète est documentée dans `cf-tokens.css` et sera consolidée en Sprint 41 dans une famille `skills/20-DESIGN-*.md`. En résumé doctrinal :
 
 - **Palette.** Crème `#FBFAF7` en fond. Bleu CF `#007AFF` comme accent primaire (cohérent iOS). Pastels secondaires : lilas, indigo, orange, rose, mint. Rouge `#FF3B30` réservé à l'urgence et au destructif. Forest green `#1F4937` est **déprécié** — toute trace dans le code est à supprimer.
-- **Typographie.** Stack système (`-apple-system, system-ui`). Pas de webfont chargée. SF natif sur macOS/iPadOS, Helvetica Neue ailleurs. Maximum 4 tailles par page.
+- **Typographie.** Stack système (`-apple-system, system-ui`). Pas de webfont chargée. SF natif sur macOS/iPadOS, Helvetica Neue ailleurs.
 - **Liquid Glass iOS 26.** Trois niveaux canoniques (z1 ambient, z2 standard, z3 elevated). Backdrop-filter `blur(40px) saturate(200%)` sur z2. Border `0.5px rgba(255,255,255,0.75)`. Inset white 0.8 sur le haut.
-- **Icônes.** Lucide React stroke `1.6`, viewBox `24`, taille rendue `20px`. Phosphor n'est pas installé en V1.
+- **Icônes.** Lucide React stroke `1.6`, viewBox `24`, taille rendue `20px`. Phosphor n'est pas installé en V1 — toute mention "Phosphor Regular" est obsolète.
 - **Wallpaper.** Neutral (crème nuancée diffuse), pas saturé. Les fonds saturés multicolores sont autorisés sur l'écran Aujourd'hui uniquement, et discrètement.
-- **Animations.** Duration 250-600ms uniquement. Easing `ease-out` toujours. Jamais bounce, jamais spring. `prefers-reduced-motion` respecté.
 - **Vocabulaire des composants signatures.** Squircle, pill, glass card, sub-sidebar, page-header canonique, fil d'Ariane.
 
 ---
 
-## 12. Les sources de vérité
+## 9. Les sources de vérité
 
 Toute décision produit doit pouvoir être tracée vers l'un de ces documents :
 
 | Document | Statut | Couvre |
 |---|---|---|
-| `skills/00-MASTER.md` | Routage Claude Code | Ordre de lecture, règles absolues code |
-| `skills/00-CONCEPT.md` (ce fichier) | Source de vérité v2.0 | Positionnement, persona, doctrine, promesses, vocabulaire, piliers Apple |
-| `skills/01-ARCHITECTURE.md` | Source de vérité v2.0 | Navigation, pages, layouts, pattern de retour, stack, helpers, workflow |
-| `skills/02-EXPERTS.md` | Source de vérité v2.0 | Hélène, 12 Experts, modèle de conversation, LLM par rôle |
-| `skills/03-VOICE_SHEET.md` | Source de vérité v2.0 | Règles éditoriales, pointe vers `lib/ai/prompts/system.ts` |
-| `skills/04-MULTI_TENANT.md` | Source de vérité technique | RLS Supabase, helpers, patterns sécurité |
-| `skills/10-SACRED.md` | Règles non-négociables | Synthèse condensée des interdits absolus |
+| `skills/00-CONCEPT.md` (ce fichier) | Source de vérité v2.0 | Positionnement, persona, doctrine, promesses, vocabulaire |
+| `skills/01-ARCHITECTURE.md` | Source de vérité v2.0 | Navigation, pages, layouts, pattern de retour, multi-tenant |
+| `skills/02-EXPERTS.md` | Source de vérité v2.0 (nouveau) | Hélène, 12 Experts, modèle de conversation, LLM par rôle |
 | `skills/20-DESIGN-*.md` | À écrire Sprint 41 | Tokens, glass, icônes, animations, espacements, signatures |
 | `cf-tokens.css` | Source de vérité technique | Implémentation CSS des tokens |
 
-Tout ce qui contredit ces documents dans le code, dans les anciens audits, dans les anciennes branches (cf-conceptuel-0 notamment) est **caduc**. La branche cf-conceptuel-0, qui contient les explorations OS de marque iPadOS 26 avec dock 4 apps et Apple Santé 4 indicateurs vitaux, est conservée comme exploration V2/V3 non validée, jamais comme roadmap d'implémentation.
+Tout ce qui contredit ces documents dans le code, dans les anciens audits, dans les anciennes branches (cf-conceptuel-0 notamment) est **caduc**. La branche cf-conceptuel-0, qui contient les explorations "OS de marque iPadOS 26 avec dock 4 apps, Apple Santé 4 indicateurs vitaux", est conservée comme **exploration V2/V3 non validée**, jamais comme roadmap d'implémentation.
 
 ---
 
-## 13. Le mode de travail
+## 10. Le mode de travail
 
 Creative Fair se construit selon une discipline stricte :
 
@@ -245,23 +183,4 @@ Creative Fair se construit selon une discipline stricte :
 
 ---
 
-## 14. Décisions abandonnées — ne pas réintégrer sans amendement
-
-Ces décisions ont été prises et tranchées. Toute proposition de retour en arrière passe par un Sprint dédié et un amendement de ce document.
-
-- Méthode pédagogique 4 mois (V60-pre)
-- Couleur cuivre `#C77D3A` (V60-pre)
-- Vert forêt `#1F4937` (déprécié 6 mai 2026)
-- Nav 4 destinations top-level (remplacée par 8 destinations groupées + 2 icônes système le 20 mai 2026)
-- Bulle flottante Conseiller
-- Onboarding 10 questions (remplacé par F89 wizard piliers 5 questions)
-- Plans b2c_solo / b2c_pro / b2c_studio en V1
-- OS de marque iPadOS 26 avec dock 4 apps (exploration cf-conceptuel-0, jamais validée)
-- Apple Santé avec 4 indicateurs vitaux Cohérence/Équilibre/Densité/Profondeur dans Mon Programme (exploration cf-conceptuel-0, jamais validée)
-- Métriques de performance des publications passées en V1 (vanity metrics)
-- Conseiller comme page séparée (fusionné dans Messages avec Hélène M. pinned)
-- Contacts comme page séparée (fusionné dans Messages)
-
----
-
-*Document v2.0.1 du 21 mai 2026. Toute proposition de modification passe par un Sprint dédié, jamais en passant.*
+*Document v2.0 du 20 mai 2026. Toute proposition de modification passe par un Sprint dédié, jamais en passant.*

@@ -127,10 +127,6 @@ Le script `scripts/test-multi-tenant.ts` crée 2 tenants A et B avec 1 user et 1
 | `analytics_events` | ✓ | **Read-only pour les users** — writes via service_role. |
 | `credits_usage` | ✓ | **Read-only pour les users** — writes via service_role. |
 
-## Concept abandonné — pas de table `programmes`
-
-L'idée de "méthode 4 mois" (V60-pre) est remplacée par `brands.business_calendar` (jsonb). Le calendrier éditorial est piloté par les événements business du tenant, pas par une phase imposée. Si un sprint te demande de créer une table `programmes`, **arrête-toi et signale-le** — c'est probablement un prompt obsolète.
-
 ## En cas de doute
 
 - Si tu écris une nouvelle table : `tenant_id uuid not null references tenants(id) on delete cascade` est obligatoire.
