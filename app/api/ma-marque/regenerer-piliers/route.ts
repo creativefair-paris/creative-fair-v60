@@ -187,14 +187,16 @@ export async function POST() {
     )
   }
 
-  // 5. Persist via admin
+  // 5. Persist via admin — Sprint 41-secu-compte (A) : filtre tenant_id obligatoire.
   const admin = createAdmin()
   const adminTyped = admin as unknown as {
     from: (t: string) => {
       update: (payload: Record<string, unknown>) => {
-        eq: (col: string, val: string) => Promise<{
-          error: { message: string } | null
-        }>
+        eq: (col: string, val: string) => {
+          eq: (col: string, val: string) => Promise<{
+            error: { message: string } | null
+          }>
+        }
       }
     }
   }
@@ -205,6 +207,7 @@ export async function POST() {
       updated_at: new Date().toISOString(),
     })
     .eq('id', brand.id)
+    .eq('tenant_id', tenantId)
 
   if (updateErr) {
     return NextResponse.json(

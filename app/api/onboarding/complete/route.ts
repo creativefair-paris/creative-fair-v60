@@ -149,9 +149,11 @@ export async function POST(req: NextRequest) {
         }
       }
       update: (row: Record<string, unknown>) => {
-        eq: (col: string, val: string) => Promise<{
-          error: { message: string } | null
-        }>
+        eq: (col: string, val: string) => {
+          eq: (col: string, val: string) => Promise<{
+            error: { message: string } | null
+          }>
+        }
       }
     }
   }
@@ -180,10 +182,12 @@ export async function POST(req: NextRequest) {
 
   let brandId: string
   if (existingRaw?.id) {
+    // Sprint 41-secu-compte (A) : filtre tenant_id obligatoire.
     const { error: updErr } = await adminBrands
       .from('brands')
       .update(brandPayload)
       .eq('id', existingRaw.id)
+      .eq('tenant_id', tenantId)
     if (updErr) {
       return NextResponse.json(
         { error: 'brand update failed', detail: updErr.message },
