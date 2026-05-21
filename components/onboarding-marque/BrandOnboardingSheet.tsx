@@ -11,7 +11,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { WizardProgressBar } from '@/components/conseiller/WizardProgressBar'
+// Sprint 40 Phase 2B — import WizardProgressBar retiré (Bloc 3 Conseiller V1 dégagé).
+// Progression simple "N / N" en header (ligne 188) suffit pour le brand onboarding V1.
 import { ExitConfirmDialog } from '@/components/conseiller/ExitConfirmDialog'
 import {
   updateBrandOnboardingStep,
@@ -189,10 +190,8 @@ export function BrandOnboardingSheet({ session: initial, onClose }: Props) {
         </span>
       </header>
 
-      <WizardProgressBar
-        currentStep={currentStep}
-        totalSteps={BRAND_ONBOARDING_TOTAL_STEPS}
-      />
+      {/* Sprint 40 Phase 2B — WizardProgressBar retire (Bloc 3) ; le
+          compteur "N / N" en header (ligne 188) suffit. */}
 
       <main
         style={{
