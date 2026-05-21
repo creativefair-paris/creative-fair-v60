@@ -19,7 +19,7 @@ import {
   OnboardingChoiceStep,
   type OnboardingChoiceOption,
 } from './OnboardingChoiceStep'
-import { ConseillerIntro } from './ConseillerIntro'
+// Sprint 40 Phase 2B — import ConseillerIntro retiré (Bloc 16 proposed-deletions).
 
 type TextQuestion = {
   kind: 'text'
@@ -195,19 +195,16 @@ export function OnboardingFlow() {
         const data = (await res.json().catch(() => ({}))) as { error?: string }
         throw new Error(data.error ?? `Erreur ${res.status}`)
       }
-      // Sprint 37 — succès : bascule sur le mini-onboarding du conseiller
-      // (3 écrans skippables, doc 09 §8 / décision Apple #51) plutôt que
-      // de rediriger directement sur /aujourd-hui.
-      setStatus('intro')
+      // Sprint 40 Phase 2B — mini-onboarding du conseiller dégagé (Bloc 16).
+      // Bascule directe sur /aujourd-hui après onboarding marque.
+      window.location.href = '/aujourd-hui'
     } catch (err) {
       setStatus('error')
       setError(err instanceof Error ? err.message : 'Erreur inconnue')
     }
   }
 
-  if (status === 'intro') {
-    return <ConseillerIntro />
-  }
+  // Sprint 40 Phase 2B — branche status === 'intro' retirée (ConseillerIntro dégagé).
 
   if (status === 'submitting') {
     return (
