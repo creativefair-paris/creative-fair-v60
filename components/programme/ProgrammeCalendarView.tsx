@@ -28,10 +28,13 @@ type Props = {
 export function ProgrammeCalendarView({ posts }: Props) {
   // Sprint 37.G F64 — persistance localStorage.
   const [viewKind, setViewKind] = useState<CalendarViewKind>('week')
+  // Sprint 41-secu-compte (C) : pattern d'hydratation client (localStorage
+  // inaccessible côté SSR). Le setViewKind n'est appelé que si valeur valide.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const stored = window.localStorage.getItem('cf:calendar-view')
     if (stored === 'week' || stored === 'month' || stored === 'list') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewKind(stored)
     }
   }, [])

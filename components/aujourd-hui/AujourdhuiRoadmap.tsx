@@ -18,7 +18,7 @@ export function AujourdhuiRoadmap({ steps, generatedAt }: Props) {
   return (
     <section className="roadmap glass-z2" aria-label="Parcours du jour">
       <header className="roadmap-header">
-        <h2 className="roadmap-title">Aujourd'hui, voici ton parcours</h2>
+        <h2 className="roadmap-title">Aujourd&apos;hui, voici ton parcours</h2>
         {generatedAt ? (
           <p className="roadmap-meta">Préparé par Hélène M. à {generatedAt}</p>
         ) : null}

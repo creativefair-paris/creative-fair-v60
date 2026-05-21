@@ -54,6 +54,9 @@ export function PillarWizardSheet({ open, brandId, onDismiss, onCreated }: Props
   const [error, setError] = useState<string | null>(null)
 
   // Reset + charge questions à l'ouverture.
+  // Sprint 41-secu-compte (C) : multiples setState intentionnels (reset wizard
+  // à chaque réouverture). Pas une cascade — un seul re-render groupé.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) return
     setStep('questions')
@@ -62,6 +65,7 @@ export function PillarWizardSheet({ open, brandId, onDismiss, onCreated }: Props
     setPropositions([])
     setDraft({ title: '', description: '' })
     setError(null)
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     let cancelled = false
     setLoadingQuestions(true)

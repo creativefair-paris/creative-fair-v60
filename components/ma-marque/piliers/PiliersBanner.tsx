@@ -36,10 +36,17 @@ export function PiliersBanner() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
+    // Sprint 41-secu-compte (C) : pattern d'hydratation client (localStorage
+    // inaccessible côté SSR). setState ici est intentionnel — il s'exécute
+    // une seule fois au mount, pas en cascade.
     try {
       const dismissed = window.localStorage.getItem(STORAGE_KEY)
-      setVisible(dismissed !== '1')
+      if (dismissed !== '1') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setVisible(true)
+      }
     } catch {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true)
     }
   }, [])

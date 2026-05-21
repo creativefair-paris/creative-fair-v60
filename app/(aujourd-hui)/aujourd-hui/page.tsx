@@ -141,7 +141,7 @@ export default async function AujourdhuiPage() {
       <header className="page-header">
         <div className="page-shell">
           <span className="header-eyebrow">{headerDate.toUpperCase()}</span>
-          <h1 className="header-h1">Aujourd'hui</h1>
+          <h1 className="header-h1">Aujourd&apos;hui</h1>
         </div>
       </header>
 

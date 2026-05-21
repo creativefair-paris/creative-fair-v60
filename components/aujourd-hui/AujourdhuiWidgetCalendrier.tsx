@@ -48,7 +48,7 @@ export function AujourdhuiWidgetCalendrier({ dayNumber, weekday, month, events }
 
         <ul className="widget-cal-events">
           {events.length === 0 ? (
-            <li className="widget-cal-empty">Rien de prévu aujourd'hui.</li>
+            <li className="widget-cal-empty">Rien de prévu aujourd&apos;hui.</li>
           ) : (
             events.slice(0, 2).map((event) => (
               <li key={event.id} className="widget-cal-event">

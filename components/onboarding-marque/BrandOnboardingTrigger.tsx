@@ -223,7 +223,7 @@ function ResumeChoiceMiniSheet({
             margin: 0,
           }}
         >
-          Tu en es à l'étape {currentStep + 1} sur {totalSteps}. Tu veux reprendre où tu en étais ou tout recommencer ?
+          Tu en es à l&apos;étape {currentStep + 1} sur {totalSteps}. Tu veux reprendre où tu en étais ou tout recommencer ?
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
           <button

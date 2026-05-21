@@ -21,7 +21,7 @@ export function AujourdhuiWidgetRappels({ rappels }: Props) {
           <span className="widget-rap-count">{active.length}</span>
           <div>
             <div className="widget-rap-label">{active.length === 1 ? 'tâche' : 'tâches'}</div>
-            <div className="widget-rap-sub">Aujourd'hui</div>
+            <div className="widget-rap-sub">Aujourd&apos;hui</div>
           </div>
         </header>
         <ul className="widget-rap-list">
