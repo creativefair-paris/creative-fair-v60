@@ -15,7 +15,7 @@ import { PlanPreview } from '@/components/programme/PlanPreview'
 import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
 import { ProgrammeCalendarView } from '@/components/programme/ProgrammeCalendarView'
 import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
-import { checkJalonStatus } from '@/lib/jalons/check-jalons'
+// Sprint 40 Phase 2B — import checkJalonStatus retiré (Bloc 14 Jalons dégagé).
 import type { BusinessCalendar } from '@/types/business-calendar'
 import type { PilierNarratif, PostRow } from '@/types/programme'
 import type { BrandBook } from '@/types/ma-marque'
@@ -117,10 +117,8 @@ export default async function ProgrammePage({ searchParams }: ProgrammePageProps
     (rawProfileFreq as { publication_frequency?: PublicationFrequency | null } | null)
       ?.publication_frequency ?? null
 
-  // Sprint 37.C (F26) — vérifie le jalon courant avant d'autoriser le
-  // wizard A1. Si la marque n'est pas posée, un dialogue de friction
-  // s'ouvre côté client.
-  const jalonStatus = await checkJalonStatus(supabase, tenantId)
+  // Sprint 40 Phase 2B — jalonStatus retiré (Bloc 14 Jalons dégagé). Plus de
+  // dialogue de friction côté client (Conseiller V1 dégagé, wizard A1 disparu).
 
   // Sprint 37.D (F34) — Charge l'aperçu du plan fraîchement généré.
   type NewPlanPreviewPost = {

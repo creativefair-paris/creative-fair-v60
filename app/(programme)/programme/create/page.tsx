@@ -7,7 +7,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getBrandByTenantId } from '@/lib/supabase/brands'
 import { ProgrammeCreateForm } from '@/components/programme-create/ProgrammeCreateForm'
-import { checkJalonStatus } from '@/lib/jalons/check-jalons'
+// Sprint 40 Phase 2B — checkJalonStatus retiré (Bloc 14 Jalons). La logique
+// "marque incomplete" est désormais une simple vérification de la présence
+// de piliers narratifs sur la brand.
 import { MarqueIncompleteWarning } from '@/components/programme-create/MarqueIncompleteWarning'
 import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
 import type { BusinessCalendar } from '@/types/business-calendar'
@@ -42,9 +44,6 @@ export default async function CreateProgrammePage() {
     redirect('/onboarding/analyse-marque')
   }
 
-  // Sprint 37.E (F44) — Check jalon marque pour afficher l'alerte.
-  const jalonStatus = await checkJalonStatus(supabase, tenantId)
-
   // Récupère piliers + business calendar pour les suggestions.
   const brandRow = brand as unknown as {
     piliers_narratifs?: unknown
@@ -54,6 +53,8 @@ export default async function CreateProgrammePage() {
   if (Array.isArray(brandRow.piliers_narratifs)) {
     piliers = brandRow.piliers_narratifs as PilierNarratif[]
   }
+  // Sprint 40 Phase 2B — marque considérée complète si au moins 3 piliers définis.
+  const marqueComplete = piliers.length >= 3
   const businessCalendar = (brandRow.business_calendar ?? null) as BusinessCalendar | null
 
   // Suggestions d'ancres business sur les 90 prochains jours.
@@ -76,8 +77,9 @@ export default async function CreateProgrammePage() {
   return (
     <ProgrammeSplitShell activeItem="create">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {/* Sprint 37.E (F44) — Alerte si jalon marque non-atteint. */}
-        {!jalonStatus.marque.complete ? <MarqueIncompleteWarning /> : null}
+        {/* Sprint 40 Phase 2B — Alerte si marque incomplète (logique simplifiée :
+            moins de 3 piliers narratifs définis). Jalon dégagé Bloc 14. */}
+        {!marqueComplete ? <MarqueIncompleteWarning /> : null}
 
         <ProgrammeCreateForm
           pillarsCatalog={piliers.map((p, i) => ({
