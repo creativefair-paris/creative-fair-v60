@@ -1,3 +1,6 @@
+// @deprecated Sprint 40 Phase 2B — pas aligné Experts V2.0 (architecture
+// Hélène + 12 Experts). À refondre Sprint 43+ pour signer l'Expert pertinent.
+//
 // Sprint 37.F (F48) — Server action : mini-chat sur un post du calendrier.
 //
 // Tour court (2-4 phrases max), pair senior, tutoiement. Au-delà de 2-3

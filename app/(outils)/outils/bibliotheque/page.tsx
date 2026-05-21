@@ -26,11 +26,8 @@ export default async function BibliothequePage() {
       className="min-h-screen"
       style={{ position: 'relative', background: 'var(--color-background)' }}
     >
-      <div className="bg-halo bg-halo-1" aria-hidden="true" />
-      <div className="bg-halo bg-halo-2" aria-hidden="true" />
-      <div className="bg-halo bg-halo-3" aria-hidden="true" />
-      <div className="bg-halo bg-halo-4" aria-hidden="true" />
-      <div className="bg-halo bg-halo-5" aria-hidden="true" />
+      {/* Sprint 40 Phase 2B — halos bg-halo-N retirés (wallpaper saturated
+          réservé à Aujourd'hui uniquement, doctrine 01-ARCHITECTURE.md §3.4). */}
 
       <div
         style={{
@@ -41,10 +38,13 @@ export default async function BibliothequePage() {
           flexDirection: 'column',
         }}
       >
+        {/* Sprint 40 Phase 2B — breadcrumb simplifié (mention "Outils" retirée :
+            Bibliothèque sera promue top-level Travail Sprint 43+,
+            doctrine 01-ARCHITECTURE.md §1). */}
         <PageHeader
           title="Bibliothèque"
           subtitle="Tout ce que tu as, en un seul endroit."
-          breadcrumb={["Aujourd'hui", { label: 'Outils', href: '/outils' }, 'Bibliothèque']}
+          breadcrumb={["Aujourd'hui", 'Bibliothèque']}
         />
 
         <section

@@ -1,3 +1,8 @@
+// @deprecated Sprint 40 Phase 2B — composant à renommer MonProgrammeView
+// Sprint 43+ + refactor structurel Split Brief 40/60 → sub-sidebar 260px
+// (doctrine V2.0 §3.2). Mot "Dashboard" en nom interne tolérable §9 voice sheet
+// mais signal pour le renommage.
+//
 // Sprint 36.B.3 — Orchestrateur client de /programme en Split Brief 40/60.
 //
 // Hero gauche (40%) : narrative + chips piliers actifs + mention pilier dominant

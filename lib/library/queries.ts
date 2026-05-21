@@ -5,9 +5,9 @@
 // pilote ne voit que les items de son tenant).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+// Sprint 40 Phase 2B — ConversationPreview retiré (Conseiller V1 dégagé Blocs 1-9).
 import type {
   BrandBookPreview,
-  ConversationPreview,
   DocumentPreview,
   LibraryItem,
   PostPreview,
@@ -152,50 +152,8 @@ async function loadPosts(supabase: SupabaseClient): Promise<LibraryItem[]> {
   })
 }
 
-async function loadConversations(supabase: SupabaseClient): Promise<LibraryItem[]> {
-  const { data, error } = await supabase
-    .from('conseiller_conversations')
-    .select('id, scenario_type, messages, created_at, state, context')
-    .eq('state', 'CONSUMED')
-    .order('created_at', { ascending: false })
-    .limit(100)
-  if (error) {
-    console.warn('[library/queries] loadConversations failed:', error.message)
-    return []
-  }
-  return (data ?? []).map((r) => {
-    const row = r as {
-      id: string
-      scenario_type: string
-      messages: unknown
-      created_at: string
-      state: string
-      context: unknown
-    }
-    const preview: ConversationPreview = {
-      kind: 'conversation',
-      scenario_type: row.scenario_type,
-      messages: row.messages,
-    }
-    const ctx = row.context && typeof row.context === 'object' ? (row.context as Record<string, unknown>) : null
-    const titleSeed =
-      ctx && typeof ctx['period_start'] === 'string' && typeof ctx['period_end'] === 'string'
-        ? `Plan ${String(ctx['period_start'])} → ${String(ctx['period_end'])}`
-        : (safeStr(ctx?.['buzz_text']) ?? safeStr(ctx?.['message_text'])) ?? `Conversation ${row.scenario_type}`
-    return {
-      id: row.id,
-      category: 'conversation',
-      title: titleSeed.split(/\s+/).slice(0, 8).join(' '),
-      date: row.created_at,
-      status: 'archived',
-      subtitle: row.scenario_type,
-      searchIndex: `${row.scenario_type} ${
-        typeof row.messages === 'string' ? trim(row.messages, 500) : ''
-      }`.toLowerCase(),
-      preview,
-    }
-  })
-}
+// Sprint 40 Phase 2B — loadConversations() retiré (Conseiller V1 dégagé Blocs 1-9).
+// La table conseiller_conversations sera dropée/repurposée Sprint 41 schéma dédié.
 
 async function loadReviews(supabase: SupabaseClient): Promise<LibraryItem[]> {
   const { data, error } = await supabase
@@ -284,15 +242,15 @@ async function loadProgrammes(supabase: SupabaseClient): Promise<LibraryItem[]> 
 }
 
 export async function loadLibrary(supabase: SupabaseClient): Promise<LibraryItem[]> {
-  const [docs, brand, posts, convs, reviews, progs] = await Promise.all([
+  // Sprint 40 Phase 2B — loadConversations retiré.
+  const [docs, brand, posts, reviews, progs] = await Promise.all([
     loadDocuments(supabase),
     loadBrandBook(supabase),
     loadPosts(supabase),
-    loadConversations(supabase),
     loadReviews(supabase),
     loadProgrammes(supabase),
   ])
-  return [...brand, ...docs, ...posts, ...convs, ...reviews, ...progs].sort(
+  return [...brand, ...docs, ...posts, ...reviews, ...progs].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )
 }

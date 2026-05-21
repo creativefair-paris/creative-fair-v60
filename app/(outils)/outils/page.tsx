@@ -34,11 +34,8 @@ export default async function OutilsPage() {
       className="min-h-screen"
       style={{ position: 'relative', background: 'var(--color-background)' }}
     >
-      <div className="bg-halo bg-halo-1" aria-hidden="true" />
-      <div className="bg-halo bg-halo-2" aria-hidden="true" />
-      <div className="bg-halo bg-halo-3" aria-hidden="true" />
-      <div className="bg-halo bg-halo-4" aria-hidden="true" />
-      <div className="bg-halo bg-halo-5" aria-hidden="true" />
+      {/* Sprint 40 Phase 2B — halos bg-halo-N retirés (wallpaper saturated
+          réservé à Aujourd'hui uniquement, doctrine 01-ARCHITECTURE.md §3.4). */}
 
       <div
         style={{

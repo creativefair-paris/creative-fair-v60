@@ -1,11 +1,13 @@
 // Sprint 37.A (F9.preview) — Preview multi-type Bibliothèque.
+// Sprint 40 Phase 2B — kind 'conversation' retiré (Conseiller V1 dégagé Blocs 1-9) ;
+// section ConversationSection + imports ConseillerBubble/PiloteBubble + types
+// ConversationData / ConversationMessage retirés.
 //
 // Affiche le payload selon LibraryItem.category :
 //   - document : iframe PDF (browser viewer) ou message DOCX "à télécharger"
 //                ou image direct
 //   - brand-book : metadata 4 piliers du brand book
 //   - post : reconstruction fiche post (texte + statut + retombées)
-//   - conversation : timeline messages lecture seule
 //   - review : 3 sections (fact-check + crédit + ready-to-paste)
 //   - programme : arc + dates + status
 
@@ -13,18 +15,14 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ConseillerBubblesFromText } from '@/components/conseiller/ConseillerBubble'
-import { PiloteBubble } from '@/components/conseiller/PiloteBubble'
 import type {
   BrandBookPreview as BrandBookData,
-  ConversationPreview as ConversationData,
   DocumentPreview as DocumentData,
   LibraryItem,
   PostPreview as PostData,
   ProgrammePreview as ProgrammeData,
   ReviewPreview as ReviewData,
 } from '@/lib/library/types'
-import type { ConversationMessage } from '@/lib/conseiller/types'
 import type {
   FactCheckItem,
   VisualCredit,
@@ -43,8 +41,6 @@ export function LibraryPreview({ item }: Props) {
       return <BrandBookSection data={item.preview as BrandBookData} title={item.title} />
     case 'post':
       return <PostSection data={item.preview as PostData} title={item.title} />
-    case 'conversation':
-      return <ConversationSection data={item.preview as ConversationData} title={item.title} />
     case 'review':
       return <ReviewSection data={item.preview as ReviewData} title={item.title} />
     case 'programme':
@@ -230,37 +226,7 @@ function PostSection({ data, title }: { data: PostData; title: string }) {
   )
 }
 
-// ── Conversation ─────────────────────────────────────────────────────────
-
-function ConversationSection({
-  data,
-  title,
-}: {
-  data: ConversationData
-  title: string
-}) {
-  const msgs = Array.isArray(data.messages)
-    ? (data.messages as ConversationMessage[])
-    : []
-  return (
-    <article className="glass-thin" style={cardStyle}>
-      <Header title={title} subtitle={`Conversation ${data.scenario_type}`} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {msgs.length === 0 ? (
-          <p style={pStyle}>Conversation vide.</p>
-        ) : (
-          msgs.map((m, i) =>
-            m.role === 'user' ? (
-              <PiloteBubble key={i} content={m.content} />
-            ) : (
-              <ConseillerBubblesFromText key={i} text={m.content} />
-            ),
-          )
-        )}
-      </div>
-    </article>
-  )
-}
+// Sprint 40 Phase 2B — ConversationSection retiré (Conseiller V1 dégagé Blocs 1-9).
 
 // ── Review ───────────────────────────────────────────────────────────────
 

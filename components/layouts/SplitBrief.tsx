@@ -1,3 +1,7 @@
+// @deprecated Sprint 40 Phase 2B — pattern Split Brief 40/60 remplacé par
+// sub-sidebar 260px doctrine V2.0 §3.2 (01-ARCHITECTURE.md). Composant
+// conservé pour compatibilité Sprint 40 ; refactor structurel Sprint 43+.
+//
 // Sprint 36.G — Layout Split Brief 40/60 canonique.
 //
 // Pattern central de la doctrine v60 pour les pages denses : colonne

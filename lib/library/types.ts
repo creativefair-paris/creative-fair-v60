@@ -1,15 +1,16 @@
 // Sprint 37.A (F9) — Types Bibliothèque.
 //
 // Un LibraryItem agrège les sources hétérogènes (uploads pilote,
-// posts publiés, conversations conseiller consommées, reviews
-// complétées, programmes générés) sous une forme commune pour le
-// listing et le segmented control.
+// posts publiés, reviews complétées, programmes générés) sous une
+// forme commune pour le listing et le segmented control.
+//
+// Sprint 40 Phase 2B — catégorie 'conversation' retirée (Bloc 1-9 :
+// Conseiller V1 dégagé, plus de conversations à indexer).
 
 export type LibraryCategory =
   | 'brand-book'
   | 'document'
   | 'post'
-  | 'conversation'
   | 'review'
   | 'programme'
 
@@ -40,7 +41,6 @@ export type LibraryTab =
   | 'brand-book'
   | 'document'
   | 'post'
-  | 'conversation'
   | 'review'
   | 'programme'
 
@@ -52,8 +52,6 @@ export function categoryLabel(c: LibraryCategory): string {
       return 'Document'
     case 'post':
       return 'Post'
-    case 'conversation':
-      return 'Conversation'
     case 'review':
       return 'Review'
     case 'programme':
@@ -65,7 +63,6 @@ export function tabLabel(t: LibraryTab): string {
   if (t === 'all') return 'Tous'
   if (t === 'document') return 'Documents'
   if (t === 'post') return 'Posts'
-  if (t === 'conversation') return 'Conversations'
   if (t === 'review') return 'Reviews'
   if (t === 'programme') return 'Programmes'
   return 'Brand book'
@@ -126,11 +123,7 @@ export type PostPreview = {
   retombees: string | null
 }
 
-export type ConversationPreview = {
-  kind: 'conversation'
-  scenario_type: string
-  messages: unknown
-}
+// Sprint 40 Phase 2B — ConversationPreview retiré (concept Conseiller V1 dégagé).
 
 export type ReviewPreview = {
   kind: 'review'

@@ -23,12 +23,13 @@ type Props = {
   items: ReadonlyArray<LibraryItem>
 }
 
+// Sprint 40 Phase 2B — tab 'conversation' retiré (Bloc 1-9 Conseiller V1 dégagé,
+// plus de conversations Conseiller indexées dans la bibliothèque).
 const TABS: ReadonlyArray<LibraryTab> = [
   'all',
   'brand-book',
   'document',
   'post',
-  'conversation',
   'review',
   'programme',
 ]

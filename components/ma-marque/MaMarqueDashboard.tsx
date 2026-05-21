@@ -1,3 +1,7 @@
+// @deprecated Sprint 40 Phase 2B — composant à renommer MaMarqueView
+// Sprint 43+. Mot "Dashboard" en nom interne tolérable §9 voice sheet
+// mais signal pour le renommage.
+//
 // Sprint 36.B.3 → 36.B.4 — Orchestrateur client de /ma-marque.
 //
 // Patch 36.B.4 :

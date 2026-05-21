@@ -1,3 +1,10 @@
+// @deprecated Sprint 40 Phase 2B — composant explicitement EXCLU de Phase 2
+// par arbitrage Lead amendement §3 (audit visuel Sprint 41 — si la barre crée
+// pression visuelle "remplis-la !" → Recalé, sinon À refactorer + renommer).
+// Frontière mince avec gamification soft : pas de pourcentage écrit, pas
+// d'animation, mais le mot "fondations" remonte à la méthode pédagogique
+// 4 mois (dégagée 00-CONCEPT.md §14).
+//
 // Sprint 36.B.5 — Barre de progression discrète sous la phrase d'état.
 //
 // Doctrine : anti-gamification. Pas de pourcentage. Pas de chiffre dans

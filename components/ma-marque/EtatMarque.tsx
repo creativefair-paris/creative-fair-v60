@@ -1,3 +1,7 @@
+// @deprecated Sprint 40 Phase 2B — composant explicitement EXCLU de Phase 2
+// par arbitrage Lead amendement §3 (audit visuel Sprint 41 conjointement avec
+// BarreFondations).
+//
 // Sprint 36.B.3 → 36.B.5 — Phrase d'état + barre discrète sous la phrase.
 //
 // La phrase reste prose tranquille (Pilier 4). La barre ajoutée Sprint 36.B.5
