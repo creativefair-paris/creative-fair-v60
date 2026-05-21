@@ -2705,3 +2705,268 @@ h1, h2, h3, h4, h5, h6 {
 .breadcrumb-separator {
   opacity: 0.5;
 }
+
+/* ============================================================
+   Sprint 43-stable — Compte v2.0
+   ============================================================ */
+
+.compte-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  align-items: start;
+  padding-top: 24px;
+}
+@media (max-width: 900px) {
+  .compte-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sa-sidebar {
+  padding: 16px 14px;
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.sa-id-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  margin-bottom: 14px;
+  border-bottom: 0.5px solid var(--border-faint);
+  padding-bottom: 14px;
+}
+.sa-id-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--lilac), var(--blue-cf));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.sa-id-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.sa-id-mail {
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sa-side-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sa-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background 200ms;
+}
+.sa-nav-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.sa-nav-item.is-active {
+  background: rgba(0, 122, 255, 0.08);
+  color: var(--blue-cf);
+  font-weight: 500;
+}
+.sa-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.sa-side-bottom {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--border-faint);
+}
+
+/* Section content */
+.compte-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.compte-section {
+  padding: 32px;
+}
+.compte-section-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+.compte-section-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 24px;
+}
+
+.compte-subsection-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 24px 0 12px;
+}
+
+.compte-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.compte-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.compte-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.compte-input {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 0.5px solid var(--border-strong);
+  background: white;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+.compte-input:focus {
+  outline: 2px solid var(--blue-cf);
+  outline-offset: -1px;
+  border-color: var(--blue-cf);
+}
+.compte-input:disabled {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-secondary);
+}
+.compte-help {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.compte-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.compte-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 200ms;
+}
+.compte-btn--primary {
+  background: var(--blue-cf);
+  color: white;
+}
+.compte-btn--secondary {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+.compte-btn--danger {
+  background: var(--red);
+  color: white;
+}
+.compte-btn:hover {
+  opacity: 0.9;
+}
+
+.compte-marque-card,
+.compte-plan-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 0.5px solid var(--border-faint);
+  border-radius: 14px;
+}
+.compte-marque-eyebrow,
+.compte-plan-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.compte-marque-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.compte-marque-plan,
+.compte-plan-status {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.compte-plan-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 4px 0;
+}
+
+.compte-invoices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 0.5px solid var(--border-faint);
+}
+.compte-invoice {
+  display: grid;
+  grid-template-columns: 1fr auto 80px;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--border-faint);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.compte-invoice-status {
+  color: var(--mint);
+  font-weight: 500;
+}
+
+.compte-security-block {
+  margin-bottom: 24px;
+}
+.compte-security-block:last-child {
+  margin-bottom: 0;
+}
