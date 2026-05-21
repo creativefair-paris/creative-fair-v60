@@ -157,3 +157,125 @@ Création complète :
   - Généré automatiquement par la Roadmap d'Aujourd'hui → `source_post_id` ou `source_brand_event_id`.
 
 Ce périmètre est explicitement laissé à un sprint dédié.
+
+---
+
+## 6. Cible doctrinale V2.0 — spec détaillée pour Sprint 43+
+
+### 6.1 Référence Apple Reminders
+
+`00-CONCEPT.md` §3 "Apple Reminders pour la sobriété des tâches et la lisibilité absolue."
+
+Les références produit Reminders incarnent la **grammaire** de Rappels Creative Fair :
+
+- **Check circle gauche** : 18px, stroke 1.5, cocher coche l'item, animation 200ms.
+- **Titre + sous-titre** : titre 15-16px medium, sous-titre 13-14px regular (date d'échéance, contexte source).
+- **Swipe actions** (mobile) : swipe gauche = marquer fait, swipe droite = supprimer.
+- **Sections** : "Aujourd'hui · Demain · Cette semaine · Plus tard · Sans date".
+- **Inbox / Listes** : pas de listes utilisateur en V1 (pas de surfeature). Une seule inbox.
+- **Création** : input simple en haut, comme Reminders ("Ajouter un rappel… ⏎").
+- **Couleurs** : rouge `#FF3B30` uniquement pour les échéances **dépassées**. Sinon noir Apple `#1C1C1E`.
+
+### 6.2 Structure de fichiers cible
+
+```
+app/(app)/rappels/
+├── layout.tsx
+├── page.tsx                            ← Server Component, charge la liste
+├── loading.tsx
+└── error.tsx
+
+components/rappels/
+├── RappelsView.tsx                     ← orchestrateur
+├── RappelsList.tsx                     ← liste sectionnée (Aujourd'hui / Demain / ...)
+├── RappelRow.tsx                       ← une ligne Things 3 style
+├── RappelSection.tsx                   ← header de section ("Aujourd'hui")
+├── NewRappelInput.tsx                  ← input en haut, créer en tapant entrée
+├── RappelDetailSheet.tsx               ← détail au clic (notes, source, échéance)
+├── RappelEmptyState.tsx                ← "Aucun rappel. Hélène te préviendra quand quelque chose mérite ton attention."
+└── RappelOverdueBadge.tsx              ← badge rouge si échéance dépassée
+
+lib/rappels/
+├── queries.ts                          ← loadRappels(supabase, view)
+├── types.ts                            ← RappelRow, RappelView, RappelSection
+└── grouping.ts                         ← group by date (today, tomorrow, this-week, later)
+
+app/_actions/rappels/
+├── create-rappel.ts                    ← createRappel(title, due_at?, source?)
+├── complete-rappel.ts                  ← markCompleted(id)
+├── update-rappel.ts                    ← updateRappel(id, patch)
+└── delete-rappel.ts                    ← deleteRappel(id)
+```
+
+### 6.3 Migration SQL prévue
+
+```sql
+-- Migration 0XX_reminders.sql (Sprint 43+)
+
+create table reminders (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  notes text,
+  due_at timestamptz,
+  completed_at timestamptz,
+  source_post_id uuid references posts(id) on delete set null,
+  source_conversation_id uuid references conversations(id) on delete set null,
+  source_event_id uuid,                  -- ancre business calendar (jsonb)
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index idx_reminders_tenant_user_active
+  on reminders(tenant_id, user_id, due_at)
+  where completed_at is null;
+
+alter table reminders enable row level security;
+
+create policy "reminders select" on reminders for select
+  using (tenant_id = public.user_tenant_id());
+
+create policy "reminders insert" on reminders for insert
+  with check (tenant_id = public.user_tenant_id() and user_id = auth.uid());
+
+create policy "reminders update" on reminders for update
+  using (tenant_id = public.user_tenant_id() and user_id = auth.uid());
+
+create policy "reminders delete" on reminders for delete
+  using (tenant_id = public.user_tenant_id() and user_id = auth.uid());
+```
+
+Note : `user_id = auth.uid()` en plus de `tenant_id` car les rappels sont personnels (une équipe multi-user partage le tenant mais pas forcément ses rappels).
+
+### 6.4 Cross-pages — interconnexions
+
+`01-ARCHITECTURE.md` §6 :
+
+| Source | Action | Destination Rappel |
+|---|---|---|
+| Messages (Hélène) | "Ajoute ça à mes rappels" | Nouveau rappel avec `source_conversation_id` |
+| Aujourd'hui Roadmap | Hélène insère une étape orchestrée | Nouveau rappel auto avec `source_post_id` ou `source_event_id` |
+| Calendrier (post programmé en retard) | "Préparer ce post" | Rappel avec `source_post_id` |
+| Mon Programme | "Penser à ce pilier" | Rappel manuel |
+| Création manuelle | Input en haut Rappels | Rappel sans source |
+
+### 6.5 Vue par défaut
+
+Sections affichées dans l'ordre :
+1. **En retard** (rouge, si échéance dépassée).
+2. **Aujourd'hui**.
+3. **Demain**.
+4. **Cette semaine** (J+2 à J+7).
+5. **Plus tard** (J+8 et au-delà).
+6. **Sans date**.
+
+Les rappels complétés (`completed_at not null`) sont masqués par défaut. Un toggle "Afficher complétés" en bas révèle l'historique des 30 derniers jours.
+
+### 6.6 Pourquoi Apple Reminders et pas Things 3 strict
+
+`01-ARCHITECTURE.md` §1 mentionne "format Things 3". Cependant, `00-CONCEPT.md` §3 cite explicitement Apple Reminders. Les deux sont compatibles dans l'esprit :
+- **Things 3 apport** : la grammaire visuelle (check circle gauche, sections nommées).
+- **Apple Reminders apport** : la sobriété native iOS 26 (typo SF, glass cells, animations système).
+
+La cible V2.0 = un hybride **Things-grammar + Reminders-aesthetic** dans le langage Liquid Glass de Creative Fair.

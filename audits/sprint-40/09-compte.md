@@ -220,3 +220,125 @@ Validés :
 - Audit copies des `docs/user/*.md`.
 - Patch sécurité multi-tenant sur `app/_actions/ensure-profile.ts` (audit dans `10-transverse.md` §1).
 - Sprint 42 — harmonisation espace admin Lead avec doctrine V2.0.
+
+---
+
+## 6. Cible doctrinale V2.0 — spec détaillée pour Sprint 41+/42/43+
+
+### 6.1 Structure de fichiers cible Compte
+
+```
+app/(app)/compte/
+├── layout.tsx
+├── page.tsx                            ← page Compte unique, style Apple Settings (onglets internes)
+├── loading.tsx
+└── error.tsx
+
+components/compte/
+├── CompteView.tsx                      ← orchestrateur Apple Settings
+├── ProfilSection.tsx                   ← nom, email, avatar
+├── PlanSection.tsx                     ← Plan Pro · une marque active, prix, statut Stripe
+├── SecuriteSection.tsx                 ← email recovery, sessions actives, log out
+├── ApparenceSection.tsx                ← dark mode, taille texte (futur)
+├── MaMarqueLinkRow.tsx                 ← unique bloc vers Ma Marque (§4 doctrine)
+├── AccessibiliteSection.tsx            ← prefers-reduced-motion, prefers-reduced-transparency, etc.
+└── DangerZoneSection.tsx               ← supprimer le compte (destructif rouge)
+```
+
+### 6.2 Structure de fichiers cible Aide
+
+```
+app/(app)/aide/
+├── layout.tsx
+├── page.tsx                            ← page Aide
+└── error.tsx
+
+components/aide/
+├── AideView.tsx                        ← orchestrateur
+├── AideCategories.tsx                  ← Premiers pas / Ma Marque / Mes Outils / Messages / etc.
+├── AideArticle.tsx                     ← article détail
+├── AideContact.tsx                     ← contact direct Lead (email canonique creativefair@1922.studio)
+└── AideAbout.tsx                       ← à propos, version, doctrine résumée
+```
+
+### 6.3 Mono-marque V1 — implications UI
+
+`01-ARCHITECTURE.md` §4 :
+
+- **Pas de sélecteur de marque dans le header.** Pas de switch.
+- **Compte > Marques n'affiche pas de liste.** Un bloc unique "Ma Marque" qui renvoie vers la page Ma Marque.
+- **Ma Marque > sidebar > "Plan Pro · une marque active"** rédigé sans ambiguïté.
+
+La cible cible respecte exactement cette doctrine — le code actuel a déjà un sous-arbre `/compte/ma-marque/` à supprimer (cf. §5.1).
+
+### 6.4 Pattern Apple Settings (référence visuelle)
+
+`00-CONCEPT.md` §3 cite Linear pour la rigueur graphique. Apple Settings (macOS Ventura+) incarne le pattern :
+- Sub-sidebar gauche 260px avec catégories (Profil, Plan, Sécurité, Apparence, etc.).
+- Content pane droit avec la section sélectionnée.
+- Pas de tabs horizontaux. Pas de bottom nav.
+- Sections séparées par des dividers discrets (rgba(0,0,0,0.05)).
+- Boutons destructifs (Danger Zone) en rouge `#FF3B30` avec confirmation textuelle (`03-VOICE_SHEET.md` §6.2).
+
+### 6.5 Pattern menu utilisateur (trailing avatar)
+
+`01-ARCHITECTURE.md` §3.3 :
+
+- Avatar utilisateur trailing à droite du PageHeader.
+- Click → menu déroulant avec :
+  - Nom + email.
+  - Lien "Mon compte" → `/compte`.
+  - Lien "Aide" → `/aide`.
+  - Bouton "Se déconnecter" (destructif gris, pas rouge).
+
+Cohérent macOS user menu. Pas de bulle décorative — sobriété.
+
+### 6.6 Espace admin Lead (Sprint 42)
+
+`00-CONCEPT.md` §8 V1 "Pas d'espace administrateur public. L'admin Lead est interne, prévu Sprint 42." `01-ARCHITECTURE.md` §8 `(admin)/`.
+
+Le code actuel a un admin partiellement (Sprint 1+) avec :
+- Listing tenants (`app/(admin)/tenants/page.tsx`).
+- Création tenant (`new/page.tsx` + `NewTenantForm.tsx`).
+- Édition tenant (`[slug]/page.tsx` + 4 éditeurs : BrandBook, BusinessCalendar, Theme, Users).
+
+Cible Sprint 42 :
+- Confirmer protégé par allowlist (`lib/auth/admin.ts` ✓).
+- Ajouter tableau de bord crédits temps réel (`02-EXPERTS.md` §7 "L'espace admin Lead (Sprint 42) devra exposer ces coûts en temps réel").
+- Ajouter monitoring qualité (Langfuse ou équivalent).
+- Ajouter export logs IA (debugging).
+
+### 6.7 Authentification — magic link Supabase
+
+`01-ARCHITECTURE.md` §8 + `04-MULTI_TENANT.md` :
+
+- `app/(auth)/login/page.tsx` — form email + bouton "Recevoir le lien magique".
+- `app/(auth)/login/actions.ts` — server action envoi magic link via Supabase Auth.
+- `app/auth/callback/route.ts` — callback Supabase après clic.
+- `app/(auth)/logout/route.ts` — déconnexion.
+- `app/_actions/ensure-profile.ts` — créer profile + lier tenant à la première connexion (cas légitime `createAdmin`).
+
+Tout est en place. Audit copies Sprint 41 (vocabulaire, sentence case, pas d'exclamation).
+
+### 6.8 Aide — contenu V1 minimal
+
+V1 n'a pas besoin d'un système d'articles complet. Cible :
+
+- **Catégorie "Premiers pas"** : 1 article "Comment Creative Fair fonctionne en 5 minutes".
+- **Catégorie "Ma Marque"** : 1 article "Compléter ta doctrine de marque".
+- **Catégorie "Mes Outils"** : 4 articles (1 par outil : Post Creator, Moodboard, Variations, Reviews).
+- **Catégorie "Messages"** : 1 article "Parler à Hélène et aux Experts".
+- **Catégorie "À propos"** : version Creative Fair, mentions légales, contact creativefair@1922.studio.
+
+Total V1 = ~8 articles. Pas plus. Pilier 6 Uncompromising Polish.
+
+### 6.9 Voice sheet sur copies Compte + Aide
+
+`03-VOICE_SHEET.md` §5 + §6 :
+
+- **Sentence case** partout (sauf noms propres).
+- **Pas d'emoji**, pas d'exclamation.
+- **Tutoiement** : "Ton compte", "Ta marque", "Tes paramètres".
+- **Pas de sycophancie** : "Voici tes options" plutôt que "N'hésite pas à explorer !".
+
+Audit copies fine Sprint 41 sur tous les composants Compte + Aide.

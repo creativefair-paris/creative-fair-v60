@@ -157,3 +157,71 @@ Aucun fichier Calendrier n'est Recalé. La purge attendra le Sprint 43+ qui cré
   - **Calendrier (top-level)** : vue temporelle publications futures + événements (post-by-post).
   - **Mon Programme** : heatmap éditoriale 30 jours agrégée (dimension pilotage).
 - Liaison cross-pages doctrinale (`?from=calendrier&context=postId`).
+
+---
+
+## 6. Cible doctrinale V2.0 — spec détaillée pour Sprint 43+
+
+### 6.1 Structure de fichiers cible
+
+```
+app/(app)/calendrier/
+├── layout.tsx
+├── page.tsx                            ← Server Component
+├── loading.tsx
+└── error.tsx
+
+components/calendrier/
+├── CalendrierView.tsx                  ← orchestrateur
+├── CalendrierMonthView.tsx             ← vue mois (grille 7 colonnes)
+├── CalendrierWeekView.tsx              ← vue semaine (timeline 7 jours)
+├── CalendrierListView.tsx              ← vue liste (chronologique)
+├── CalendrierToggle.tsx                ← switch mois/semaine/liste
+├── CalendrierPostCard.tsx              ← card publication dans la grille
+├── CalendrierEventCard.tsx             ← card événement business (ancres calendrier business)
+├── CalendrierDayCell.tsx               ← cellule jour individuelle
+├── CalendrierNavigator.tsx             ← précédent/suivant + aujourd'hui
+└── NewPostFromCalendrier.tsx           ← création publication depuis la grille
+
+lib/calendrier/
+├── queries.ts                          ← loadCalendrier(supabase, range)
+├── types.ts                            ← CalendrierItem (post + event), CalendrierRange
+└── range.ts                            ← calcul des ranges de date
+```
+
+### 6.2 Spec visuelle (lue depuis la doctrine)
+
+`01-ARCHITECTURE.md` §1 + §3.2 :
+- **Layout** : sub-sidebar 260px (mini-calendrier + filtres piliers + bouton "nouvelle publication") + content pane droit.
+- **Vue par défaut** : Mois.
+- **Référence produit** : `00-CONCEPT.md` §3 "Notion Calendar version simplifiée pour l'organisation du temps".
+
+`00-CONCEPT.md` §11 :
+- Crème `#FBFAF7` en fond.
+- Cellules de jour glassmorphism z2 standard.
+- Animations 250ms ease-out sur les transitions de mois.
+
+### 6.3 Liens cross-pages
+
+- Depuis Calendrier, ouvrir une publication → `?from=calendrier&context=postId` vers détail post.
+- Depuis Calendrier, "Préparer ce post" → ouvre Post Creator avec date pré-remplie.
+- Depuis Aujourd'hui, widget Calendrier (cf. §3.1) → renvoie à Calendrier vue semaine courante.
+- Depuis Mon Programme heatmap 30j, cliquer un jour → renvoie à Calendrier vue jour.
+
+### 6.4 Pas de nouveau schéma SQL
+
+La table `posts` (avec `date_prevue`, `statut`) couvre déjà l'usage. Les événements business viennent de `brand_business_calendar` (jsonb dans `brands`) ou d'une future table dédiée.
+
+### 6.5 Distinction Calendrier vs Mon Programme
+
+Doctrine confirme deux pages distinctes :
+
+| Aspect | Calendrier (top-level Travail) | Mon Programme (Éditorial) |
+|---|---|---|
+| **But** | Voir ce qui vient (publications + événements) | Piloter la stratégie éditoriale trimestrielle |
+| **Vue principale** | Mois / Semaine / Liste (post-by-post) | Heatmap 30 jours (agrégée) + suggestions semaine + piliers actifs |
+| **Granularité** | Une cellule = un post précis avec sa publication | Une cellule = densité éditoriale (X publications ce jour) |
+| **Action principale** | Cliquer un post = ouvrir détail | Cliquer un jour = explorer la stratégie de la semaine |
+| **Public** | Tout le monde (Floriane utilise quotidiennement) | Pilote (Floriane mensuel pour ajuster) |
+
+Cette distinction est doctrinale et doit être préservée à la création Sprint 43+.

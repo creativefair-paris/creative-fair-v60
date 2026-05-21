@@ -256,3 +256,137 @@ Création complète de la page Messages V2.0 :
 - Types `lib/experts/types.ts`.
 - Routing `lib/experts/routing.ts` (mapping rôle → modèle, voir `02-EXPERTS.md` §3).
 - Migration schéma `conversations` pour V2.0 (refondre les colonnes).
+
+---
+
+## 6. Cible doctrinale V2.0 — spec détaillée pour Sprint 43+
+
+### 6.1 Structure de fichiers cible Messages
+
+```
+app/(app)/messages/
+├── layout.tsx
+├── page.tsx                            ← Hélène pinned + liste conversations + carnet onglet
+├── loading.tsx
+├── error.tsx
+├── helene/page.tsx                     ← conversation principale Floriane ↔ Hélène
+├── expert/[slug]/page.tsx              ← conversation directe Floriane ↔ Expert
+└── groupe/[id]/page.tsx                ← conversation de groupe
+
+components/messages/
+├── MessagesView.tsx                    ← orchestrateur layout (sub-sidebar 260px liste + content thread)
+├── ConversationList.tsx                ← liste pinned + secondaire
+├── HelenePinned.tsx                    ← entrée pinned d'Hélène en haut
+├── ExpertConversationRow.tsx           ← rangée conversation directe Expert
+├── GroupConversationRow.tsx            ← rangée conversation de groupe
+├── MessageThread.tsx                   ← fil de messages
+├── MessageBubble.tsx                   ← bulle individuelle (user / assistant / expert)
+├── MessageInput.tsx                    ← input + envoi
+├── HeleneListensBanner.tsx             ← bannière "Hélène suit cette conversation" obligatoire
+├── ExpertSignature.tsx                 ← signature "Avec l'avis d'Antoine F. · Création visuelle"
+├── CarnetView.tsx                      ← onglet carnet (12 Experts)
+├── ExpertCard.tsx                      ← fiche détaillée Expert
+├── HeleneCard.tsx                      ← fiche détaillée Hélène + équipe pilotée
+└── ConfidentialDiscussionToggle.tsx    ← option "Discussion confidentielle" §4.3
+
+lib/messages/
+├── queries.ts                          ← loadConversations(supabase)
+├── types.ts                            ← Message, Conversation, Participant
+└── grouping.ts                         ← group by participant
+
+lib/experts/
+├── types.ts                            ← Expert, ExpertRole, LLMModel
+├── routing.ts                          ← mapping rôle → modèle (selon 02-EXPERTS.md §3)
+└── voice.ts                            ← métadonnées de voix de chaque Expert
+
+lib/ai/prompts/
+├── helene.ts                           ← system prompt Hélène M. Opus 4.7
+└── experts/
+    ├── sofia.ts                        ← Sofia P. (Ads, Sonnet 4.6)
+    ├── lea.ts                          ← Léa Z. (Influence Premium, Opus 4.7)
+    ├── capucine.ts                     ← Capucine V. (Communauté, Sonnet 4.6)
+    ├── jonas.ts                        ← Jonas K. (Coups & Viralité, Opus 4.7)
+    ├── albane.ts                       ← Albane R. (Éditorial Magazine, Opus 4.7)
+    ├── marc.ts                         ← Marc D. (Veille, Sonnet 4.6)
+    ├── ines.ts                         ← Inès B. (Ops, Sonnet 4.6)
+    ├── sebastien.ts                    ← Sébastien L. (Analytics, Sonnet 4.6)
+    ├── valentine.ts                    ← Valentine D. (Crise, Opus 4.7)
+    ├── antoine.ts                      ← Antoine F. (Création Visuelle, Opus 4.7)
+    ├── camille.ts                      ← Camille O. (Channels adjacents, Sonnet 4.6)
+    └── elise.ts                        ← Élise M. (Archives, Opus 4.7)
+
+app/_actions/messages/
+├── send-message.ts                     ← envoi à Hélène ou Expert
+├── invite-expert.ts                    ← inviter Expert dans conversation existante (option B §4.1)
+├── start-conversation.ts               ← démarrer conversation directe avec Expert
+├── toggle-confidential.ts              ← Discussion confidentielle on/off §4.3
+└── list-conversations.ts               ← lister conversations user
+```
+
+### 6.2 Spec visuelle (de la doctrine)
+
+`02-EXPERTS.md` §2 + `01-ARCHITECTURE.md` §3.2 :
+
+- **Layout** : sub-sidebar 260px (Hélène pinned + ConversationList + onglet Carnet) + content pane droit (MessageThread actif).
+- **Pinned Hélène** : 56px de hauteur, avatar à gauche, nom + dernier message tronqué, fond glass z2 standard distinct du reste.
+- **Liste secondaire** : conversations directes Expert + groupes, fond glass z1 ambient, hover discret.
+- **MessageThread** : bulles user à droite (bleu CF `#007AFF`), bulles Hélène/Expert à gauche (gris pâle), signature Expert en bas de bulle.
+- **Bannière "Hélène suit cette conversation"** : sticky en haut du thread, fond glass z1, icône œil ouvert, 32px de hauteur.
+
+### 6.3 Pattern conversation principale Hélène
+
+`02-EXPERTS.md` §4.1 :
+
+- Floriane parle à Hélène par défaut.
+- Hélène a deux options pour les sujets Expert :
+  - **Option A — Appel silencieux** : Hélène consulte l'Expert en arrière-plan, restitue la réponse signée "avec l'avis d'Antoine". 80% des cas.
+  - **Option B — Invitation dans la conversation** : Hélène propose "veux-tu qu'on invite Antoine sur cette discussion ?". Si Floriane accepte, conversation passe en groupe.
+
+Implémentation backend :
+- `lib/experts/routing.ts` décide silencieux vs invité selon complexité + durée probable.
+- Floriane peut surcharger via input direct : "demande à Antoine" ou "on invite Marc".
+
+### 6.4 Pattern conversation directe Expert
+
+`02-EXPERTS.md` §4.2 :
+
+- Floriane peut démarrer une conversation directe depuis le Carnet.
+- Discret dans l'UI : pas de raccourci proéminent qui inviterait Floriane à zapper Hélène.
+- Liste secondaire, pas en évidence.
+- Bannière "Hélène suit cette conversation" obligatoire (§4.3).
+
+### 6.5 Pattern conversations de groupe
+
+`02-EXPERTS.md` §4.4 :
+
+- Hélène peut inviter plusieurs Experts dans une même conversation (lancement produit = Antoine + Albane + Camille + Hélène).
+- Section "Groupes" dans la liste avec avatar collectif + participants visibles.
+
+### 6.6 Pattern carnet des Experts
+
+`02-EXPERTS.md` §5 :
+
+- Onglet Carnet dans Messages (bouton "Voir tous les contacts" ou tab).
+- Hélène pinned en haut, fiche détaillée.
+- 12 Experts listés alphabétiquement par prénom.
+- Fiche Expert :
+  - Nom, avatar, territoire éditorial (eyebrow).
+  - 3 pastilles spécialités.
+  - CTA "Démarrer une conversation".
+  - CTA "Demander un avis" (ouverture Messages avec prompt pré-rempli).
+  - Doctrine de référence (skill Lead correspondante en résumé une ligne).
+- Fiche Hélène :
+  - Tout ce qui précède.
+  - **+ "L'équipe qu'elle pilote · 12 Experts"** avec liste pastillée.
+  - Mention "elle orchestre la Roadmap d'Aujourd'hui".
+
+### 6.7 Reconstruction depuis le HTML Messages Claude Design
+
+Le HTML "Messages" mentionné en brief §1 incarne la doctrine Messages V2.0. Sa lecture Sprint 43+ permettra de caler :
+- Position exacte Hélène pinned (hauteur, padding, glass).
+- Animation de drift de la bulle pinned.
+- Styling des sections Travail / Carnet.
+- Layout responsive mobile/tablette.
+- Signature Expert format exact.
+
+Sprint 40 prépare le terrain en dégageant le legacy Conseiller V1. Sprint 43+ construira Messages V2.0 propre.

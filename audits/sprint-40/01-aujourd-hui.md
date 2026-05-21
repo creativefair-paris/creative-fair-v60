@@ -234,3 +234,112 @@ Détail Validés :
    - Création des routes `/calendrier`, `/rappels`, `/bibliotheque`, `/messages` au top-level.
 
 Sprint 40 = **purger ce qui contredit la doctrine V2.0**. La reconstruction des écrans cibles est un sprint séparé.
+
+---
+
+## 6. Cible doctrinale V2.0 — spec détaillée pour Sprint 43+
+
+### 6.1 Layout canonique du hub (lecture mot à mot de `01-ARCHITECTURE.md` §3.1)
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  page-header  (sticky, breadcrumb désactivé, H1 + date)   │
+├────────────┬─────────────────────────────────────────────┤
+│            │                                             │
+│  Sidebar   │  Content pane                               │
+│  globale   │  ├─ 3 widgets (Calendrier · Rappels · Mes.) │
+│  10 items  │  └─ Roadmap "X étapes pour aujourd'hui"     │
+│  + 2 icons │                                             │
+│            │                                             │
+└────────────┴─────────────────────────────────────────────┘
+```
+
+Densité **α stricte minimale** :
+- Trois widgets visibles uniquement.
+- Un bloc Roadmap.
+- Pas d'État du programme. Pas de KPIs Cohérence/Équilibre/Densité/Profondeur. Aucune métrique inventée.
+- Pas de Dernière activité.
+
+### 6.2 Composition de la sidebar globale
+
+`01-ARCHITECTURE.md` §2.1 :
+
+```
+TRAVAIL
+  ▸ Calendrier
+  ▸ Rappels
+  ▸ Bibliothèque
+  ▸ Messages
+
+ÉDITORIAL
+  ▸ Mon Programme
+  ▸ Ma Marque
+  ▸ Mes Outils
+
+[icône Compte]  [icône Aide]
+```
+
+- Eyebrows TRAVAIL/ÉDITORIAL : `11px / 600 / uppercase / letter-spacing 0.08em / color rgba(60,60,67,0.45)`.
+- Pas de séparateur visuel agressif entre les sections.
+- Icônes Compte + Aide en bas, sur une seule ligne, sans label.
+
+### 6.3 Spec des 3 widgets
+
+#### Widget Calendrier
+- Aperçu compact de la semaine en cours (5-7 publications à venir).
+- Date prochain post + heure.
+- Cliquer → renvoie à `/calendrier` (top-level).
+
+#### Widget Rappels
+- 3-5 rappels non complétés du jour ou du lendemain.
+- Échéance en retard → rouge `#FF3B30`.
+- Cliquer → renvoie à `/rappels`.
+
+#### Widget Messages
+- Dernier message d'Hélène (si non lu).
+- Conversation active si Floriane est en cours d'échange.
+- Compteur de messages non lus discret.
+- Cliquer → renvoie à `/messages` avec Hélène pinned.
+
+### 6.4 Spec de la Roadmap orchestrée par Hélène
+
+`01-ARCHITECTURE.md` §3.1 + `02-EXPERTS.md` §2 :
+
+- Bloc unique en bas du content pane.
+- Titre : "Aujourd'hui, voici ton parcours" ou similaire (sentence case, pas d'exclamation).
+- **3 à 10 étapes** selon la charge réelle du jour (Hélène décide).
+- Chaque étape = `<TaskRow>` (composant déjà existant — réutilisable depuis `components/today/TaskRow.tsx`).
+- Hélène signature visible : "Préparé par Hélène M. à 7:42" en bas.
+- Chaque étape peut être cliquée → ouvre le contexte pertinent (post à préparer, conversation à reprendre, calendrier à consulter).
+
+### 6.5 Wallpaper saturated (le seul endroit autorisé)
+
+`01-ARCHITECTURE.md` §3.4 :
+
+- Halos colorés (bleu CF, lilas, indigo, orange) animés en `drift` 18-30s.
+- Réservé à Aujourd'hui uniquement.
+- `prefers-reduced-motion` désactive l'animation.
+- `prefers-reduced-transparency` réduit l'opacité.
+
+Le code actuel a `bg-halo-1..5` dans `styles/liquid-glass.css` ou `app/globals.css` — implémentation conforme.
+
+### 6.6 Page-header canonique sur Aujourd'hui
+
+`01-ARCHITECTURE.md` §3.3 :
+
+- Sticky en haut, fond transparent.
+- Padding vertical 24px ouvert, 12px compacté au scroll (classe `is-scrolled`).
+- **Breadcrumb désactivé sur Aujourd'hui** (c'est le hub, pas de fil retour).
+- H1 = "Aujourd'hui".
+- Sous-titre = date au format français long (`vendredi 21 mai 2026`).
+- Avatar utilisateur trailing à droite, niveau ligne H1.
+
+### 6.7 Reconstruction depuis le HTML Aujourd'hui v3 Claude Design
+
+Le HTML "Aujourd'hui v3" mentionné en brief §1 est la **source visuelle de référence** pour Sprint 43+. Sa lecture pixel-près permettra de :
+- Caler les positions exactes des widgets (gap, sizes, alignment).
+- Caler le visuel Liquid Glass z2 sur les cards widgets.
+- Caler les animations de drift des halos.
+- Caler la typo SF Pro Display H1 + sous-titre.
+
+**Sprint 40 ne touche pas à cette reconstruction.** Il prépare en supprimant le legacy (DemarrerCard, JalonHero, etc.) et en marquant `@deprecated` Split Brief.
