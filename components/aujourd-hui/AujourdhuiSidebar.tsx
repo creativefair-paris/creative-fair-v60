@@ -35,7 +35,7 @@ const EDITORIAL: ReadonlyArray<SidebarItem> = [
 ]
 
 const SYSTEME: ReadonlyArray<SidebarItem> = [
-  { href: '/compte/mon-compte', icon: User, label: 'Compte' },
+  { href: '/compte', icon: User, label: 'Compte' },
   { href: '/aide', icon: HelpCircle, label: 'Aide' },
 ]
 

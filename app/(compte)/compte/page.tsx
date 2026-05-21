@@ -1,4 +1,6 @@
 // Sprint 43-stable — Page Compte V2.0 (refonte complète depuis stub Sprint 34).
+// Sprint 41-secu-compte (D) — déplacée depuis /compte/mon-compte vers /compte
+// (URL canonique V2.0 doctrine 01-ARCHITECTURE.md §1).
 //
 // Doctrine 01-ARCHITECTURE.md §3.2 (sub-sidebar 260px + content) + §4 (mono-marque V1).
 // HTML de référence : docs/design-mockups/06-compte.html

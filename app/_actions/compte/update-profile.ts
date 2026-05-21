@@ -37,5 +37,5 @@ export async function updateProfile(formData: FormData): Promise<void> {
     throw new Error(`Erreur lors de la mise à jour : ${error.message}`)
   }
 
-  revalidatePath('/compte/mon-compte')
+  revalidatePath('/compte')
 }

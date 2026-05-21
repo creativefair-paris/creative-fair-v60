@@ -45,7 +45,7 @@ export function CompteSubSidebar({ active, userName, userEmail }: Props) {
           return (
             <Link
               key={s.key}
-              href={`/compte/mon-compte?section=${s.key}`}
+              href={`/compte?section=${s.key}`}
               className={`sa-nav-item ${active === s.key ? 'is-active' : ''}`}
             >
               <span className="sa-nav-icon" style={{ color: s.color }}>
