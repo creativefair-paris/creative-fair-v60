@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<!--
+  Rappels · v61 (audit /cfs-apple-audit 19 mai 2026)
+  Diff v60 → v61 :
+   - wallpaper-saturated → wallpaper-neutral (R1)
+   - sa-statusbar + sa-back + sa-page-header → page-header canonique (R2)
+   - H1 "Aujourd'hui" (confus) → H1 "Rappels" + subtitle date/comptage (R2)
+   - .rap-layout 280px → 260px (R3)
+   - body overflow:hidden → page-scroll canonique
+   - Cartes tâches déjà glass z2 (rgba 0.55 + blur 20)
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Rappels · Creative Fair</title>
+<link rel="stylesheet" href="cf-tokens.css">
+<link rel="stylesheet" href="cf-systemapps.css">
+<style>
+  body { min-height: 100vh; background: var(--cream); }
+
+  .rap-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .rap-layout { grid-template-columns: 1fr; gap: var(--s-5); }
+  }
+
+  /* Override .sa-sidebar pour s'aligner sur .sub-sidebar canonique */
+  .rap-layout > .sa-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+    overflow: visible;
+    padding: 14px 12px;
+    border-right: 0;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Override .sa-content pour scroll page */
+  .rap-layout > .sa-content {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* ============================================================
+     Sidebar — vues rapides + listes
+     ============================================================ */
+  .rap-quick-icon {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+    font-size: 14px;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.3);
+  }
+  .rap-quick-icon svg { width: 13px; height: 13px; }
+
+  .rap-list-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.5);
+  }
+
+  /* ============================================================
+     Content
+     ============================================================ */
+  .rap-content { max-width: 820px; }
+
+  .rap-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 12px 4px 10px;
+    margin-top: 18px;
+  }
+  .rap-section-head:first-of-type { margin-top: 4px; }
+  .rap-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+  }
+  .rap-section-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rap-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Tâche unitaire — card Liquid Glass z2 individuelle */
+  .rap-task {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: start;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .rap-task:hover { background: rgba(255, 255, 255, 0.72); }
+
+  .rap-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.6px solid var(--border-strong);
+    background: transparent;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .rap-check.list-pubs:hover  { border-color: var(--blue-cf); }
+  .rap-check.list-briefs:hover { border-color: var(--lilac); }
+  .rap-check.list-prod:hover   { border-color: var(--orange); }
+  .rap-check.list-veille:hover { border-color: var(--mint); }
+
+  .rap-check.done {
+    border-color: var(--blue-cf);
+    background: var(--blue-cf);
+  }
+  .rap-check.done::after {
+    content: "";
+    position: absolute;
+    top: 4px; left: 6px;
+    width: 5px; height: 9px;
+    border: solid #fff;
+    border-width: 0 1.8px 1.8px 0;
+    transform: rotate(45deg);
+  }
+
+  .rap-task-body { min-width: 0; }
+  .rap-task-title {
+    font-size: 15px;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.35;
+  }
+  .rap-task-subline {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    letter-spacing: -0.005em;
+  }
+  .rap-task-subline .rap-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.6);
+    border: 0.5px solid var(--border-subtle);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .rap-task-subline .rap-tag .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+  }
+  .rap-task-due {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .rap-task-due.is-overdue { color: var(--red); font-weight: 500; }
+  .rap-task-due svg { width: 11px; height: 11px; }
+
+  /* Done state */
+  .rap-task.is-done .rap-task-title {
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+    color: var(--text-tertiary);
+  }
+  .rap-task.is-done .rap-task-subline { color: var(--text-tertiary); opacity: 0.75; }
+  .rap-task.is-done { opacity: 0.85; }
+
+  /* Action right side : dots révélés au hover uniquement */
+  .rap-task-actions {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-quaternary);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .rap-task:hover .rap-task-actions { opacity: 1; }
+  .rap-task-actions svg { width: 13px; height: 13px; }
+
+  /* Empty state nudge */
+  .rap-empty-nudge {
+    margin-top: 28px;
+    padding: 18px 22px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.45);
+    border: 0.5px dashed var(--border-subtle);
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+  }
+  .rap-empty-nudge strong { color: var(--text-primary); font-weight: 600; }
+</style>
+</head>
+<body data-screen-label="Rappels">
+
+<!-- Wallpaper neutral (v61, cf-tokens.css §17.1) -->
+<div class="wallpaper-neutral" aria-hidden="true"></div>
+
+<!-- Page header canonique (v61, cf-tokens.css §17.3) -->
+<header class="page-header" id="pageHeader">
+  <div class="page-shell">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <a href="01-aujourd-hui-v3.html" class="breadcrumb-link">Aujourd'hui</a>
+          <span class="breadcrumb-separator">›</span>
+          <span>Rappels</span>
+        </div>
+        <h1 class="header-h1">Rappels</h1>
+      </div>
+      <div class="sa-side-title-action" aria-label="Nouvelle tâche" style="width:32px;height:32px;border-radius:8px;">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 2 L 7 12 M2 7 L 12 7"/></svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell">
+  <div class="rap-layout">
+
+    <!-- ============================================================
+         Sub-sidebar
+         ============================================================ -->
+    <aside class="sa-sidebar" aria-label="Navigation Rappels">
+
+      <div class="sa-side-search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="7" cy="7" r="5"/>
+          <path d="M11 11 L14 14" stroke-linecap="round"/>
+        </svg>
+        <span>Rechercher</span>
+      </div>
+
+      <nav class="sa-side-section">
+        <div class="sa-side-section-title">Vues rapides</div>
+        <div class="sa-nav-item active">
+          <span class="rap-quick-icon" style="background: var(--red);">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1 L 7 7 M3 4 L 11 4"/><path d="M3 13 L 11 13"/></svg>
+          </span>
+          Aujourd'hui
+          <span class="sa-nav-count">3</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="rap-quick-icon" style="background: var(--blue-cf);">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="10" height="8" rx="1.2"/><path d="M2 5.5 L 12 5.5"/><path d="M4.5 2 L 4.5 4 M9.5 2 L 9.5 4"/></svg>
+          </span>
+          Cette semaine
+          <span class="sa-nav-count">8</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="rap-quick-icon" style="background: var(--orange);">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5"/><path d="M7 4 L 7 7 L 9 8.5" stroke-linecap="round"/></svg>
+          </span>
+          En retard
+          <span class="sa-nav-count">1</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="rap-quick-icon" style="background: var(--indigo);">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><circle cx="7" cy="7" r="2"/></svg>
+          </span>
+          Toutes
+          <span class="sa-nav-count">24</span>
+        </div>
+      </nav>
+
+      <nav class="sa-side-section">
+        <div class="sa-side-section-title">Mes listes</div>
+        <div class="sa-nav-item">
+          <span class="rap-list-dot" style="background: var(--blue-cf);"></span>
+          Publications
+          <span class="sa-nav-count">9</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="rap-list-dot" style="background: var(--lilac);"></span>
+          Points & Briefs
+          <span class="sa-nav-count">6</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="rap-list-dot" style="background: var(--orange);"></span>
+          Production
+          <span class="sa-nav-count">4</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="rap-list-dot" style="background: var(--mint);"></span>
+          Veille
+          <span class="sa-nav-count">5</span>
+        </div>
+      </nav>
+
+      <div class="sa-side-footer">
+        <div class="sa-nav-item" style="color: var(--blue-cf);">
+          <span class="rap-quick-icon" style="background: var(--blue-cf);">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 2 L 7 12 M2 7 L 12 7"/></svg>
+          </span>
+          Ajouter une liste
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         Content
+         ============================================================ -->
+    <section class="sa-content">
+
+      <div class="rap-content" style="padding-top: 4px;">
+
+        <!-- ============================================================
+             Aujourd'hui (3 tâches)
+             ============================================================ -->
+        <div class="rap-section-head">
+          <div class="rap-section-title">Aujourd'hui</div>
+          <div class="rap-section-count">3 tâches</div>
+        </div>
+        <div class="rap-tasks">
+
+          <div class="rap-task">
+            <div class="rap-check list-prod" role="checkbox" aria-checked="false"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Briefer photographe shoot juin</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--blue-cf);"></span>Publications</span>
+                <span class="rap-task-due">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="9" height="8" rx="1.2"/><path d="M1.5 5 L 10.5 5"/></svg>
+                  18 mai
+                </span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="rap-task">
+            <div class="rap-check list-briefs" role="checkbox" aria-checked="false"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Relire brouillon série Anecdote</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--lilac);"></span>Points & Briefs</span>
+                <span>3 publications · angle artisanat à équilibrer</span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="rap-task">
+            <div class="rap-check list-pubs" role="checkbox" aria-checked="false"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Programmer publication Communauté</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--blue-cf);"></span>Publications</span>
+                <span class="rap-task-due">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="9" height="8" rx="1.2"/><path d="M1.5 5 L 10.5 5"/></svg>
+                  Lundi 20 mai
+                </span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============================================================
+             Cette semaine
+             ============================================================ -->
+        <div class="rap-section-head">
+          <div class="rap-section-title">Cette semaine</div>
+          <div class="rap-section-count">5 tâches</div>
+        </div>
+        <div class="rap-tasks">
+
+          <div class="rap-task">
+            <div class="rap-check list-briefs"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Valider angle Manifeste avec Hélène</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--lilac);"></span>Points & Briefs</span>
+                <span class="rap-task-due">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="9" height="8" rx="1.2"/><path d="M1.5 5 L 10.5 5"/></svg>
+                  19 mai
+                </span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="rap-task">
+            <div class="rap-check list-prod"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Commander accessoires shoot</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--orange);"></span>Production</span>
+                <span class="rap-task-due">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="9" height="8" rx="1.2"/><path d="M1.5 5 L 10.5 5"/></svg>
+                  20 mai
+                </span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="rap-task">
+            <div class="rap-check list-veille"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Lecture article Vogue Italia (Sozzani)</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--mint);"></span>Veille</span>
+                <span>Signalé par Olivia · pépite archives</span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="rap-task">
+            <div class="rap-check list-pubs"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Newsletter mai à finaliser</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--blue-cf);"></span>Publications</span>
+                <span class="rap-task-due">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="9" height="8" rx="1.2"/><path d="M1.5 5 L 10.5 5"/></svg>
+                  22 mai
+                </span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="rap-task is-done">
+            <div class="rap-check list-prod done"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Confirmer date studio</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--orange);"></span>Production</span>
+                <span>Réservé hier · 12 juin</span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============================================================
+             Plus tard
+             ============================================================ -->
+        <div class="rap-section-head">
+          <div class="rap-section-title">Plus tard</div>
+          <div class="rap-section-count">2 tâches</div>
+        </div>
+        <div class="rap-tasks">
+
+          <div class="rap-task">
+            <div class="rap-check list-briefs"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Cadrage série juin · pilier Patrimoine</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--lilac);"></span>Points & Briefs</span>
+                <span class="rap-task-due">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="9" height="8" rx="1.2"/><path d="M1.5 5 L 10.5 5"/></svg>
+                  26 mai
+                </span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="rap-task">
+            <div class="rap-check list-veille"></div>
+            <div class="rap-task-body">
+              <div class="rap-task-title">Benchmark maisons historiques · Sprout Social</div>
+              <div class="rap-task-subline">
+                <span class="rap-tag"><span class="dot" style="background: var(--mint);"></span>Veille</span>
+                <span>Demande Thomas R.</span>
+              </div>
+            </div>
+            <div class="rap-task-actions">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="3" r="0.8" fill="currentColor"/><circle cx="6" cy="6" r="0.8" fill="currentColor"/><circle cx="6" cy="9" r="0.8" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<a class="index-button" href="index.html">↩ Index mockups</a>
+
+<script>
+  /* Header sticky compaction (Règle 7) */
+  (function() {
+    const header = document.getElementById('pageHeader');
+    if (!header) return;
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 60);
+    }, { passive: true });
+  })();
+</script>
+
+</body>
+</html>

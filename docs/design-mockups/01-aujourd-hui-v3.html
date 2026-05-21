@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Aujourd'hui · Creative Fair</title>
+
+<!-- cf-tokens v60 — source de vérité unique pour :
+     typographie · liquid glass · radius · shadows · spacing
+     contrôles transverses · animations canoniques -->
+<style>/* ============================================================
+   CF · cf-tokens.css
+   Tokens fondateurs Creative Fair — DA système unifiée v60
+   Source de vérité : doc 06-anatomie-ipados-26-liquid-glass.md
+   ------------------------------------------------------------
+   À importer dans TOUS les mockups via :
+       <link rel="stylesheet" href="cf-tokens.css">
+   ============================================================ */
+
+
+/* ============================================================
+   01 · RESET MINIMAL
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+
+
+/* ============================================================
+   02 · PALETTE CF v60 (post-pivot 6 mai 2026)
+   ------------------------------------------------------------
+   Forest green #1F4937 → DÉPRÉCIÉ, jamais utiliser.
+   ============================================================ */
+
+:root {
+  /* Base — crème nuancée */
+  --cream:          #FBFAF7;
+  --cream-deeper:   #F5F0EA;
+  --cream-deepest:  #EEE8DF;
+
+  /* Accent primaire — bleu CF (cohérent iOS) */
+  --blue-cf:        #007AFF;
+  --blue-cf-soft:   #E6F2FF;
+
+  /* Secondaires — pastels */
+  --lilac:          #A78BFA;
+  --lilac-soft:     #F0EBFE;
+  --indigo:         #6366F1;
+  --indigo-soft:    #E8EAFD;
+  --orange:         #FB923C;
+  --orange-soft:    #FEF1E6;
+  --rose:           #F472B6;
+  --rose-soft:      #FEEDF6;
+  --mint:           #10B981;
+  --mint-soft:      #D1FAE5;
+  --red:            #FF3B30;
+  --red-soft:       #FFE5E3;
+
+  /* Texte */
+  --text-primary:    #1C1C1E;
+  --text-secondary:  #737373;
+  --text-tertiary:   #A0A0A0;
+  --text-quaternary: #C7C7CC;
+
+  /* Bordures */
+  --border-faint:    #F0F0F0;
+  --border-subtle:   #DBDBDB;
+  --border-strong:   #C0C0C0;
+
+  /* Sémantiques — flux CF (alias de la palette) */
+  --c-publications: var(--blue-cf);
+  --c-business:     var(--lilac);
+  --c-echeances:    var(--orange);
+  --c-validations:  var(--mint);
+  --c-doyens:       var(--indigo);
+  --c-crise:        var(--red);
+}
+
+
+/* ============================================================
+   03 · TYPOGRAPHIE
+   ------------------------------------------------------------
+   Stack système — aucun fichier de fonts redistribué.
+   Sur macOS/iPadOS → SF natif. Ailleurs → Helvetica Neue.
+   ============================================================ */
+
+:root {
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont,
+                  "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text:    system-ui, -apple-system, BlinkMacSystemFont,
+                  "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Échelle 9 niveaux — doc 06 §8 */
+  --t-title-xxl: 52px; /* Hero (Bonjour Floriane) */
+  --t-title-xl:  38px; /* App title */
+  --t-title-lg:  28px; /* Section title */
+  --t-title-md:  22px; /* Sub-section */
+  --t-title-sm:  17px; /* Card title */
+  --t-body:      15px; /* Body standard */
+  --t-body-md:   14px; /* Cells */
+  --t-caption:   13px; /* Meta, time */
+  --t-micro:     11px; /* Eyebrows uppercase */
+
+  /* Letter-spacing canonique */
+  --ls-tight:   -0.025em;
+  --ls-snug:    -0.015em;
+  --ls-normal:  -0.005em;
+  --ls-eyebrow:  0.08em;
+
+  /* Line-heights */
+  --lh-tight:   1.1;
+  --lh-snug:    1.25;
+  --lh-normal:  1.45;
+  --lh-relaxed: 1.6;
+}
+
+/* Helpers typo */
+.t-title-xxl { font-size: var(--t-title-xxl); font-weight: 700; letter-spacing: var(--ls-tight); line-height: var(--lh-tight); }
+.t-title-xl  { font-size: var(--t-title-xl);  font-weight: 700; letter-spacing: var(--ls-tight); line-height: var(--lh-tight); }
+.t-title-lg  { font-size: var(--t-title-lg);  font-weight: 700; letter-spacing: var(--ls-snug);  line-height: var(--lh-snug); }
+.t-title-md  { font-size: var(--t-title-md);  font-weight: 600; letter-spacing: var(--ls-snug);  line-height: var(--lh-snug); }
+.t-title-sm  { font-size: var(--t-title-sm);  font-weight: 600; letter-spacing: var(--ls-normal); line-height: var(--lh-snug); }
+.t-body      { font-size: var(--t-body);      font-weight: 400; letter-spacing: var(--ls-normal); line-height: var(--lh-normal); }
+.t-body-md   { font-size: var(--t-body-md);   font-weight: 400; letter-spacing: var(--ls-normal); line-height: var(--lh-normal); }
+.t-caption   { font-size: var(--t-caption);   font-weight: 500; letter-spacing: var(--ls-normal); line-height: var(--lh-snug); color: var(--text-secondary); }
+.t-micro     { font-size: var(--t-micro);     font-weight: 600; letter-spacing: var(--ls-eyebrow); line-height: 1; text-transform: uppercase; color: var(--text-secondary); }
+
+/* Numérique tabulaire — heures, counts, indicateurs */
+.tabular { font-variant-numeric: tabular-nums; }
+
+
+/* ============================================================
+   04 · ESPACEMENT — système 4px
+   ============================================================ */
+
+:root {
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+}
+
+
+/* ============================================================
+   05 · BORDER RADIUS (continu, doc 06 §10)
+   ============================================================ */
+
+:root {
+  --r-xs:   4px;
+  --r-sm:   6px;
+  --r-md:   10px;
+  --r-lg:   14px;
+  --r-xl:   20px;
+  --r-2xl:  24px;
+  --r-3xl:  32px;
+  --r-pill: 999px;
+}
+
+
+/* ============================================================
+   06 · SHADOWS (doc 06 §11)
+   ============================================================ */
+
+:root {
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.16);
+
+  --shadow-glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+
+/* ============================================================
+   07 · WALLPAPER CF v60 SATURÉ DEFAULT (doc 06 §3 — révisé)
+   ------------------------------------------------------------
+   Doctrine D5 (révisée 18 mai 2026) : wallpaper saturé unifié
+   inter-apps (référence iPadOS 26). Les panes absorbent la
+   saturation via Liquid Glass z2 opaque 0.72.
+   ============================================================ */
+
+.wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(167, 139, 250, 0.50) 0%, transparent 45%),
+    radial-gradient(circle at 88% 12%, rgba(251, 146, 60, 0.55) 0%, transparent 48%),
+    radial-gradient(circle at 50% 45%, rgba(244, 114, 182, 0.35) 0%, transparent 50%),
+    radial-gradient(circle at 18% 82%, rgba(99, 102, 241, 0.55) 0%, transparent 55%),
+    radial-gradient(circle at 82% 85%, rgba(16, 185, 129, 0.50) 0%, transparent 55%),
+    linear-gradient(135deg, #FBFAF7 0%, #F4E8D8 100%);
+}
+
+/* Grain texture anti-banding */
+.wallpaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   08 · LIQUID GLASS — 3 niveaux canoniques (doc 06 §2)
+   ============================================================ */
+
+/* z1 — surfaces ambient : sidebars passives, widgets discrets */
+.glass-z1 {
+  background: rgba(251, 250, 247, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.6);
+}
+
+/* z2 — surfaces interactives : cards, widgets actifs, cells hover */
+.glass-z2 {
+  background: rgba(251, 250, 247, 0.72);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 0.5px solid rgba(255, 255, 255, 0.75);
+  box-shadow: var(--shadow-md), var(--shadow-glass-inset);
+}
+
+/* z3 — contrôles flottants : popovers, sheets, modals, dock */
+.glass-z3 {
+  background: rgba(251, 250, 247, 0.94);
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  border: 0.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* Highlight specular simulé (à composer en surimpression) */
+.glass-highlight {
+  position: relative;
+  overflow: hidden;
+}
+.glass-highlight::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.18), transparent);
+  pointer-events: none;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+/* Edge animation (light glint au hover) — V1.5 désactivé par défaut, opt-in */
+@keyframes liquid-glint {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  50%  { opacity: 0.4; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.glass-glint::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: liquid-glint 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Perf hint — uniquement sur z3 animés */
+.glass-z3.is-animated {
+  transform: translateZ(0);
+  will-change: backdrop-filter;
+}
+
+
+/* ============================================================
+   09 · STATUS BAR iPad (doc 06 §4)
+   ============================================================ */
+
+.statusbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px 6px;
+  color: rgba(28, 28, 30, 0.85);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.statusbar-time { font-variant-numeric: tabular-nums; }
+.statusbar-right {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(28, 28, 30, 0.85);
+}
+
+
+/* ============================================================
+   10 · DOCK Liquid Glass (doc 06 §13)
+   ------------------------------------------------------------
+   4 apps système universelles — utilisé sur Aujourd'hui uniquement.
+   ============================================================ */
+
+.dock {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(251, 250, 247, 0.45);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 0.5px solid rgba(255, 255, 255, 0.55);
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  z-index: 50;
+}
+
+
+/* ============================================================
+   11 · APP ICONS CF v2 — Liquid Glass material
+   ------------------------------------------------------------
+   Composition multi-couches : mesh fond SVG + atmospheric inner
+   glow CSS + glyphe glass (dans le SVG) + specular highlight CSS.
+   Tous glyphes ORIGINAUX CF — aucune réplique des designs Apple.
+   Lisibilité testée à 28 / 44 / 60 / 76 px.
+   ============================================================ */
+
+.app-icon {
+  --icon-size: 76px;
+  --icon-radius: 22.5%;        /* squircle approx — scale auto */
+
+  position: relative;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  border-radius: var(--icon-radius);
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.25s ease;
+  /* Drop shadow propre + inner shadow douce + bord highlight haut */
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    inset 0 0 18px rgba(0, 0, 0, 0.04),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* Le SVG mesh+glyphe occupe toute la surface */
+.app-icon > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Specular highlight haut — discret (opacity 0.10-0.15 max) */
+.app-icon::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 55%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    transparent 95%
+  );
+  pointer-events: none;
+  z-index: 2;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+/* Light glint au hover — couche 5 (opt-in via .with-glint) */
+.app-icon.with-glint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.32) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  pointer-events: none;
+  z-index: 3;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.app-icon.with-glint:hover::after { transform: translateX(100%); }
+
+/* Interactions */
+.app-icon:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.07),
+    inset 0 0 18px rgba(0, 0, 0, 0.04),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
+}
+.app-icon:active { transform: scale(0.96); }
+
+/* (Variantes de glow retirées — plus d'inner glow atmospheric en v3) */
+
+/* App tile (icône + label sous l'icône) */
+.app-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+}
+.app-tile-label {
+  font-size: var(--t-caption);
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: center;
+  letter-spacing: var(--ls-normal);
+}
+
+
+/* ============================================================
+   12 · CONTEXT BANNER (doc 09 — pattern transverse A)
+   ------------------------------------------------------------
+   Bandeau discret en haut quand ?from=<module> dans l'URL.
+   ============================================================ */
+
+.context-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  background: rgba(251, 250, 247, 0.72);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 0.5px solid rgba(255, 255, 255, 0.75);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.context-banner:hover { background: rgba(251, 250, 247, 0.88); }
+.context-banner:active { transform: scale(0.98); }
+.context-banner-arrow {
+  display: inline-flex;
+  width: 14px; height: 14px;
+  color: var(--blue-cf);
+}
+
+
+/* ============================================================
+   13 · BOUTON "INDEX MOCKUPS" — footer universel
+   ------------------------------------------------------------
+   Présent en bas-centre de TOUS les mockups, cohérence Phase B.
+   ============================================================ */
+
+.index-button {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  background: rgba(28, 28, 30, 0.78);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.index-button:hover { background: rgba(28, 28, 30, 0.88); }
+.index-button:active { transform: translateX(-50%) scale(0.96); }
+
+
+/* ============================================================
+   14 · CONTRÔLES STANDARDS
+   ============================================================ */
+
+/* Pills (badges, tags piliers, filtres) */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  letter-spacing: var(--ls-normal);
+  background: rgba(255, 255, 255, 0.65);
+  border: 0.5px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+.pill-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Boutons primaires / secondaires */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--r-md);
+  font-size: var(--t-body-md);
+  font-weight: 600;
+  letter-spacing: var(--ls-normal);
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-primary {
+  background: var(--blue-cf);
+  color: #fff;
+  box-shadow: var(--shadow-xs);
+}
+.btn-primary:hover { background: #0066D9; box-shadow: var(--shadow-sm); }
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.65);
+  border: 0.5px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.88); }
+.btn:active { transform: scale(0.97); }
+
+/* Search bar Liquid Glass bottom (Bibliothèque, Messages, Rappels, Contacts) */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  background: rgba(251, 250, 247, 0.94);
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  border: 0.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  color: var(--text-tertiary);
+  font-size: var(--t-body);
+}
+
+
+/* ============================================================
+   15 · ANIMATIONS CANONIQUES (doc 06 §7)
+   ============================================================ */
+
+/* A — Tab bar shrink-on-scroll */
+.tab-bar {
+  transition: transform 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+}
+.tab-bar.is-scrolled {
+  padding: 6px 10px;
+  transform: scale(0.92);
+  opacity: 0.95;
+}
+
+/* B — Modal / sheet morph depuis origin */
+@keyframes cf-morph-in {
+  from { transform: scale(0.05); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+.sheet {
+  transform-origin: var(--origin-x, 50%) var(--origin-y, 50%);
+  animation: cf-morph-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* C — App icon tap (hover lift + active scale, déjà dans .app-icon) */
+
+/* D — Bulles messages spring-in */
+@keyframes cf-bubble-in {
+  from { transform: scale(0.7) translateY(8px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);   opacity: 1; }
+}
+.bubble-in { animation: cf-bubble-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* E — Typing indicator 3 dots */
+@keyframes cf-typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot {
+  width: 6px; height: 6px;
+  background: var(--text-tertiary);
+  border-radius: 50%;
+  animation: cf-typing 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.30s; }
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 14px;
+  border-radius: var(--r-2xl);
+  background: rgba(255, 255, 255, 0.82);
+  border: 0.5px solid var(--border-faint);
+}
+
+/* F — Checkbox tap (Rappels) */
+.cf-check {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.cf-check.done {
+  border-color: var(--orange);
+  background: var(--orange);
+}
+.cf-check.done::after {
+  content: "";
+  position: absolute;
+  top: 4px; left: 7px;
+  width: 4px; height: 9px;
+  border: solid white;
+  border-width: 0 1.6px 1.6px 0;
+  transform: rotate(45deg);
+  animation: cf-check-pop 0.25s cubic-bezier(0.4, 1.6, 0.5, 1);
+}
+@keyframes cf-check-pop {
+  from { transform: rotate(45deg) scale(0); }
+  to   { transform: rotate(45deg) scale(1); }
+}
+
+/* G — Photo zoom plein écran (Bibliothèque) */
+@keyframes cf-photo-zoom {
+  from { transform: scale(var(--start-scale, 0.2)); opacity: 0.6; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.photo-zoom-in { animation: cf-photo-zoom 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+
+/* ============================================================
+   16 · A11Y — reduced motion + focus visible
+   ------------------------------------------------------------
+   Proposition ajoutée hors doc 06 — à valider Lead.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue-cf);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   FIN cf-tokens.css
+   ============================================================ */
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<style>/* vietnamese */
+@font-face {
+  font-family: 'Crimson Pro';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("614b3b2a-1d60-4dc6-8c92-7136e624f08d") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Crimson Pro';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("f6540523-94ea-47f3-aeec-fdecae9c8c55") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Crimson Pro';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("da147fdb-f186-40b2-8816-e6642f2074c1") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+
+<style>
+  /* ============================================================
+     /aujourd-hui v3 — page-scoped layout uniquement
+     Tout le visuel transverse vient de cf-tokens.css
+     ============================================================ */
+
+  body {
+    min-height: 100vh;
+    background: var(--cream);
+  }
+
+  /* ============================================================
+     Wallpaper · saturé v60 (importé de cf-tokens.css §07)
+     ============================================================ */
+  .bg-halo { display: none; } /* legacy, remplacé par .wallpaper saturé */
+
+  /* ============================================================
+     Page container
+     ============================================================ */
+  .page-shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: var(--s-6);
+    padding-right: var(--s-6);
+  }
+  @media (max-width: 768px) {
+    .page-shell { padding-left: var(--s-4); padding-right: var(--s-4); }
+  }
+
+  /* ============================================================
+     Header
+     ============================================================ */
+  .page-header { background: transparent; padding: var(--s-6) 0; }
+  .header-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-6); }
+  .header-left { display: flex; flex-direction: column; gap: var(--s-1) + 2; gap: 6px; }
+  .header-eyebrow {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+  .header-h1 {
+    font-family: var(--font-display);
+    font-size: var(--t-title-lg);
+    font-weight: 700;
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-snug);
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  /* ============================================================
+     Layout 30/70
+     ============================================================ */
+  .layout {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    gap: var(--s-8);
+    align-items: start;
+    padding-bottom: var(--s-20);
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: var(--s-6); }
+  }
+
+  /* ============================================================
+     Sidebar
+     ============================================================ */
+  /* ============================================================
+     Sidebar — surface frosted Apple-grade pour lisibilité
+     sur wallpaper saturé (matériau .glass-z1 + tint crème)
+     ============================================================ */
+  .sidebar {
+    position: sticky;
+    top: var(--s-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    padding: var(--s-3);
+    border-radius: var(--r-xl);
+    background: rgba(251, 250, 247, 0.65);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 0.5px solid rgba(255, 255, 255, 0.7);
+    box-shadow: var(--shadow-sm), var(--shadow-glass-inset);
+  }
+
+  .sidebar-section { display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-section-h {
+    font-size: var(--t-micro);
+    font-weight: 700;
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    opacity: 0.85;
+    margin: 0 0 var(--s-2) var(--s-3);
+  }
+
+  .sidebar-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    background: transparent;
+    transition:
+      background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sidebar-row:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  .sidebar-row:hover .sidebar-icon { color: var(--text-primary); }
+  .sidebar-row.is-active { background: var(--blue-cf-soft); }
+  .sidebar-row.is-active .sidebar-icon,
+  .sidebar-row.is-active .sidebar-label { color: var(--blue-cf); }
+
+  .sidebar-icon {
+    width: 28px; height: 28px;
+    border-radius: var(--r-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-primary);
+    opacity: 0.78;
+    transition: opacity 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sidebar-row:hover .sidebar-icon { opacity: 1; }
+  .sidebar-label {
+    font-size: var(--t-body);
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: var(--ls-normal);
+  }
+
+  /* ============================================================
+     Content pane
+     ============================================================ */
+  .content { display: flex; flex-direction: column; gap: var(--s-6); }
+
+  /* ===== Widgets grid v1-style — 3 cols : Cal/Tasks larges + Messages étroit ===== */
+  .widgets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.9fr;
+    gap: var(--s-3);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .widgets-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Le matériau .glass-z2 vient de cf-tokens.css §08 */
+  .widget {
+    border-radius: var(--r-lg);
+    padding: var(--s-5);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;            /* canonical grid-min-width fix : laisse fr respecter les ratios */
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s ease;
+    cursor: pointer;
+  }
+  .widget:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), var(--shadow-glass-inset);
+  }
+  .widget:active { transform: translateY(0) scale(0.99); }
+
+  /* Cal + Tasks : hauteur naturelle, visuel proche du 2×2 */
+  /* Messages : court et aligné en haut, ratio 2×1 */
+
+  /* ============================================================
+     Widgets v1 — portés de 01-aujourd-hui.html
+     (Calendrier riche · Rappels chiffré · Messages avatar 44px)
+     ============================================================ */
+
+  /* ----- Widget Calendrier ----- */
+  .widget-cal { padding: var(--s-4) var(--s-4); }
+  .cal-header { display: flex; align-items: flex-start; gap: var(--s-3); margin-bottom: var(--s-3); }
+  .cal-day-number {
+    font-size: 48px; font-weight: 700; line-height: 0.85;
+    color: var(--red);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-day-info { display: flex; flex-direction: column; padding-top: 2px; }
+  .cal-weekday {
+    font-size: 16px; font-weight: 600; color: var(--text-primary);
+    line-height: 1.15; text-transform: capitalize;
+  }
+  .cal-month {
+    font-size: 13px; font-weight: 400; color: var(--text-secondary);
+    line-height: 1.2; margin-top: 2px;
+  }
+  .cal-strip {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 2px; margin-bottom: var(--s-3);
+  }
+  .cal-strip-day {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; padding: 2px 0;
+  }
+  .cal-strip-letter {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-tertiary); letter-spacing: 0.04em;
+  }
+  .cal-strip-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-strip-day.active .cal-strip-num {
+    background: var(--red); color: #fff;
+    box-shadow: 0 1px 3px rgba(255, 59, 48, 0.30);
+  }
+  .cal-events { display: flex; flex-direction: column; gap: 4px; }
+  .cal-event {
+    display: flex; align-items: flex-start; gap: var(--s-2);
+    padding: 6px 0;
+    border-top: 0.5px solid var(--border-faint);
+  }
+  .cal-event:first-child { border-top: 0; padding-top: 0; }
+  .cal-event-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue-cf);
+    margin-top: 6px; flex-shrink: 0;
+  }
+  .cal-event-dot.lilac  { background: var(--lilac); }
+  .cal-event-dot.orange { background: var(--orange); }
+  .cal-event-time {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .cal-event-title {
+    font-size: 13px; font-weight: 500; color: var(--text-primary);
+    letter-spacing: -0.005em; line-height: 1.3; margin-top: 1px;
+  }
+
+  /* ----- Widget Rappels ----- */
+  .widget-rap { padding: var(--s-4) var(--s-4); }
+  .rap-header { display: flex; align-items: flex-start; gap: var(--s-3); margin-bottom: var(--s-3); }
+  .rap-count-number {
+    font-size: 48px; font-weight: 700; line-height: 0.85;
+    color: var(--blue-cf);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .rap-count-info { display: flex; flex-direction: column; padding-top: 2px; }
+  .rap-count-label {
+    font-size: 16px; font-weight: 600;
+    color: var(--text-primary); line-height: 1.15;
+  }
+  .rap-sub {
+    font-size: 12px; font-weight: 400; color: var(--text-secondary);
+    line-height: 1.2; margin-top: 2px;
+  }
+  .rap-list { list-style: none; margin: 0; padding: 0; }
+  .rap-item {
+    display: flex; align-items: center; gap: var(--s-3);
+    padding: 8px 0;
+    border-top: 0.5px solid var(--border-faint);
+  }
+  .rap-item:first-child { border-top: 0; padding-top: 2px; }
+  .rap-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.6px solid var(--border-strong);
+    background: transparent; flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .rap-check:hover { border-color: var(--blue-cf); }
+  .rap-text {
+    font-size: 13px; color: var(--text-primary);
+    line-height: 1.3; letter-spacing: -0.005em;
+  }
+
+  /* ----- Widget Messages ----- */
+  .widget-msg { padding: 20px 24px; }
+  .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .msg-header-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .msg-conv { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+  .msg-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px; font-weight: 600;
+    background: linear-gradient(135deg, #A7F3C9 0%, #2BB04A 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .msg-info { flex: 1; min-width: 0; }
+  .msg-name {
+    font-size: 15px; font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    display: flex; align-items: center; gap: 6px;
+    line-height: 1.2;
+  }
+  .msg-pin { font-size: 11px; }
+  .msg-preview {
+    font-size: 13px; color: var(--text-secondary);
+    line-height: 1.35; margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .msg-time {
+    font-size: 12px; color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0; align-self: flex-start; margin-top: 2px;
+  }
+
+  /* ===== Card générique (.glass-z2 vient des tokens) ===== */
+  .card {
+    border-radius: var(--r-2xl);
+    padding: var(--s-6) calc(var(--s-6) + 2px);
+    /* Hover anim canonique */
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s ease;
+  }
+  .card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg), var(--shadow-glass-inset);
+  }
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s-6);
+    margin-bottom: var(--s-1);
+  }
+  .card-eyebrow {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .card-meta-right {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-size: var(--t-micro);
+    color: var(--text-secondary);
+  }
+  .card-avatar-h {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #A7F3C9, #2BB04A);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .card-h2 {
+    font-size: var(--t-title-sm);
+    font-weight: 600;
+    letter-spacing: var(--ls-normal);
+    color: var(--text-primary);
+    margin: 6px 0 var(--s-4);
+  }
+
+  /* ===== Roadmap step ===== */
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-3) 0;
+    border-bottom: 0.5px solid var(--border-faint);
+    cursor: pointer;
+    transition: background 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Widget-link wrapper (passthrough) */
+  .widget-link { display: contents; }
+
+  /* Lien program-link cliquable */
+  .program-link-a { text-decoration: none; color: inherit; cursor: pointer; }
+  .program-link-a:hover .program-link { color: var(--blue-cf); }
+
+  /* Activity contacts cliquables */
+  .activity-card { cursor: pointer; text-decoration: none; color: inherit; }
+  .activity-card strong { transition: color 150ms ease; }
+  .activity-card:hover strong { color: var(--blue-cf); }
+  .step-row:last-child { border-bottom: none; }
+  .step-row:hover { background: rgba(0, 0, 0, 0.02); }
+  .step-check { color: var(--text-tertiary); flex-shrink: 0; }
+  .step-num {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    color: var(--text-tertiary);
+    width: 14px;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .step-body { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .step-title {
+    font-size: var(--t-body-md);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.3;
+    letter-spacing: var(--ls-normal);
+  }
+  .step-sub {
+    font-size: var(--t-micro);
+    color: var(--text-secondary);
+    line-height: 1.35;
+  }
+  .step-arrow {
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .step-row:hover .step-arrow {
+    transform: translateX(3px);
+    color: var(--text-secondary);
+  }
+
+  /* ============================================================
+     ROADMAP HORIZONTAL v2 — Liquid Glass intégral + bleu CF
+     Doctrine couleur v60.1 :
+       - Bleu CF #007AFF : validé / actif / dynamique / CTA
+       - Mint #10B981 : RÉSERVÉ Hélène + Messages (chip auteur seulement)
+       - Lilas SUPPRIMÉ de la doctrine
+     ============================================================ */
+  .roadmap-h-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+  }
+  .roadmap-h-head-left { display: flex; flex-direction: column; gap: 4px; }
+  .roadmap-h-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: rgba(60, 60, 67, 0.45);
+  }
+  .roadmap-h-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--text-primary);
+  }
+
+  /* Chip Hélène M. — SEULE occurrence mint autorisée */
+  .roadmap-h-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px 6px 6px;
+    background: rgba(16, 185, 129, 0.10);
+    border-radius: 999px;
+    font-size: 11px;
+    color: #047857;
+    font-weight: 500;
+  }
+  .roadmap-h-author-avatar {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6EE7B7, #10B981);
+    display: flex; align-items: center; justify-content: center;
+    color: #FFF; font-size: 10px; font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .timeline {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin: 8px 0 0;
+    padding: 0 8px;
+  }
+  .timeline-line {
+    position: absolute;
+    top: 18px;
+    left: calc(100% / 14 + 8px);
+    right: calc(100% / 14 + 8px);
+    height: 2px;
+    background: var(--border-subtle);
+    border-radius: 1px;
+    z-index: 0;
+  }
+  /* Ligne validée — bleu CF solide */
+  .timeline-line-done {
+    position: absolute;
+    top: 18px;
+    left: calc(100% / 14 + 8px);
+    height: 2px;
+    background: var(--blue-cf);
+    border-radius: 1px;
+    z-index: 1;
+    transition: width 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .waypoint {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    gap: 10px;
+    padding: 4px 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Waypoint Liquid Glass base (état À VENIR par défaut) */
+  .waypoint-dot {
+    position: relative;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    color: var(--text-tertiary);
+    font-size: 12px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    transition:
+      background 250ms ease,
+      border-color 250ms ease,
+      color 250ms ease,
+      transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* Specular highlight Liquid Glass iOS 26 */
+  .waypoint-dot::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 55%;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.10) 50%,
+      transparent 95%
+    );
+    pointer-events: none;
+    z-index: 2;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+  }
+  .waypoint:hover .waypoint-dot { transform: scale(1.06); }
+  .waypoint:active .waypoint-dot { transform: scale(0.96); }
+
+  /* État VALIDÉ — bleu CF Liquid Glass + ✓ stroke 1.5px */
+  .waypoint.is-done .waypoint-dot {
+    background: rgba(0, 122, 255, 0.85);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    color: #FFFFFF;
+    box-shadow:
+      0 2px 4px rgba(0, 122, 255, 0.18),
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.6);
+  }
+  .waypoint.is-done .waypoint-dot::before {
+    content: "";
+    position: absolute;
+    top: 12px; left: 13px;
+    width: 5px; height: 10px;
+    border: solid #FFF;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+    z-index: 3;
+  }
+  .waypoint.is-done .waypoint-dot .waypoint-num { display: none; }
+
+  /* État EN COURS — bleu CF Liquid Glass + pulse box-shadow */
+  .waypoint.is-active .waypoint-dot {
+    background: rgba(0, 122, 255, 0.78);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1.5px solid rgba(255, 255, 255, 0.65);
+    color: #FFFFFF;
+    font-weight: 700;
+    box-shadow:
+      0 2px 6px rgba(0, 122, 255, 0.22),
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.7),
+      0 0 0 0 rgba(0, 122, 255, 0.55);
+    animation: cf-pulse-shadow 1.8s ease-out infinite;
+  }
+  @keyframes cf-pulse-shadow {
+    0% {
+      box-shadow:
+        0 2px 6px rgba(0, 122, 255, 0.22),
+        0 1px 2px rgba(0, 0, 0, 0.06),
+        inset 0 0.5px 0 rgba(255, 255, 255, 0.7),
+        0 0 0 0 rgba(0, 122, 255, 0.55);
+    }
+    70% {
+      box-shadow:
+        0 2px 6px rgba(0, 122, 255, 0.22),
+        0 1px 2px rgba(0, 0, 0, 0.06),
+        inset 0 0.5px 0 rgba(255, 255, 255, 0.7),
+        0 0 0 14px rgba(0, 122, 255, 0);
+    }
+    100% {
+      box-shadow:
+        0 2px 6px rgba(0, 122, 255, 0.22),
+        0 1px 2px rgba(0, 0, 0, 0.06),
+        inset 0 0.5px 0 rgba(255, 255, 255, 0.7),
+        0 0 0 14px rgba(0, 122, 255, 0);
+    }
+  }
+
+  /* État SELECTED (clic) — ring bleu CF (sauf si is-active) */
+  .waypoint.is-selected:not(.is-active) .waypoint-dot {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.8),
+      0 0 0 4px rgba(0, 122, 255, 0.15);
+  }
+
+  /* Labels — 1 ligne max */
+  .waypoint-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: -0.005em;
+    text-align: center;
+    max-width: 110px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 200ms ease, font-weight 200ms ease;
+  }
+  .waypoint.is-active .waypoint-label,
+  .waypoint.is-selected .waypoint-label {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .waypoint.is-done .waypoint-label { color: var(--text-tertiary); }
+
+  /* ============================================================
+     Bulle détail — Glass z2
+     ============================================================ */
+  .detail-wrap {
+    position: relative;
+    margin-top: 36px;
+    display: flex;
+    justify-content: center;
+  }
+  .detail-bubble {
+    position: relative;
+    max-width: 520px;
+    width: 100%;
+    background: rgba(251, 250, 247, 0.72);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.75);
+    border-radius: 16px;
+    padding: 22px 26px;
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    animation: cf-bubble-pop 350ms cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  @keyframes cf-bubble-pop {
+    from { transform: translateY(6px) scale(0.97); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  .detail-pointer {
+    position: absolute;
+    bottom: 100%;
+    width: 14px; height: 14px;
+    background: rgba(251, 250, 247, 0.72);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border-left: 0.5px solid rgba(255, 255, 255, 0.75);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.75);
+    transform: translate(-50%, 50%) rotate(45deg);
+    border-radius: 2px 0 0 0;
+    transition: left 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: -1;
+  }
+  .detail-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .detail-state.s-done    { color: var(--blue-cf); }
+  .detail-state.s-active  { color: var(--blue-cf); }
+  .detail-state.s-pending { color: var(--text-tertiary); }
+  .detail-state-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .s-done .detail-state-dot   { background: var(--blue-cf); }
+  .s-active .detail-state-dot { background: var(--blue-cf); position: relative; }
+  .s-active .detail-state-dot::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: var(--blue-cf);
+    opacity: 0.35;
+    animation: cf-pulse-dot 1.8s ease-out infinite;
+  }
+  @keyframes cf-pulse-dot {
+    0%   { transform: scale(0.92); opacity: 0.5; }
+    70%  { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  .s-pending .detail-state-dot {
+    background: transparent;
+    border: 1.5px solid var(--border-strong);
+  }
+  .detail-h3 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+    line-height: 1.3;
+  }
+  .detail-body {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+  .detail-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .detail-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 180ms ease, transform 150ms ease;
+  }
+  .detail-action.primary { background: var(--blue-cf); color: #FFFFFF; }
+  .detail-action.primary:hover { background: #0066D9; }
+  .detail-action.secondary { background: rgba(0, 0, 0, 0.04); color: var(--text-primary); }
+  .detail-action.secondary:hover { background: rgba(0, 0, 0, 0.08); }
+  .detail-action:active { transform: scale(0.97); }
+  .detail-action svg { width: 12px; height: 12px; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .waypoint-dot,
+    .timeline-line-done,
+    .detail-pointer { transition: none !important; }
+    .waypoint.is-active .waypoint-dot { animation: none !important; }
+    .s-active .detail-state-dot::after { animation: none !important; }
+    .detail-bubble { animation: none !important; }
+  }
+
+  /* ===== État du programme ===== */
+  .program-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin-bottom: var(--s-1);
+  }
+  .program-link {
+    font-size: var(--t-caption);
+    font-weight: 500;
+    color: var(--blue-cf);
+    cursor: pointer;
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      color 0.2s ease;
+  }
+  .program-link:hover {
+    transform: translateX(2px);
+    color: var(--blue-cf-pressed, #0051D5);
+  }
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+  }
+  .kpi { display: flex; flex-direction: column; }
+  .kpi-label {
+    font-size: var(--t-micro);
+    color: var(--text-secondary);
+    margin-bottom: var(--s-1);
+    letter-spacing: var(--ls-normal);
+    text-transform: none;
+  }
+  .kpi-val {
+    font-size: var(--t-title-md);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text-primary);
+    letter-spacing: var(--ls-snug);
+  }
+  .kpi-val small {
+    font-size: var(--t-caption);
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: 2px;
+  }
+  .kpi-delta {
+    font-size: 10px;
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--ls-normal);
+  }
+  .kpi-delta.up   { color: var(--mint); }
+  .kpi-delta.flat { color: var(--text-tertiary); }
+
+  /* ===== Dernière activité ===== */
+  .activity-head {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: var(--s-3);
+  }
+  .activity-list { display: flex; flex-direction: column; gap: var(--s-3); }
+  /* .activity-card aussi en .glass-z1 (surface ambient) */
+  .activity-card {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border-radius: var(--r-lg);
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background 0.2s ease,
+      box-shadow 0.2s ease;
+    cursor: pointer;
+  }
+  .activity-card:hover {
+    transform: translateX(2px);
+    background: rgba(251, 250, 247, 0.85);
+    box-shadow: var(--shadow-sm);
+  }
+  .activity-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--t-micro);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .activity-text {
+    font-size: var(--t-caption);
+    color: var(--text-primary);
+    letter-spacing: var(--ls-normal);
+    line-height: 1.35;
+  }
+  .activity-text strong { font-weight: 500; }
+</style>
+</head>
+<body style="">
+
+<!-- ============================================================
+     Wallpaper · saturé v60 (cf-tokens.css §07)
+     ============================================================ -->
+<div class="wallpaper" aria-hidden="true"></div>
+
+<!-- ============================================================
+     SVG sprite — Lucide icons (en prod : <Calendar size={20} ... />)
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="lc-calendar" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+        <path d="M16 2v4 M8 2v4 M3 10h18"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-check-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="m9 12 2 2 4-4"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-book-open" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z"></path>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-contact" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 2v2 M17 22v-2 M8 22v-2 M7 2v2"></path>
+        <rect width="16" height="18" x="4" y="4" rx="2"></rect>
+        <circle cx="12" cy="11" r="3"></circle>
+        <path d="M7 19c.97-1.5 2.94-2.5 5-2.5s4.03 1 5 2.5"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-message-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-compass" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+      </g>
+    </symbol>
+    <symbol id="lc-pen-tool" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414Z"></path>
+        <path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path>
+        <path d="m2.3 2.3 7.286 7.286"></path>
+        <circle cx="11" cy="11" r="2"></circle>
+      </g>
+    </symbol>
+    <symbol id="lc-layout-grid" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="7" height="7" x="3" y="3" rx="1"></rect>
+        <rect width="7" height="7" x="14" y="3" rx="1"></rect>
+        <rect width="7" height="7" x="14" y="14" rx="1"></rect>
+        <rect width="7" height="7" x="3" y="14" rx="1"></rect>
+      </g>
+    </symbol>
+    <symbol id="lc-user-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <circle cx="12" cy="10" r="3"></circle>
+        <path d="M6.168 18.849A4 4 0 0 1 10 16h4a4 4 0 0 1 3.834 2.855"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-help-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <path d="M12 17h.01"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+      </g>
+    </symbol>
+    <symbol id="lc-chevron-right" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m9 18 6-6-6-6"></path>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============================================================
+     Page · Aujourd'hui
+     ============================================================ -->
+<header class="page-header">
+  <div class="page-shell">
+    <div class="header-row">
+      <div class="header-left">
+        <span class="header-eyebrow">VENDREDI 17 MAI</span>
+        <h1 class="header-h1">Aujourd'hui</h1>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell">
+  <div class="layout">
+
+    <!-- =====================================================
+         Sidebar (.glass-z1 = surface ambient)
+         ===================================================== -->
+    <aside class="sidebar" style="opacity: 0.8; background-color: rgba(251, 250, 247, 0.514); border-radius: 24px 24px 20px">
+
+      <!-- Groupe TRAVAIL -->
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-h">Travail</h3>
+
+        <a class="sidebar-row" href="07-calendrier.html">
+          <span class="sidebar-icon" style="color: rgb(255, 59, 49);"><svg width="20" height="20"><use href="#lc-calendar"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(255, 59, 49);">Calendrier</span>
+        </a>
+        <a class="sidebar-row" href="08-rappels.html">
+          <span class="sidebar-icon" style="color: rgb(0, 122, 255);"><svg width="20" height="20"><use href="#lc-check-circle"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(0, 122, 255);">Rappels</span>
+        </a>
+        <a class="sidebar-row" href="03-bibliotheque-v2.html">
+          <span class="sidebar-icon" style="color: rgb(28, 28, 30);"><svg width="20" height="20"><use href="#lc-book-open"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(28, 28, 30);">Bibliothèque</span>
+        </a>
+        <a class="sidebar-row" href="03bis-contacts.html">
+          <span class="sidebar-icon" style="color: rgb(28, 28, 30);"><svg width="20" height="20"><use href="#lc-contact"></use></svg></span>
+          <span class="sidebar-label" style=""><span style="color: rgb(28, 28, 30);">Contacts</span></span>
+        </a>
+        <a class="sidebar-row" href="03-messages.html">
+          <span class="sidebar-icon" style="color: rgb(18, 185, 129);"><svg width="20" height="20"><use href="#lc-message-circle"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(18, 185, 129);">Messages</span>
+        </a>
+      </div>
+
+      <!-- Groupe ÉDITORIAL -->
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-h">Éditorial</h3>
+
+        <a class="sidebar-row" href="02-mon-programme.html">
+          <span class="sidebar-icon"><svg width="20" height="20"><use href="#lc-compass"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(28, 28, 30);">Mon Programme</span>
+        </a>
+        <a class="sidebar-row" href="05-ma-marque.html">
+          <span class="sidebar-icon"><svg width="20" height="20"><use href="#lc-pen-tool"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(28, 28, 30);">Ma Marque</span>
+        </a>
+        <a class="sidebar-row" href="02-mes-outils-v2.html">
+          <span class="sidebar-icon"><svg width="20" height="20"><use href="#lc-layout-grid"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(28, 28, 30);">Mes Outils</span>
+        </a>
+      </div>
+
+      <!-- Groupe SYSTÈME -->
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-h">Système</h3>
+
+        <a class="sidebar-row" href="06-compte.html">
+          <span class="sidebar-icon" style="color: rgb(28, 28, 30)"><svg width="20" height="20"><use href="#lc-user-circle"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(28, 28, 30)">Compte</span>
+        </a>
+        <div class="sidebar-row">
+          <span class="sidebar-icon" style="color: rgb(28, 28, 30)"><svg width="20" height="20"><use href="#lc-help-circle"></use></svg></span>
+          <span class="sidebar-label" style="color: rgb(28, 28, 30)">Aide</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- =====================================================
+         Content pane
+         ===================================================== -->
+    <section class="content">
+
+      <!-- ===== Bloc 2 · 3 widgets (portés de v1 · .glass-z2) ===== -->
+      <div class="widgets-grid">
+
+        <!-- Widget Calendrier -->
+        <a class="widget-link" href="07-calendrier.html" aria-label="Ouvrir Calendrier">
+        <article class="widget widget-cal glass-z2" aria-label="Calendrier" style="height: 260px; border-radius: 24px">
+          <header class="cal-header">
+            <span class="cal-day-number tabular">17</span>
+            <div class="cal-day-info">
+              <div class="cal-weekday">Vendredi</div>
+              <div class="cal-month">Mai 2026</div>
+            </div>
+          </header>
+          <div class="cal-strip">
+            <div class="cal-strip-day"><span class="cal-strip-letter">L</span><span class="cal-strip-num tabular">13</span></div>
+            <div class="cal-strip-day"><span class="cal-strip-letter">M</span><span class="cal-strip-num tabular">14</span></div>
+            <div class="cal-strip-day"><span class="cal-strip-letter">M</span><span class="cal-strip-num tabular">15</span></div>
+            <div class="cal-strip-day"><span class="cal-strip-letter">J</span><span class="cal-strip-num tabular">16</span></div>
+            <div class="cal-strip-day active"><span class="cal-strip-letter">V</span><span class="cal-strip-num tabular">17</span></div>
+            <div class="cal-strip-day"><span class="cal-strip-letter">S</span><span class="cal-strip-num tabular">18</span></div>
+            <div class="cal-strip-day"><span class="cal-strip-letter">D</span><span class="cal-strip-num tabular">19</span></div>
+          </div>
+          <div class="cal-events">
+            <div class="cal-event">
+              <span class="cal-event-dot"></span>
+              <div style="flex:1; min-width:0;">
+                <div class="cal-event-time">15h00 · 1h</div>
+                <div class="cal-event-title">Préparation atelier</div>
+              </div>
+            </div>
+            <div class="cal-event">
+              <span class="cal-event-dot lilac"></span>
+              <div style="flex:1; min-width:0;">
+                <div class="cal-event-time">16h30 · 45 min</div>
+                <div class="cal-event-title">Point Hélène · angle Manifeste</div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Widget Rappels -->
+        </article></a>
+        <a class="widget-link" href="08-rappels.html" aria-label="Ouvrir Rappels">
+        <article class="widget widget-rap glass-z2" aria-label="Rappels" style="height: 260px; width: 260px; border-radius: 14px 24px 24px">
+          <header class="rap-header">
+            <span class="rap-count-number tabular">3</span>
+            <div class="rap-count-info">
+              <div class="rap-count-label">tâches</div>
+              <div class="rap-sub">Aujourd'hui</div>
+            </div>
+          </header>
+          <ul class="rap-list">
+            <li class="rap-item">
+              <button class="rap-check" aria-label="Tâche à faire"></button>
+              <span class="rap-text">Briefer photographe shoot juin</span>
+            </li>
+            <li class="rap-item">
+              <button class="rap-check" aria-label="Tâche à faire"></button>
+              <span class="rap-text">Relire brouillon série Anecdote</span>
+            </li>
+            <li class="rap-item">
+              <button class="rap-check" aria-label="Tâche à faire"></button>
+              <span class="rap-text">Programmer publication Communauté</span>
+            </li>
+          </ul>
+        </article>
+
+        <!-- Widget Messages -->
+        </article></a>
+        <a class="widget-link" href="03-messages.html" aria-label="Ouvrir Messages">
+        <article class="widget widget-msg glass-z2" aria-label="Messages" style="width: 260px; height: 130px; border-radius: 24px 40px 50px 50px">
+          <header class="msg-header">
+            <span class="msg-header-label">Messages</span>
+          </header>
+          <div class="msg-conv">
+            <div class="msg-avatar">
+</div>
+            <div class="msg-info">
+              <div class="msg-name">Hélène M. <span class="msg-pin">
+</span></div>
+              <div class="msg-preview">L'angle Manifeste mérite une variation cette semaine.</div>
+            </div>
+            <span class="msg-time tabular">14h12</span>
+          </div>
+        </article></a>
+
+      </div>
+
+      <!-- ===== Bloc 3 · Roadmap (.glass-z2) ===== -->
+      <div class="card glass-z2" style="border-radius: 24px">
+        <div class="roadmap-h-head">
+          <div class="roadmap-h-head-left">
+            <div class="roadmap-h-eyebrow">Ton parcours aujourd'hui</div>
+            <div class="roadmap-h-title">7 étapes pour aujourd'hui</div>
+          </div>
+          <div class="roadmap-h-author">
+            <span class="roadmap-h-author-avatar">H</span>
+            Généré par Hélène M.
+          </div>
+        </div>
+
+        <!-- Timeline 7 waypoints -->
+        <div class="timeline" id="timeline">
+          <div class="timeline-line"></div>
+          <div class="timeline-line-done" id="timelineDone"></div>
+
+          <div class="waypoint is-done" data-step="1">
+            <div class="waypoint-dot"><span class="waypoint-num">01</span></div>
+            <div class="waypoint-label">Messages</div>
+          </div>
+          <div class="waypoint is-done" data-step="2">
+            <div class="waypoint-dot"><span class="waypoint-num">02</span></div>
+            <div class="waypoint-label">Brief photo</div>
+          </div>
+          <div class="waypoint is-active is-selected" data-step="3">
+            <div class="waypoint-dot"><span class="waypoint-num">03</span></div>
+            <div class="waypoint-label">Programmer</div>
+          </div>
+          <div class="waypoint" data-step="4">
+            <div class="waypoint-dot"><span class="waypoint-num">04</span></div>
+            <div class="waypoint-label">Briefer Mateo</div>
+          </div>
+          <div class="waypoint" data-step="5">
+            <div class="waypoint-dot"><span class="waypoint-num">05</span></div>
+            <div class="waypoint-label">Ma Marque</div>
+          </div>
+          <div class="waypoint" data-step="6">
+            <div class="waypoint-dot"><span class="waypoint-num">06</span></div>
+            <div class="waypoint-label">Archiver</div>
+          </div>
+          <div class="waypoint" data-step="7">
+            <div class="waypoint-dot"><span class="waypoint-num">07</span></div>
+            <div class="waypoint-label">Newsletter</div>
+          </div>
+        </div>
+
+        <!-- Bulle détail (contenu injecté par JS) -->
+        <div class="detail-wrap">
+          <div class="detail-bubble" id="detailBubble" style="border-radius: 24px">
+            <div class="detail-pointer" id="detailPointer"></div>
+            <div id="detailContent"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Bloc 4 · État du programme (.glass-z2) ===== -->
+      <div class="card glass-z2">
+        <div class="program-head">
+          <div>
+            <span class="card-eyebrow">CETTE SEMAINE</span>
+            <h2 class="card-h2" style="margin: 6px 0 0;">État du programme</h2>
+          </div>
+          <a class="program-link-a" href="02-mon-programme.html"><span class="program-link">Voir mon programme →</span></a>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <span class="kpi-label">Cohérence</span>
+            <span class="kpi-val">87<small>/100</small></span>
+            <span class="kpi-delta up">▲ +3</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi-label">Piliers actifs</span>
+            <span class="kpi-val">4<small>/5</small></span>
+            <span class="kpi-delta flat">— stable</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi-label">Cadence</span>
+            <span class="kpi-val">4<small>/sem</small></span>
+            <span class="kpi-delta up">▲ régulière</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi-label">Profondeur</span>
+            <span class="kpi-val">3,2<small>×</small></span>
+            <span class="kpi-delta up">▲ +0,4</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Bloc 5 · Dernière activité (.glass-z1 surfaces ambient) ===== -->
+      <div>
+        <div class="activity-head">Dernière activité</div>
+        <div class="activity-list">
+
+          <a class="activity-card glass-z1" href="03bis-contacts.html" style="background-color: rgba(251, 250, 247, 0.408); border-radius: 24px">
+            <span class="activity-avatar" style="background: linear-gradient(135deg, #A7F3C9, #2BB04A);">
+</span>
+            <span class="activity-text"><strong>Hélène M.</strong> a reformulé ton ADN éditorial · il y a 5 jours</span>
+          </a>
+
+          <a class="activity-card glass-z1" href="03bis-contacts.html" style="background-color: rgba(251, 250, 247, 0.416); border-radius: 24px 24px 14px">
+            <span class="activity-avatar" style="background: linear-gradient(135deg, #B89BFB, #9474F0);">
+</span>
+            <span class="activity-text"><strong>Yannis M.</strong> a validé la newsletter de mai · hier</span>
+          </a>
+
+          <a class="activity-card glass-z1" href="03bis-contacts.html" style="background-color: rgba(251, 250, 247, 0.404); border-radius: 24px">
+            <span class="activity-avatar" style="background: linear-gradient(135deg, #FCA858, #F47D2A);">
+</span>
+            <span class="activity-text"><strong>Antoine F.</strong> a partagé 3 photos atelier · ce matin</span>
+          </a>
+
+        </div>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<script>
+  /* ============================================================
+     Roadmap horizontal — interactions waypoints + bulle détail
+     ============================================================ */
+  const steps = {
+    1: {
+      state: 'done',
+      stateLabel: 'Validé · 09:42',
+      title: "Lire les 2 messages d'Hélène et Antoine",
+      body: "Validation brief photo + angle Manifeste — terminée ce matin.",
+      actions: [
+        { label: 'Ouvrir Messages', href: '03-messages.html', primary: true }
+      ]
+    },
+    2: {
+      state: 'done',
+      stateLabel: 'Validé · 11:15',
+      title: "Valider le brief photographe",
+      body: "En cours depuis 2 jours · Mes Outils › Rapport. Antoine F. a transmis la version finale.",
+      actions: [
+        { label: 'Ouvrir Mes Outils', href: '02-mes-outils-v2.html', primary: true }
+      ]
+    },
+    3: {
+      state: 'active',
+      stateLabel: 'En cours',
+      title: "Programmer la publication Communauté de lundi",
+      body: "Pilier Communauté · format Anecdote. À publier lundi 20 mai à 9h00.",
+      actions: [
+        { label: 'Ouvrir Calendrier', href: '07-calendrier.html', primary: true },
+        { label: 'Voir Bibliothèque', href: '03-bibliotheque-v2.html', primary: false }
+      ]
+    },
+    4: {
+      state: 'pending',
+      stateLabel: 'À venir',
+      title: "Briefer Mateo sur le shoot juin",
+      body: "Capsule « Mains » · 22-23 juin. Antoine F. à valider avant transmission.",
+      actions: [
+        { label: 'Préparer dans Rappels', href: '08-rappels.html', primary: true }
+      ]
+    },
+    5: {
+      state: 'pending',
+      stateLabel: 'À venir',
+      title: "Réviser la dernière reformulation Ma Marque",
+      body: "Validation finale · proposée le 12 mai par Mathilde · Marque.",
+      actions: [
+        { label: 'Ouvrir Ma Marque', href: '05-ma-marque.html', primary: true }
+      ]
+    },
+    6: {
+      state: 'pending',
+      stateLabel: 'À venir',
+      title: "Archiver 3 nouvelles photos atelier",
+      body: "Reçues d'Antoine F. · à ranger dans Bibliothèque, album Capsule Mains.",
+      actions: [
+        { label: 'Ouvrir Bibliothèque', href: '03-bibliotheque-v2.html', primary: true }
+      ]
+    },
+    7: {
+      state: 'pending',
+      stateLabel: 'À venir',
+      title: "Marquer la newsletter mai comme prête",
+      body: "Brouillon long-form · validé par Yannis. Envoi prévu samedi 25 mai.",
+      actions: [
+        { label: 'Ouvrir Mon Programme', href: '02-mon-programme.html', primary: true }
+      ]
+    }
+  };
+
+  function renderDetail(stepId) {
+    const step = steps[stepId];
+    if (!step) return;
+    const stateClass = { done: 's-done', active: 's-active', pending: 's-pending' }[step.state];
+    const arrowSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    const actionsHTML = step.actions.length
+      ? '<div class="detail-actions">' + step.actions.map(a =>
+          `<a class="detail-action ${a.primary ? 'primary' : 'secondary'}" href="${a.href}">${a.label}${a.primary ? arrowSvg : ''}</a>`
+        ).join('') + '</div>'
+      : '';
+    const html =
+      `<div class="detail-state ${stateClass}"><span class="detail-state-dot"></span>Étape ${String(stepId).padStart(2, '0')} · ${step.stateLabel}</div>` +
+      `<h3 class="detail-h3">${step.title}</h3>` +
+      `<p class="detail-body">${step.body}</p>` +
+      actionsHTML;
+    const content = document.getElementById('detailContent');
+    const bubble = document.getElementById('detailBubble');
+    bubble.style.animation = 'none';
+    content.innerHTML = html;
+    void bubble.offsetWidth;
+    bubble.style.animation = '';
+  }
+
+  function positionPointer(stepId) {
+    const pointer = document.getElementById('detailPointer');
+    const bubble = document.getElementById('detailBubble');
+    const waypoint = document.querySelector(`.waypoint[data-step="${stepId}"]`);
+    if (!pointer || !bubble || !waypoint) return;
+    const bubbleRect = bubble.getBoundingClientRect();
+    const waypointRect = waypoint.getBoundingClientRect();
+    const waypointCenterX = waypointRect.left + waypointRect.width / 2;
+    const offsetX = waypointCenterX - bubbleRect.left;
+    const clampedX = Math.max(20, Math.min(bubbleRect.width - 20, offsetX));
+    pointer.style.left = `${clampedX}px`;
+  }
+
+  function updateTimelineLine() {
+    const doneWaypoints = document.querySelectorAll('.waypoint.is-done');
+    const activeWaypoint = document.querySelector('.waypoint.is-active');
+    const line = document.getElementById('timelineDone');
+    if (!line) return;
+    let endStep = doneWaypoints.length;
+    if (activeWaypoint) endStep = parseInt(activeWaypoint.dataset.step, 10);
+    const pct = ((endStep - 1) / 6) * 100;
+    line.style.width = `calc((100% - 16px) * ${pct / 100})`;
+  }
+
+  document.querySelectorAll('.waypoint').forEach(wp => {
+    wp.addEventListener('click', () => {
+      document.querySelectorAll('.waypoint').forEach(w => w.classList.remove('is-selected'));
+      wp.classList.add('is-selected');
+      const stepId = parseInt(wp.dataset.step, 10);
+      renderDetail(stepId);
+      requestAnimationFrame(() => positionPointer(stepId));
+    });
+  });
+
+  renderDetail(3);
+  requestAnimationFrame(() => { positionPointer(3); updateTimelineLine(); });
+  window.addEventListener('resize', () => {
+    const selected = document.querySelector('.waypoint.is-selected');
+    if (selected) positionPointer(parseInt(selected.dataset.step, 10));
+  });
+</script>
+
+</body></html>

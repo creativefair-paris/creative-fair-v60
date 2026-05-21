@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<!--
+  Mes Outils v2 — Layout 2-panes simplifié
+  Doctrine actée le 19 mai 2026 :
+  - Aujourd'hui = hub central avec sidebar globale (10 items 3 groupes)
+  - Toutes les autres pages = layout interne autonome SANS sidebar globale
+  - Navigation entre pages via fil d'Ariane (clic sur "Aujourd'hui" retour hub)
+-->
+<html lang="fr"><head>
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Mes Outils · Creative Fair</title>
+
+<!-- cf-tokens v60 — source de vérité unique pour :
+     typographie · liquid glass · radius · shadows · spacing
+     contrôles transverses · animations canoniques -->
+<link rel="stylesheet" href="cf-tokens.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@1,400&amp;display=swap">
+
+<style>
+  /* ============================================================
+     /aujourd-hui v3 — page-scoped layout uniquement
+     Tout le visuel transverse vient de cf-tokens.css
+     ============================================================ */
+
+  body {
+    min-height: 100vh;
+    background: var(--cream);
+  }
+
+  /* ============================================================
+     Wallpaper · saturé v60 (importé de cf-tokens.css §07)
+     ============================================================ */
+  .bg-halo { display: none; } /* legacy, remplacé par .wallpaper saturé */
+
+  /* ============================================================
+     Page container
+     ============================================================ */
+  .page-shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: var(--s-6);
+    padding-right: var(--s-6);
+  }
+  @media (max-width: 768px) {
+    .page-shell { padding-left: var(--s-4); padding-right: var(--s-4); }
+  }
+
+  /* ============================================================
+     Header sticky avec fil d'Ariane (v2)
+     ============================================================ */
+  .page-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: transparent;
+    padding: 24px 0 28px;
+    transition: padding 200ms ease;
+  }
+  .page-header.is-scrolled {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .page-header.is-scrolled .breadcrumb { display: none; }
+  .page-header.is-scrolled .header-h1 {
+    font-size: 22px;
+    transition: font-size 200ms ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .page-header,
+    .page-header .header-h1 { transition: none !important; }
+  }
+  .header-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-6); }
+  .header-left { display: flex; flex-direction: column; gap: 4px; }
+  .breadcrumb {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: rgba(60, 60, 67, 0.45);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+  }
+  .breadcrumb-link {
+    color: rgba(60, 60, 67, 0.35);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 150ms ease;
+  }
+  .breadcrumb-link:hover { color: rgba(60, 60, 67, 0.65); }
+  .breadcrumb-separator { margin: 0 6px; color: rgba(60, 60, 67, 0.25); }
+  .header-h1 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  /* ============================================================
+     Layout 2 panes : sub-sidebar 260px + content 1fr
+     ============================================================ */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--s-6);
+    align-items: start;
+    padding: var(--s-2) 0 var(--s-20);
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: var(--s-5); }
+  }
+
+  /* ============================================================
+     Sidebar
+     ============================================================ */
+  /* ============================================================
+     Sidebar — surface frosted Apple-grade pour lisibilité
+     sur wallpaper saturé (matériau .glass-z1 + tint crème)
+     ============================================================ */
+  .sidebar {
+    position: sticky;
+    top: var(--s-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    padding: var(--s-3);
+    border-radius: var(--r-xl);
+    background: rgba(251, 250, 247, 0.65);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 0.5px solid rgba(255, 255, 255, 0.7);
+    box-shadow: var(--shadow-sm), var(--shadow-glass-inset);
+  }
+
+  .sidebar-section { display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-section-h {
+    font-size: var(--t-micro);
+    font-weight: 700;
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    opacity: 0.85;
+    margin: 0 0 var(--s-2) var(--s-3);
+  }
+
+  .sidebar-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    background: transparent;
+    transition:
+      background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sidebar-row:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  .sidebar-row:hover .sidebar-icon { color: var(--text-primary); }
+  .sidebar-row.is-active { background: var(--blue-cf-soft); }
+  .sidebar-row.is-active .sidebar-icon,
+  .sidebar-row.is-active .sidebar-label { color: var(--blue-cf); }
+
+  .sidebar-icon {
+    width: 28px; height: 28px;
+    border-radius: var(--r-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-primary);
+    opacity: 0.78;
+    transition: opacity 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sidebar-row:hover .sidebar-icon { opacity: 1; }
+  .sidebar-label {
+    font-size: var(--t-body);
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: var(--ls-normal);
+  }
+
+  /* ============================================================
+     Content pane
+     ============================================================ */
+  .content { display: flex; flex-direction: column; gap: var(--s-6); }
+
+  /* ===== Widgets grid v1-style — 3 cols : Cal/Tasks larges + Messages étroit ===== */
+  .widgets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.9fr;
+    gap: var(--s-3);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .widgets-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Le matériau .glass-z2 vient de cf-tokens.css §08 */
+  .widget {
+    border-radius: var(--r-lg);
+    padding: var(--s-5);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;            /* canonical grid-min-width fix : laisse fr respecter les ratios */
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s ease;
+    cursor: pointer;
+  }
+  .widget:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), var(--shadow-glass-inset);
+  }
+  .widget:active { transform: translateY(0) scale(0.99); }
+
+  /* Cal + Tasks : hauteur naturelle, visuel proche du 2×2 */
+  /* Messages : court et aligné en haut, ratio 2×1 */
+
+  /* ============================================================
+     Widgets v1 — portés de 01-aujourd-hui.html
+     (Calendrier riche · Rappels chiffré · Messages avatar 44px)
+     ============================================================ */
+
+  /* ----- Widget Calendrier ----- */
+  .widget-cal { padding: var(--s-4) var(--s-4); }
+  .cal-header { display: flex; align-items: flex-start; gap: var(--s-3); margin-bottom: var(--s-3); }
+  .cal-day-number {
+    font-size: 48px; font-weight: 700; line-height: 0.85;
+    color: var(--red);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-day-info { display: flex; flex-direction: column; padding-top: 2px; }
+  .cal-weekday {
+    font-size: 16px; font-weight: 600; color: var(--text-primary);
+    line-height: 1.15; text-transform: capitalize;
+  }
+  .cal-month {
+    font-size: 13px; font-weight: 400; color: var(--text-secondary);
+    line-height: 1.2; margin-top: 2px;
+  }
+  .cal-strip {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 2px; margin-bottom: var(--s-3);
+  }
+  .cal-strip-day {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; padding: 2px 0;
+  }
+  .cal-strip-letter {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-tertiary); letter-spacing: 0.04em;
+  }
+  .cal-strip-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-strip-day.active .cal-strip-num {
+    background: var(--red); color: #fff;
+    box-shadow: 0 1px 3px rgba(255, 59, 48, 0.30);
+  }
+  .cal-events { display: flex; flex-direction: column; gap: 4px; }
+  .cal-event {
+    display: flex; align-items: flex-start; gap: var(--s-2);
+    padding: 6px 0;
+    border-top: 0.5px solid var(--border-faint);
+  }
+  .cal-event:first-child { border-top: 0; padding-top: 0; }
+  .cal-event-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue-cf);
+    margin-top: 6px; flex-shrink: 0;
+  }
+  .cal-event-dot.lilac  { background: var(--lilac); }
+  .cal-event-dot.orange { background: var(--orange); }
+  .cal-event-time {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .cal-event-title {
+    font-size: 13px; font-weight: 500; color: var(--text-primary);
+    letter-spacing: -0.005em; line-height: 1.3; margin-top: 1px;
+  }
+
+  /* ----- Widget Rappels ----- */
+  .widget-rap { padding: var(--s-4) var(--s-4); }
+  .rap-header { display: flex; align-items: flex-start; gap: var(--s-3); margin-bottom: var(--s-3); }
+  .rap-count-number {
+    font-size: 48px; font-weight: 700; line-height: 0.85;
+    color: var(--blue-cf);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .rap-count-info { display: flex; flex-direction: column; padding-top: 2px; }
+  .rap-count-label {
+    font-size: 16px; font-weight: 600;
+    color: var(--text-primary); line-height: 1.15;
+  }
+  .rap-sub {
+    font-size: 12px; font-weight: 400; color: var(--text-secondary);
+    line-height: 1.2; margin-top: 2px;
+  }
+  .rap-list { list-style: none; margin: 0; padding: 0; }
+  .rap-item {
+    display: flex; align-items: center; gap: var(--s-3);
+    padding: 8px 0;
+    border-top: 0.5px solid var(--border-faint);
+  }
+  .rap-item:first-child { border-top: 0; padding-top: 2px; }
+  .rap-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.6px solid var(--border-strong);
+    background: transparent; flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .rap-check:hover { border-color: var(--blue-cf); }
+  .rap-text {
+    font-size: 13px; color: var(--text-primary);
+    line-height: 1.3; letter-spacing: -0.005em;
+  }
+
+  /* ----- Widget Messages ----- */
+  .widget-msg { padding: 20px 24px; }
+  .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .msg-header-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .msg-conv { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+  .msg-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px; font-weight: 600;
+    background: linear-gradient(135deg, #A7F3C9 0%, #2BB04A 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .msg-info { flex: 1; min-width: 0; }
+  .msg-name {
+    font-size: 15px; font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    display: flex; align-items: center; gap: 6px;
+    line-height: 1.2;
+  }
+  .msg-pin { font-size: 11px; }
+  .msg-preview {
+    font-size: 13px; color: var(--text-secondary);
+    line-height: 1.35; margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .msg-time {
+    font-size: 12px; color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0; align-self: flex-start; margin-top: 2px;
+  }
+
+  /* ===== Card générique (.glass-z2 vient des tokens) ===== */
+  .card {
+    border-radius: var(--r-2xl);
+    padding: var(--s-6) calc(var(--s-6) + 2px);
+    /* Hover anim canonique */
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s ease;
+  }
+  .card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg), var(--shadow-glass-inset);
+  }
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s-6);
+    margin-bottom: var(--s-1);
+  }
+  .card-eyebrow {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .card-meta-right {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-size: var(--t-micro);
+    color: var(--text-secondary);
+  }
+  .card-avatar-h {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #A7F3C9, #2BB04A);
+    color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .card-h2 {
+    font-size: var(--t-title-sm);
+    font-weight: 600;
+    letter-spacing: var(--ls-normal);
+    color: var(--text-primary);
+    margin: 6px 0 var(--s-4);
+  }
+
+  /* ===== Roadmap step ===== */
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-3) 0;
+    border-bottom: 0.5px solid var(--border-faint);
+    cursor: pointer;
+    transition: background 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .step-row:last-child { border-bottom: none; }
+  .step-row:hover { background: rgba(0, 0, 0, 0.02); }
+  .step-check { color: var(--text-tertiary); flex-shrink: 0; }
+  .step-num {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    color: var(--text-tertiary);
+    width: 14px;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .step-body { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .step-title {
+    font-size: var(--t-body-md);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.3;
+    letter-spacing: var(--ls-normal);
+  }
+  .step-sub {
+    font-size: var(--t-micro);
+    color: var(--text-secondary);
+    line-height: 1.35;
+  }
+  .step-arrow {
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .step-row:hover .step-arrow {
+    transform: translateX(3px);
+    color: var(--text-secondary);
+  }
+
+  /* ===== État du programme ===== */
+  .program-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin-bottom: var(--s-1);
+  }
+  .program-link {
+    font-size: var(--t-caption);
+    font-weight: 500;
+    color: var(--blue-cf);
+    cursor: pointer;
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      color 0.2s ease;
+  }
+  .program-link:hover {
+    transform: translateX(2px);
+    color: var(--blue-cf-pressed, #0051D5);
+  }
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+  }
+  .kpi { display: flex; flex-direction: column; }
+  .kpi-label {
+    font-size: var(--t-micro);
+    color: var(--text-secondary);
+    margin-bottom: var(--s-1);
+    letter-spacing: var(--ls-normal);
+    text-transform: none;
+  }
+  .kpi-val {
+    font-size: var(--t-title-md);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text-primary);
+    letter-spacing: var(--ls-snug);
+  }
+  .kpi-val small {
+    font-size: var(--t-caption);
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: 2px;
+  }
+  .kpi-delta {
+    font-size: 10px;
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--ls-normal);
+  }
+  .kpi-delta.up   { color: var(--mint); }
+  .kpi-delta.flat { color: var(--text-tertiary); }
+
+  /* ===== Dernière activité ===== */
+  .activity-head {
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: var(--s-3);
+  }
+  .activity-list { display: flex; flex-direction: column; gap: var(--s-3); }
+  /* .activity-card aussi en .glass-z1 (surface ambient) */
+  .activity-card {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border-radius: var(--r-lg);
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background 0.2s ease,
+      box-shadow 0.2s ease;
+    cursor: pointer;
+  }
+  .activity-card:hover {
+    transform: translateX(2px);
+    background: rgba(251, 250, 247, 0.85);
+    box-shadow: var(--shadow-sm);
+  }
+  .activity-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--t-micro);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .activity-text {
+    font-size: var(--t-caption);
+    color: var(--text-primary);
+    letter-spacing: var(--ls-normal);
+    line-height: 1.35;
+  }
+  .activity-text strong { font-weight: 500; }
+
+  /* ============================================================
+     SUB-SIDEBAR · 9 outils (CRÉER / DIFFUSER / MESURER)
+     ============================================================ */
+  .sub-sidebar-outils {
+    position: sticky;
+    top: var(--s-6);
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    padding: 14px 12px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .sub-section { display: flex; flex-direction: column; gap: 1px; }
+  .sub-section-h {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(60, 60, 67, 0.30);
+    padding: 0 8px 8px;
+    margin: 0;
+  }
+
+  .tool-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease-out,
+      transform 180ms ease-out;
+  }
+  .tool-item:hover { background: rgba(0, 0, 0, 0.04); }
+  .tool-item:active { transform: scale(0.99); }
+  .tool-item.is-disabled { opacity: 0.4; cursor: not-allowed; }
+  .tool-item.is-disabled:hover { background: transparent; }
+  .tool-item.is-active {
+    background: rgba(0, 122, 255, 0.08);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tool-item { transition: none !important; }
+  }
+
+  .tool-icon-container {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 180ms ease-out, filter 180ms ease-out;
+  }
+  .tool-item:hover .tool-icon-container { filter: saturate(1.15); }
+  .tool-icon-container svg { width: 14px; height: 14px; }
+
+  .tool-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1C1C1E;
+    letter-spacing: -0.005em;
+  }
+  .tool-item.is-active .tool-label { font-weight: 600; color: #007AFF; }
+  .tool-item.is-active .tool-icon-container { background: rgba(0, 122, 255, 0.15) !important; color: #007AFF !important; }
+
+  /* Mapping couleurs squircles outils (inactif) */
+  .t-post   { background: rgba(0, 122, 255, 0.10);   color: #007AFF; }
+  .t-mood   { background: rgba(167, 139, 250, 0.12); color: #A78BFA; }
+  .t-var    { background: rgba(88, 86, 214, 0.12);   color: #5856D6; }
+  .t-rev    { background: rgba(255, 149, 0, 0.12);   color: #FF9500; }
+  .t-mail   { background: rgba(244, 114, 182, 0.12); color: #F472B6; }
+  .t-reels  { background: rgba(88, 86, 214, 0.12);   color: #5856D6; }
+  .t-films  { background: rgba(16, 185, 129, 0.12);  color: #10B981; }
+  .t-ads    { background: rgba(255, 59, 48, 0.10);   color: #FF3B30; }
+  .t-rep    { background: rgba(199, 90, 18, 0.12);   color: #C75A12; }
+
+  /* ============================================================
+     PANE 3 · Tool Hub (Post Creator par défaut)
+     ============================================================ */
+  .tool-hub {
+    background: rgba(255, 255, 255, 0.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    padding: 24px 26px;
+  }
+  .tool-hub-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .tool-hub-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    background: rgba(0, 122, 255, 0.10);
+    color: #007AFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .tool-hub-icon svg { width: 22px; height: 22px; }
+  .tool-hub-title-block { display: flex; flex-direction: column; gap: 2px; }
+  .tool-hub-h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1C1C1E;
+    margin: 0;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+  }
+  .tool-hub-desc {
+    font-size: 13px;
+    color: rgba(60, 60, 67, 0.55);
+    line-height: 1.35;
+  }
+  .tool-hub-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(60, 60, 67, 0.45);
+    margin-bottom: 14px;
+  }
+
+  /* Format cards (sous-types Post Creator) */
+  .format-cards-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .fcc {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    transition:
+      transform 200ms cubic-bezier(0.32, 0.72, 0, 1),
+      box-shadow 200ms,
+      background 200ms;
+    cursor: pointer;
+  }
+  .fcc:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+  .fcc.is-disabled { opacity: 0.5; cursor: not-allowed; }
+  .fcc.is-disabled:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: none;
+  }
+  .fcc.is-disabled .fcc-arrow { display: none; }
+  .fcc-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .fcc-icon svg { width: 20px; height: 20px; }
+  .fcc-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .fcc-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.88);
+    letter-spacing: -0.005em;
+  }
+  .fcc-desc {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.55);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .fcc-arrow {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.3);
+    transition: transform 200ms ease-out, color 200ms ease-out;
+    flex-shrink: 0;
+  }
+  .fcc:hover .fcc-arrow { transform: translateX(3px); color: rgba(0, 0, 0, 0.55); }
+  @media (prefers-reduced-motion: reduce) {
+    .fcc, .fcc-arrow { transition: none !important; }
+  }
+
+  /* Squircles sous-types Post Creator */
+  .ft-anecdote  { background: rgba(0, 122, 255, 0.15);   color: #007AFF; }
+  .ft-produit   { background: rgba(52, 199, 89, 0.15);   color: #34C759; }
+  .ft-evenement { background: rgba(255, 149, 0, 0.15);   color: #FF9500; }
+  .ft-manifeste { background: rgba(255, 59, 48, 0.15);   color: #FF3B30; }
+  .ft-question  { background: rgba(88, 86, 214, 0.15);   color: #5856D6; }
+  .ft-coulisses { background: rgba(175, 82, 222, 0.15);  color: #AF52DE; }
+
+  /* Indicateur courant page (haut sidebar) */
+  .sidebar-current-indicator {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 12px 8px;
+    font-size: 13px; font-weight: 500;
+    color: rgba(60, 60, 67, 0.6);
+  }
+  .sidebar-current-indicator .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #34C759;
+    flex-shrink: 0;
+  }
+
+  /* Mes Outils row active (indigo) */
+  .sidebar-row.is-active-outils {
+    background: rgba(88, 86, 214, 0.10) !important;
+  }
+  .sidebar-row.is-active-outils .sidebar-icon { color: #5856D6 !important; opacity: 1 !important; }
+  .sidebar-row.is-active-outils .sidebar-icon svg { stroke-width: 2; }
+  .sidebar-row.is-active-outils .sidebar-label { color: #5856D6 !important; font-weight: 600; }
+</style>
+</head>
+<body style="">
+
+<!-- ============================================================
+     Wallpaper neutral v61 (cf-tokens.css §17.1)
+     ============================================================ -->
+<div class="wallpaper-neutral" aria-hidden="true"></div>
+
+<!-- ============================================================
+     SVG sprite — Lucide icons (en prod : <Calendar size={20} ... />)
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="lc-calendar" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+        <path d="M16 2v4 M8 2v4 M3 10h18"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-check-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="m9 12 2 2 4-4"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-book-open" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z"></path>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-contact" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 2v2 M17 22v-2 M8 22v-2 M7 2v2"></path>
+        <rect width="16" height="18" x="4" y="4" rx="2"></rect>
+        <circle cx="12" cy="11" r="3"></circle>
+        <path d="M7 19c.97-1.5 2.94-2.5 5-2.5s4.03 1 5 2.5"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-message-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-compass" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+      </g>
+    </symbol>
+    <symbol id="lc-pen-tool" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414Z"></path>
+        <path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path>
+        <path d="m2.3 2.3 7.286 7.286"></path>
+        <circle cx="11" cy="11" r="2"></circle>
+      </g>
+    </symbol>
+    <symbol id="lc-layout-grid" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="7" height="7" x="3" y="3" rx="1"></rect>
+        <rect width="7" height="7" x="14" y="3" rx="1"></rect>
+        <rect width="7" height="7" x="14" y="14" rx="1"></rect>
+        <rect width="7" height="7" x="3" y="14" rx="1"></rect>
+      </g>
+    </symbol>
+    <symbol id="lc-user-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <circle cx="12" cy="10" r="3"></circle>
+        <path d="M6.168 18.849A4 4 0 0 1 10 16h4a4 4 0 0 1 3.834 2.855"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-help-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <path d="M12 17h.01"></path>
+      </g>
+    </symbol>
+    <symbol id="lc-circle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+      </g>
+    </symbol>
+    <symbol id="lc-chevron-right" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m9 18 6-6-6-6"></path>
+      </g>
+    </symbol>
+
+    <!-- ===== Lucide icons additionnels pour Mes Outils ===== -->
+    <symbol id="lc-pencil-line" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+        <path d="m15 5 3 3"/>
+      </g>
+    </symbol>
+    <symbol id="lc-layers" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2 2 7l10 5 10-5-10-5Z"/>
+        <path d="m2 17 10 5 10-5"/>
+        <path d="m2 12 10 5 10-5"/>
+      </g>
+    </symbol>
+    <symbol id="lc-star" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </g>
+    </symbol>
+    <symbol id="lc-mail" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="20" height="16" x="2" y="4" rx="2"/>
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+      </g>
+    </symbol>
+    <symbol id="lc-smartphone" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+        <polygon points="10 9 14 12 10 15" fill="currentColor" stroke="none"/>
+      </g>
+    </symbol>
+    <symbol id="lc-film" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="20" height="20" x="2" y="2" rx="2.18"/>
+        <path d="M7 2v20"/>
+        <path d="M17 2v20"/>
+        <path d="M2 12h20"/>
+        <path d="M2 7h5"/>
+        <path d="M2 17h5"/>
+        <path d="M17 17h5"/>
+        <path d="M17 7h5"/>
+      </g>
+    </symbol>
+    <symbol id="lc-megaphone" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 11 18-5v12L3 14v-3z"/>
+        <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+      </g>
+    </symbol>
+    <symbol id="lc-bar-chart-3" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 3v18h18"/>
+        <path d="M18 17V9"/>
+        <path d="M13 17V5"/>
+        <path d="M8 17v-3"/>
+      </g>
+    </symbol>
+    <symbol id="lc-package" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m7.5 4.27 9 5.15"/>
+        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+        <path d="m3.3 7 8.7 5 8.7-5"/>
+        <path d="M12 22V12"/>
+      </g>
+    </symbol>
+    <symbol id="lc-camera" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+        <circle cx="12" cy="13" r="3"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============================================================
+     Page · Aujourd'hui
+     ============================================================ -->
+<header class="page-header" id="pageHeader">
+  <div class="page-shell">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <a href="01-aujourd-hui-v3.html" class="breadcrumb-link">Aujourd'hui</a>
+          <span class="breadcrumb-separator">›</span>
+          <span>Mes Outils</span>
+        </div>
+        <h1 class="header-h1">Mes Outils</h1>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell">
+  <div class="layout">
+
+    <!-- =====================================================
+         PANE 1 · Sub-sidebar 9 outils (260px)
+         ===================================================== -->
+    <aside class="sub-sidebar-outils" aria-label="Catalogue outils">
+
+      <!-- CRÉER -->
+      <div class="sub-section">
+        <h3 class="sub-section-h">Créer</h3>
+        <div class="tool-item is-active" aria-current="true">
+          <span class="tool-icon-container t-post"><svg><use href="#lc-pencil-line"></use></svg></span>
+          <span class="tool-label">Post Creator</span>
+        </div>
+        <div class="tool-item">
+          <span class="tool-icon-container t-mood"><svg><use href="#lc-layers"></use></svg></span>
+          <span class="tool-label">Moodboard</span>
+        </div>
+        <div class="tool-item">
+          <span class="tool-icon-container t-var"><svg><use href="#lc-layout-grid"></use></svg></span>
+          <span class="tool-label">Variations</span>
+        </div>
+        <div class="tool-item">
+          <span class="tool-icon-container t-rev"><svg><use href="#lc-star"></use></svg></span>
+          <span class="tool-label">Reviews</span>
+        </div>
+      </div>
+
+      <!-- DIFFUSER -->
+      <div class="sub-section">
+        <h3 class="sub-section-h">Diffuser</h3>
+        <div class="tool-item is-disabled">
+          <span class="tool-icon-container t-mail"><svg><use href="#lc-mail"></use></svg></span>
+          <span class="tool-label">Emailing</span>
+        </div>
+        <div class="tool-item is-disabled">
+          <span class="tool-icon-container t-reels"><svg><use href="#lc-smartphone"></use></svg></span>
+          <span class="tool-label">Reels</span>
+        </div>
+        <div class="tool-item is-disabled">
+          <span class="tool-icon-container t-films"><svg><use href="#lc-film"></use></svg></span>
+          <span class="tool-label">Films</span>
+        </div>
+        <div class="tool-item is-disabled">
+          <span class="tool-icon-container t-ads"><svg><use href="#lc-megaphone"></use></svg></span>
+          <span class="tool-label">Ads</span>
+        </div>
+      </div>
+
+      <!-- MESURER -->
+      <div class="sub-section">
+        <h3 class="sub-section-h">Mesurer</h3>
+        <div class="tool-item is-disabled">
+          <span class="tool-icon-container t-rep"><svg><use href="#lc-bar-chart-3"></use></svg></span>
+          <span class="tool-label">Rapport</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- =====================================================
+         PANE 3 · Tool Hub — Post Creator par défaut
+         ===================================================== -->
+    <section class="content">
+      <div class="tool-hub">
+
+        <!-- Header du hub -->
+        <div class="tool-hub-header">
+          <div class="tool-hub-icon"><svg><use href="#lc-pencil-line"></use></svg></div>
+          <div class="tool-hub-title-block">
+            <h2 class="tool-hub-h2">Post Creator</h2>
+            <span class="tool-hub-desc">Crée un post Instagram à partir d'un angle</span>
+          </div>
+        </div>
+
+        <!-- Eyebrow -->
+        <div class="tool-hub-eyebrow">Choisis un format</div>
+
+        <!-- 6 sous-types (FormatCards) -->
+        <div class="format-cards-grid">
+
+          <div class="fcc">
+            <span class="fcc-icon ft-anecdote"><svg><use href="#lc-book-open"></use></svg></span>
+            <div class="fcc-text">
+              <span class="fcc-title">Anecdote</span>
+              <span class="fcc-desc">Une histoire vraie de la maison</span>
+            </div>
+            <span class="fcc-arrow">→</span>
+          </div>
+
+          <div class="fcc">
+            <span class="fcc-icon ft-produit"><svg><use href="#lc-package"></use></svg></span>
+            <div class="fcc-text">
+              <span class="fcc-title">Produit</span>
+              <span class="fcc-desc">Met en lumière un objet ou une création</span>
+            </div>
+            <span class="fcc-arrow">→</span>
+          </div>
+
+          <div class="fcc">
+            <span class="fcc-icon ft-evenement"><svg><use href="#lc-calendar"></use></svg></span>
+            <div class="fcc-text">
+              <span class="fcc-title">Événement</span>
+              <span class="fcc-desc">Annonce un rendez-vous, un lancement</span>
+            </div>
+            <span class="fcc-arrow">→</span>
+          </div>
+
+          <div class="fcc">
+            <span class="fcc-icon ft-manifeste"><svg><use href="#lc-megaphone"></use></svg></span>
+            <div class="fcc-text">
+              <span class="fcc-title">Manifeste</span>
+              <span class="fcc-desc">Affirme une conviction de la marque</span>
+            </div>
+            <span class="fcc-arrow">→</span>
+          </div>
+
+          <div class="fcc is-disabled">
+            <span class="fcc-icon ft-question"><svg><use href="#lc-message-circle"></use></svg></span>
+            <div class="fcc-text">
+              <span class="fcc-title">Question</span>
+              <span class="fcc-desc">Engage ta communauté autour d'un sujet</span>
+            </div>
+            <span class="fcc-arrow">→</span>
+          </div>
+
+          <div class="fcc is-disabled">
+            <span class="fcc-icon ft-coulisses"><svg><use href="#lc-camera"></use></svg></span>
+            <div class="fcc-text">
+              <span class="fcc-title">Coulisses</span>
+              <span class="fcc-desc">Montre l'envers du décor de l'atelier</span>
+            </div>
+            <span class="fcc-arrow">→</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+  // Header sticky compaction au scroll
+  (function() {
+    const header = document.getElementById('pageHeader');
+    if (!header) return;
+    const onScroll = () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 60);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+  })();
+</script>
+
+</body></html>

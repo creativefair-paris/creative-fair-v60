@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<!--
+  Calendrier · v61 (audit /cfs-apple-audit 19 mai 2026)
+  Diff v60 → v61 :
+   - wallpaper-saturated → wallpaper-neutral (R1)
+   - sa-statusbar + sa-back + sa-page-header → page-header canonique (R2)
+   - H1 "Mai 2026" → H1 "Calendrier" + subtitle "Mai 2026" (R2)
+   - .cal-layout 280px → 260px (R3)
+   - body overflow:hidden → page-scroll canonique
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Calendrier · Creative Fair</title>
+<link rel="stylesheet" href="cf-tokens.css">
+<link rel="stylesheet" href="cf-systemapps.css">
+<style>
+  body { min-height: 100vh; background: var(--cream); }
+
+  .cal-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .cal-layout { grid-template-columns: 1fr; gap: var(--s-5); }
+  }
+
+  /* Override .sa-sidebar pour s'aligner sur .sub-sidebar canonique */
+  .cal-layout > .sa-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+    overflow: visible;
+    padding: 14px 12px;
+    border-right: 0;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Override .sa-content pour scroll page */
+  .cal-layout > .sa-content {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* ============================================================
+     Sidebar — calendriers avec disclosure Publications
+     ============================================================ */
+  .cal-cal-list .cal-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.5);
+  }
+  .cal-disclosure {
+    width: 12px; height: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+  .cal-disclosure.is-open { transform: rotate(90deg); }
+  .cal-disclosure svg { width: 7px; height: 7px; }
+  .cal-parent-row {
+    display: grid;
+    grid-template-columns: 12px 12px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .cal-parent-row:hover { background: rgba(28,28,30,0.04); }
+  .cal-children {
+    margin: 2px 0 4px;
+    padding-left: 24px;
+    border-left: 0.5px solid var(--border-faint);
+    margin-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .cal-child-row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .cal-child-row:hover { background: rgba(28,28,30,0.03); color: var(--text-primary); }
+  .cal-child-icon {
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cal-child-icon svg { width: 13px; height: 13px; }
+  .cal-child-count {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-link-arrow {
+    width: 10px;
+    height: 10px;
+    margin-left: 4px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+
+  .cal-today-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 4px;
+  }
+  .cal-today-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 0.5px solid rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .cal-today-item:hover { background: rgba(255, 255, 255, 0.75); }
+  .cal-today-bar {
+    width: 3px;
+    align-self: stretch;
+    border-radius: 2px;
+    background: var(--blue-cf);
+    flex-shrink: 0;
+  }
+  .cal-today-bar.lilac { background: var(--lilac); }
+  .cal-today-bar.orange { background: var(--orange); }
+  .cal-today-body { min-width: 0; flex: 1; }
+  .cal-today-time {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-today-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+    margin-top: 2px;
+  }
+
+  /* ============================================================
+     Content : header + grille mois
+     ============================================================ */
+  .cal-content { display: flex; flex-direction: column; padding-bottom: 32px; }
+
+  .cal-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .cal-toolbar-left {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .cal-nav-btn {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 0.5px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .cal-nav-btn:hover { background: #fff; color: var(--text-primary); }
+  .cal-nav-btn svg { width: 12px; height: 12px; }
+  .cal-today-pill {
+    padding: 6px 14px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 0.5px solid var(--border-subtle);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+  .cal-today-pill:hover { background: #fff; }
+
+  /* ============================================================
+     Grille mois — Liquid Glass z1
+     ============================================================ */
+  .cal-month {
+    flex: 1;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.30);
+    display: grid;
+    grid-template-rows: 32px repeat(5, 1fr);
+    min-height: 600px;
+  }
+
+  .cal-row-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.30);
+  }
+  .cal-col-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .cal-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.20);
+    min-height: 100px;
+  }
+  .cal-row:last-child { border-bottom: 0; }
+
+  .cal-cell {
+    background: transparent;
+    border-right: 1px solid rgba(255, 255, 255, 0.20);
+    padding: 10px 8px 6px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .cal-cell:last-child { border-right: 0; }
+  .cal-cell.weekend { background: rgba(255, 255, 255, 0.05); }
+  .cal-cell.is-other-month .cal-cell-num { color: var(--text-quaternary); }
+  .cal-cell-num {
+    align-self: flex-start;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.005em;
+  }
+  /* Today : chiffre rond rouge, pas la cell entière */
+  .cal-cell.is-today .cal-cell-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(255, 59, 48, 0.30);
+  }
+
+  /* Events — palette CF v60 stricte */
+  .cal-evt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    height: 22px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    background: rgba(0, 122, 255, 0.15);
+    color: var(--blue-cf);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .cal-evt.publications { background: rgba(0, 122, 255, 0.15); color: var(--blue-cf); }
+  .cal-evt.briefs       { background: rgba(167, 139, 250, 0.18); color: #6D4FE8; }
+  .cal-evt.rappels      { background: rgba(251, 146, 60, 0.18); color: #C25A0A; }
+  .cal-evt.business     { background: rgba(16, 185, 129, 0.15); color: #0B7D58; }
+  .cal-evt.personnel    { background: rgba(244, 114, 182, 0.18); color: #B4357F; }
+  .cal-evt .evt-time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .cal-evt .evt-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .cal-evt-more {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    padding-left: 6px;
+    letter-spacing: -0.005em;
+  }
+</style>
+</head>
+<body data-screen-label="Calendrier">
+
+<!-- Wallpaper neutral (v61, cf-tokens.css §17.1) -->
+<div class="wallpaper-neutral" aria-hidden="true"></div>
+
+<!-- Page header canonique (v61, cf-tokens.css §17.3) -->
+<header class="page-header" id="pageHeader">
+  <div class="page-shell">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <a href="01-aujourd-hui-v3.html" class="breadcrumb-link">Aujourd'hui</a>
+          <span class="breadcrumb-separator">›</span>
+          <span>Calendrier</span>
+        </div>
+        <h1 class="header-h1">Calendrier</h1>
+        <div class="header-subtitle">Mai 2026 · semaine 20</div>
+      </div>
+      <div class="sa-side-title-action" aria-label="Nouveau rendez-vous" style="width:32px;height:32px;border-radius:8px;">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 2 L 7 12 M2 7 L 12 7"/></svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell">
+  <div class="cal-layout">
+
+    <!-- ============================================================
+         Sub-sidebar
+         ============================================================ -->
+    <aside class="sa-sidebar" aria-label="Navigation Calendrier">
+
+      <div class="sa-side-search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="7" cy="7" r="5"/>
+          <path d="M11 11 L14 14" stroke-linecap="round"/>
+        </svg>
+        <span>Rechercher</span>
+      </div>
+
+      <nav class="sa-side-section cal-cal-list">
+        <div class="sa-side-section-title">Mes calendriers</div>
+
+        <!-- Publications (parent dépliable, 5 enfants) -->
+        <div class="cal-parent-row">
+          <span class="cal-disclosure is-open" aria-expanded="true">
+            <svg viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 1.5 L 5.5 4 L 2.5 6.5"/></svg>
+          </span>
+          <span class="cal-dot" style="background: var(--blue-cf);"></span>
+          <span>Publications</span>
+          <span class="sa-nav-count">9</span>
+        </div>
+        <div class="cal-children">
+          <div class="cal-child-row">
+            <span class="cal-child-icon">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="2" width="10" height="10" rx="2.4"/><circle cx="7" cy="7" r="2.4"/><circle cx="10" cy="4" r="0.6" fill="currentColor"/></svg>
+            </span>
+            Instagram
+            <span class="cal-child-count">6</span>
+          </div>
+          <div class="cal-child-row">
+            <span class="cal-child-icon">
+              <svg viewBox="0 0 14 14" fill="none"><path d="M8 13 L 8 7.5 L 9.8 7.5 L 10 5.7 L 8 5.7 L 8 4.6 Q 8 3.7 9 3.7 L 10 3.7 L 10 1.9 Q 9.4 1.7 8.4 1.7 Q 6.2 1.7 6.2 4.2 L 6.2 5.7 L 4.5 5.7 L 4.5 7.5 L 6.2 7.5 L 6.2 13 Z" fill="currentColor"/></svg>
+            </span>
+            Facebook
+            <span class="cal-child-count">3</span>
+          </div>
+          <div class="cal-child-row">
+            <span class="cal-child-icon">
+              <svg viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="4.7" r="0.9" fill="currentColor"/><rect x="3.3" y="6" width="1.4" height="5" fill="currentColor"/><path d="M6 6 L 6 11 M6 7.6 Q 6 6 7.6 6 Q 9.2 6 9.2 7.6 L 9.2 11 M9.2 7.6 Q 9.2 6 10.6 6 Q 12 6 12 7.6 L 12 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
+            </span>
+            LinkedIn
+            <span class="cal-child-count">2</span>
+          </div>
+          <div class="cal-child-row">
+            <span class="cal-child-icon">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1.8" y="3" width="10.4" height="8" rx="1.2"/><path d="M2 4 L 7 8 L 12 4"/></svg>
+            </span>
+            Newsletter
+            <span class="cal-child-count">1</span>
+          </div>
+          <div class="cal-child-row">
+            <span class="cal-child-icon">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1.5 Q 3.5 1.5 3.5 5 Q 3.5 8 7 12.5 Q 10.5 8 10.5 5 Q 10.5 1.5 7 1.5 Z"/><circle cx="7" cy="5" r="1.6"/></svg>
+            </span>
+            Google My Business
+            <span class="cal-child-count">2</span>
+          </div>
+        </div>
+
+        <!-- Rappels (lien app Rappels) -->
+        <div class="sa-nav-item">
+          <span class="cal-dot" style="background: var(--orange);"></span>
+          Rappels
+          <svg class="cal-link-arrow" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7 L 7 3 M4 3 L 7 3 L 7 6"/></svg>
+          <span class="sa-nav-count">24</span>
+        </div>
+
+        <!-- Points & Briefs -->
+        <div class="sa-nav-item">
+          <span class="cal-dot" style="background: var(--lilac);"></span>
+          Points & Briefs
+          <span class="sa-nav-count">6</span>
+        </div>
+
+        <!-- Events Business -->
+        <div class="sa-nav-item">
+          <span class="cal-dot" style="background: var(--mint);"></span>
+          Events Business
+          <span class="sa-nav-count">4</span>
+        </div>
+
+        <!-- Personnel -->
+        <div class="sa-nav-item">
+          <span class="cal-dot" style="background: var(--rose);"></span>
+          Personnel
+          <span class="sa-nav-count">2</span>
+        </div>
+      </nav>
+
+      <nav class="sa-side-section">
+        <div class="sa-side-section-title">Aujourd'hui · vendredi 17</div>
+        <div class="cal-today-list">
+          <div class="cal-today-item">
+            <span class="cal-today-bar"></span>
+            <div class="cal-today-body">
+              <div class="cal-today-time">15h00 — 16h00</div>
+              <div class="cal-today-title">Préparation atelier · matin du 12</div>
+            </div>
+          </div>
+          <div class="cal-today-item">
+            <span class="cal-today-bar lilac"></span>
+            <div class="cal-today-body">
+              <div class="cal-today-time">16h30 — 17h15</div>
+              <div class="cal-today-title">Point Hélène · angle Manifeste</div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ============================================================
+         Content : header + grille mois
+         ============================================================ -->
+    <section class="sa-content cal-content">
+
+      <div class="cal-toolbar" style="padding-top: 4px;">
+        <div class="cal-toolbar-left">
+          <button class="cal-nav-btn" aria-label="Mois précédent">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2 L3 6 L7.5 10"/></svg>
+          </button>
+          <button class="cal-today-pill">Aujourd'hui</button>
+          <button class="cal-nav-btn" aria-label="Mois suivant">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 2 L9 6 L4.5 10"/></svg>
+          </button>
+        </div>
+        <div class="sa-segmented">
+          <span class="sa-seg">Jour</span>
+          <span class="sa-seg">Semaine</span>
+          <span class="sa-seg active">Mois</span>
+          <span class="sa-seg">Année</span>
+        </div>
+      </div>
+
+      <!-- Grille mois 7×5 -->
+      <div class="cal-month">
+        <div class="cal-row-header">
+          <div class="cal-col-letter">Lun</div>
+          <div class="cal-col-letter">Mar</div>
+          <div class="cal-col-letter">Mer</div>
+          <div class="cal-col-letter">Jeu</div>
+          <div class="cal-col-letter">Ven</div>
+          <div class="cal-col-letter">Sam</div>
+          <div class="cal-col-letter">Dim</div>
+        </div>
+
+        <!-- Semaine 18 : 29 avr → 5 mai. May 1 = Mer (anchor : 17 = Ven) -->
+        <div class="cal-row">
+          <div class="cal-cell is-other-month"><span class="cal-cell-num">29</span></div>
+          <div class="cal-cell is-other-month"><span class="cal-cell-num">30</span></div>
+          <div class="cal-cell"><span class="cal-cell-num">1</span>
+            <span class="cal-evt personnel"><span class="evt-time">—</span><span class="evt-title">Fête du Travail</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">2</span></div>
+          <div class="cal-cell"><span class="cal-cell-num">3</span></div>
+          <div class="cal-cell weekend"><span class="cal-cell-num">4</span></div>
+          <div class="cal-cell weekend"><span class="cal-cell-num">5</span></div>
+        </div>
+
+        <!-- Semaine 19 : 6 → 12 mai -->
+        <div class="cal-row">
+          <div class="cal-cell"><span class="cal-cell-num">6</span>
+            <span class="cal-evt publications"><span class="evt-time">14h</span><span class="evt-title">Publication Métier</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">7</span>
+            <span class="cal-evt briefs"><span class="evt-time">10h</span><span class="evt-title">Brief Anecdote · Hélène</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">8</span>
+            <span class="cal-evt personnel"><span class="evt-time">—</span><span class="evt-title">Victoire 1945</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">9</span>
+            <span class="cal-evt publications"><span class="evt-time">11h</span><span class="evt-title">Publication Manifeste</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">10</span></div>
+          <div class="cal-cell weekend"><span class="cal-cell-num">11</span></div>
+          <div class="cal-cell weekend"><span class="cal-cell-num">12</span></div>
+        </div>
+
+        <!-- Semaine 20 : 13 → 19 mai (17 = today, Ven) -->
+        <div class="cal-row">
+          <div class="cal-cell"><span class="cal-cell-num">13</span>
+            <span class="cal-evt briefs"><span class="evt-time">15h</span><span class="evt-title">Point hebdo Hélène</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">14</span>
+            <span class="cal-evt publications"><span class="evt-time">11h</span><span class="evt-title">Publication Anecdote</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">15</span>
+            <span class="cal-evt rappels"><span class="evt-time">16h</span><span class="evt-title">Relecture newsletter mai</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">16</span>
+            <span class="cal-evt briefs"><span class="evt-time">10h</span><span class="evt-title">Prép atelier matin du 12</span></span>
+          </div>
+          <div class="cal-cell is-today"><span class="cal-cell-num">17</span>
+            <span class="cal-evt publications"><span class="evt-time">15h</span><span class="evt-title">Préparation atelier · matin du 12</span></span>
+            <span class="cal-evt briefs"><span class="evt-time">16h30</span><span class="evt-title">Point Hélène · Manifeste</span></span>
+          </div>
+          <div class="cal-cell weekend"><span class="cal-cell-num">18</span>
+            <span class="cal-evt rappels"><span class="evt-time">—</span><span class="evt-title">Échéance brief photographe</span></span>
+          </div>
+          <div class="cal-cell weekend"><span class="cal-cell-num">19</span></div>
+        </div>
+
+        <!-- Semaine 21 : 20 → 26 mai -->
+        <div class="cal-row">
+          <div class="cal-cell"><span class="cal-cell-num">20</span>
+            <span class="cal-evt publications"><span class="evt-time">11h</span><span class="evt-title">Publication Communauté</span></span>
+            <span class="cal-evt rappels"><span class="evt-time">15h</span><span class="evt-title">Accessoires shoot</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">21</span>
+            <span class="cal-evt briefs"><span class="evt-time">10h</span><span class="evt-title">Validation angle Manifeste</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">22</span>
+            <span class="cal-evt publications"><span class="evt-time">11h</span><span class="evt-title">Newsletter mai · envoi</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">23</span></div>
+          <div class="cal-cell"><span class="cal-cell-num">24</span>
+            <span class="cal-evt business"><span class="evt-time">9h</span><span class="evt-title">Shoot juin · préparation</span></span>
+            <span class="cal-evt briefs"><span class="evt-time">14h</span><span class="evt-title">Point Hélène · clôture</span></span>
+          </div>
+          <div class="cal-cell weekend"><span class="cal-cell-num">25</span></div>
+          <div class="cal-cell weekend"><span class="cal-cell-num">26</span></div>
+        </div>
+
+        <!-- Semaine 22 : 27 → 31 mai + 1–2 juin -->
+        <div class="cal-row">
+          <div class="cal-cell"><span class="cal-cell-num">27</span>
+            <span class="cal-evt briefs"><span class="evt-time">11h</span><span class="evt-title">Cadrage juin · Hélène</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">28</span></div>
+          <div class="cal-cell"><span class="cal-cell-num">29</span>
+            <span class="cal-evt publications"><span class="evt-time">14h</span><span class="evt-title">Publication Métier</span></span>
+          </div>
+          <div class="cal-cell"><span class="cal-cell-num">30</span></div>
+          <div class="cal-cell"><span class="cal-cell-num">31</span>
+            <span class="cal-evt publications"><span class="evt-time">11h</span><span class="evt-title">Publication Patrimoine</span></span>
+          </div>
+          <div class="cal-cell weekend is-other-month"><span class="cal-cell-num">1</span></div>
+          <div class="cal-cell weekend is-other-month"><span class="cal-cell-num">2</span></div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<a class="index-button" href="index.html">↩ Index mockups</a>
+
+<script>
+  (function() {
+    const header = document.getElementById('pageHeader');
+    if (!header) return;
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 60);
+    }, { passive: true });
+  })();
+</script>
+
+</body>
+</html>

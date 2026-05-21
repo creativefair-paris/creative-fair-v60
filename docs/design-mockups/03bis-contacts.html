@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<!--
+  Contacts · v61 patch ciblé (audit /cfs-apple-audit 19 mai 2026)
+  ============================================================
+  Refonte stricte selon brief Ulysse :
+   - Wallpaper neutre (pas blanc plat)
+   - Page-header canonique (breadcrumb + H1 "Contacts")
+   - 3-pane préservé : 260px filtres + 320px liste alpha + 1fr fiche compact
+   - Pas de bouton back, pas de "Task Force · 5 personas" (jargon)
+   - Pas de citations italiques inventées
+   - Hélène M. pinned en haut, 12 doyens en sections alphabétiques
+   - Fiche détail = hero compact (avatar 56px, pas 200px)
+   - "Équipe qu'elle pilote · 12 doyens" pour Hélène (pas "Task Force")
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Contacts · Creative Fair</title>
+<link rel="stylesheet" href="cf-tokens.css">
+<style>
+  body { min-height: 100vh; background: var(--cream); }
+
+  /* ============================================================
+     Layout 3-pane canonique : 260 + 320 + 1fr
+     ============================================================ */
+  .ct-layout {
+    display: grid;
+    grid-template-columns: 260px 320px 1fr;
+    gap: var(--s-6);
+    align-items: start;
+    padding: var(--s-2) 0 var(--s-20);
+  }
+  @media (max-width: 1100px) {
+    .ct-layout { grid-template-columns: 260px 1fr; }
+    .ct-pane-list { display: none; } /* fallback simple */
+  }
+  @media (max-width: 900px) {
+    .ct-layout { grid-template-columns: 1fr; gap: var(--s-5); }
+  }
+
+  /* ============================================================
+     PANE 1 — Filtres (sub-sidebar canonique)
+     ============================================================ */
+  .ct-pane-filters {
+    position: sticky;
+    top: 100px;
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    padding: 14px 12px;
+    height: fit-content;
+    display: flex; flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ============================================================
+     PANE 2 — Liste alphabétique
+     ============================================================ */
+  .ct-pane-list {
+    position: sticky;
+    top: 100px;
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    padding: 12px;
+    height: calc(100vh - 140px);
+    overflow-y: auto;
+    display: flex; flex-direction: column;
+    gap: 4px;
+  }
+  .ct-pane-list::-webkit-scrollbar { width: 0; }
+
+  .ct-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: rgba(251, 250, 247, 0.94);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(40px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-tertiary);
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .ct-search svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  .ct-alpha-h {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(60, 60, 67, 0.30);
+    padding: 12px 8px 4px;
+    margin: 0;
+  }
+
+  .ct-contact-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 150ms ease;
+  }
+  .ct-contact-row:hover { background: rgba(0, 0, 0, 0.04); }
+  .ct-contact-row.is-active { background: rgba(0, 122, 255, 0.08); }
+  .ct-contact-row.is-active .ct-contact-name { color: var(--blue-cf); font-weight: 600; }
+
+  .ct-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .ct-avatar.av-indigo  { background: linear-gradient(135deg, #C7C9F9 0%, #6366F1 100%); }
+  .ct-avatar.av-blue    { background: linear-gradient(135deg, #B6D6FF 0%, #007AFF 100%); }
+  .ct-avatar.av-rose    { background: linear-gradient(135deg, #FBCFE8 0%, #F472B6 100%); }
+  .ct-avatar.av-orange  { background: linear-gradient(135deg, #FFD4A8 0%, #FB923C 100%); }
+  .ct-avatar.av-lilac   { background: linear-gradient(135deg, #DBCFFC 0%, #A78BFA 100%); }
+  .ct-avatar.av-mint    { background: linear-gradient(135deg, #B5EAD3 0%, #10B981 100%); }
+
+  .ct-contact-body {
+    min-width: 0;
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 2px;
+  }
+  .ct-contact-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .ct-pin {
+    font-size: 10px;
+    color: rgba(60, 60, 67, 0.4);
+  }
+  .ct-contact-role {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ============================================================
+     PANE 3 — Fiche compacte
+     ============================================================ */
+  .ct-pane-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .ct-hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px 24px 22px;
+    border-radius: 14px;
+    background: rgba(251, 250, 247, 0.72);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(40px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.75);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+  .ct-hero-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px rgba(99, 102, 241, 0.2);
+  }
+  .ct-hero-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .ct-hero-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0 0 3px;
+  }
+  .ct-hero-role {
+    font-size: 14px;
+    color: var(--text-secondary);
+    letter-spacing: -0.005em;
+    margin-bottom: 8px;
+  }
+  .ct-hero-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(52, 199, 89, 0.12);
+    font-size: 11px;
+    font-weight: 600;
+    color: #1F8745;
+  }
+  .ct-hero-status .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #34C759;
+  }
+  .ct-hero-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .ct-btn {
+    padding: 8px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: background 150ms ease, transform 100ms ease;
+  }
+  .ct-btn:active { transform: scale(0.97); }
+  .ct-btn-primary {
+    background: var(--blue-cf);
+    color: #fff;
+    box-shadow: var(--shadow-xs);
+  }
+  .ct-btn-primary:hover { background: #0066D9; }
+  .ct-btn-secondary {
+    background: rgba(255, 255, 255, 0.7);
+    border: 0.5px solid var(--border-subtle);
+    color: var(--text-primary);
+  }
+  .ct-btn-secondary:hover { background: #fff; }
+
+  /* Cards glass z2 */
+  .ct-card {
+    padding: 18px 22px 20px;
+    border-radius: 14px;
+    background: rgba(251, 250, 247, 0.72);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(40px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.75);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+  .ct-card-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(60, 60, 67, 0.45);
+    margin-bottom: 12px;
+  }
+
+  .ct-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ct-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 0.5px solid var(--border-subtle);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+  }
+
+  /* Liste doyens (équipe pilotée) */
+  .ct-team {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .ct-team-row {
+    display: grid;
+    grid-template-columns: 14px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 0;
+    cursor: pointer;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.04);
+  }
+  .ct-team-row:last-child { border-bottom: 0; }
+  .ct-team-row:hover .ct-team-name { color: var(--blue-cf); }
+  .ct-team-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .ct-team-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    transition: color 150ms ease;
+  }
+  .ct-team-spec {
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: -0.005em;
+    text-align: right;
+  }
+
+  .dot-blue   { background: var(--blue-cf); }
+  .dot-rose   { background: var(--rose); }
+  .dot-lilac  { background: var(--lilac); }
+  .dot-orange { background: var(--orange); }
+  .dot-mint   { background: var(--mint); }
+  .dot-indigo { background: var(--indigo); }
+</style>
+</head>
+<body data-screen-label="Contacts">
+
+<!-- Wallpaper neutral (v61) -->
+<div class="wallpaper-neutral" aria-hidden="true"></div>
+
+<!-- Page header canonique -->
+<header class="page-header" id="pageHeader">
+  <div class="page-shell">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <a href="01-aujourd-hui-v3.html" class="breadcrumb-link">Aujourd'hui</a>
+          <span class="breadcrumb-separator">›</span>
+          <span>Contacts</span>
+        </div>
+        <h1 class="header-h1">Contacts</h1>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SVG sprite Lucide -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="lc-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g></symbol>
+    <symbol id="lc-users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g></symbol>
+    <symbol id="lc-sparkles" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></g></symbol>
+    <symbol id="lc-user-group" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></g></symbol>
+    <symbol id="lc-external" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></g></symbol>
+  </defs>
+</svg>
+
+<main class="page-shell">
+  <div class="ct-layout">
+
+    <!-- ============================================================
+         PANE 1 — Filtres
+         ============================================================ -->
+    <aside class="ct-pane-filters" aria-label="Filtres contacts">
+      <div class="sub-section">
+        <h3 class="sub-section-h">Filtres</h3>
+
+        <div class="sub-item is-active">
+          <span class="sub-icon c-graphite"><svg><use href="#lc-user-group"/></svg></span>
+          <span class="sub-label">Tout</span>
+          <span class="sub-counter">24</span>
+        </div>
+        <div class="sub-item">
+          <span class="sub-icon c-lilac"><svg><use href="#lc-sparkles"/></svg></span>
+          <span class="sub-label">Hélène M. &amp; doyens</span>
+          <span class="sub-counter">13</span>
+        </div>
+        <div class="sub-item">
+          <span class="sub-icon c-mint"><svg><use href="#lc-users"/></svg></span>
+          <span class="sub-label">Équipe interne</span>
+          <span class="sub-counter">4</span>
+        </div>
+        <div class="sub-item">
+          <span class="sub-icon c-orange"><svg><use href="#lc-external"/></svg></span>
+          <span class="sub-label">Collaborateurs externes</span>
+          <span class="sub-counter">7</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         PANE 2 — Liste alphabétique
+         ============================================================ -->
+    <aside class="ct-pane-list" aria-label="Liste contacts">
+      <div class="ct-search">
+        <svg><use href="#lc-search"/></svg>
+        <span>Rechercher un contact</span>
+      </div>
+
+      <!-- ÉPINGLÉS -->
+      <h3 class="ct-alpha-h">Épinglés</h3>
+      <div class="ct-contact-row is-active">
+        <span class="ct-avatar av-indigo">H</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Hélène M. <span class="ct-pin">📌</span></div>
+          <div class="ct-contact-role">Hélène &amp; doyens</div>
+        </div>
+      </div>
+
+      <!-- A -->
+      <h3 class="ct-alpha-h">A</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-rose">A</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Albane R.</div>
+          <div class="ct-contact-role">Éditorial Magazine</div>
+        </div>
+      </div>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-orange">A</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Antoine F.</div>
+          <div class="ct-contact-role">Création Visuelle</div>
+        </div>
+      </div>
+
+      <!-- C -->
+      <h3 class="ct-alpha-h">C</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-mint">C</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Camille O.</div>
+          <div class="ct-contact-role">Channels</div>
+        </div>
+      </div>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-lilac">C</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Capucine V.</div>
+          <div class="ct-contact-role">Communauté &amp; Micro-Influence</div>
+        </div>
+      </div>
+
+      <!-- É -->
+      <h3 class="ct-alpha-h">É</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-blue">É</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Élise M.</div>
+          <div class="ct-contact-role">Archives &amp; Mémoire</div>
+        </div>
+      </div>
+
+      <!-- I -->
+      <h3 class="ct-alpha-h">I</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-mint">I</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Inès B.</div>
+          <div class="ct-contact-role">Ops</div>
+        </div>
+      </div>
+
+      <!-- J -->
+      <h3 class="ct-alpha-h">J</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-orange">J</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Jonas K.</div>
+          <div class="ct-contact-role">Coups &amp; Viralité</div>
+        </div>
+      </div>
+
+      <!-- L -->
+      <h3 class="ct-alpha-h">L</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-rose">L</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Léa Z.</div>
+          <div class="ct-contact-role">Influence Premium</div>
+        </div>
+      </div>
+
+      <!-- M -->
+      <h3 class="ct-alpha-h">M</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-lilac">M</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Marc D.</div>
+          <div class="ct-contact-role">Veille</div>
+        </div>
+      </div>
+
+      <!-- S -->
+      <h3 class="ct-alpha-h">S</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-indigo">S</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Sébastien L.</div>
+          <div class="ct-contact-role">Analytics</div>
+        </div>
+      </div>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-blue">S</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Sofia P.</div>
+          <div class="ct-contact-role">Paid &amp; Performance</div>
+        </div>
+      </div>
+
+      <!-- V -->
+      <h3 class="ct-alpha-h">V</h3>
+      <div class="ct-contact-row">
+        <span class="ct-avatar av-blue">V</span>
+        <div class="ct-contact-body">
+          <div class="ct-contact-name">Valentine D.</div>
+          <div class="ct-contact-role">Crise</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         PANE 3 — Fiche compact Hélène M.
+         ============================================================ -->
+    <section class="ct-pane-detail">
+
+      <!-- Hero compact -->
+      <div class="ct-hero">
+        <div class="ct-hero-avatar av-indigo">H</div>
+        <div class="ct-hero-body">
+          <h2 class="ct-hero-name">Hélène M.</h2>
+          <div class="ct-hero-role">Directrice de la Communication</div>
+          <span class="ct-hero-status">
+            <span class="dot"></span>
+            Disponible
+          </span>
+        </div>
+        <div class="ct-hero-actions">
+          <a class="ct-btn ct-btn-primary" href="03-messages.html">Message</a>
+          <button class="ct-btn ct-btn-secondary">Demander un avis</button>
+        </div>
+      </div>
+
+      <!-- Spécialités -->
+      <div class="ct-card">
+        <div class="ct-card-eyebrow">Spécialités</div>
+        <div class="ct-pills">
+          <span class="ct-pill">Stratégie éditoriale</span>
+          <span class="ct-pill">Doctrine de marque</span>
+          <span class="ct-pill">Orchestration équipe</span>
+        </div>
+      </div>
+
+      <!-- Équipe qu'elle pilote · 12 doyens -->
+      <div class="ct-card">
+        <div class="ct-card-eyebrow">Équipe qu'elle pilote · 12 doyens</div>
+        <div class="ct-team">
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-blue"></span>
+            <span class="ct-team-name">Sofia P.</span>
+            <span class="ct-team-spec">Ads</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-rose"></span>
+            <span class="ct-team-name">Léa Z.</span>
+            <span class="ct-team-spec">Influence Premium</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-lilac"></span>
+            <span class="ct-team-name">Capucine V.</span>
+            <span class="ct-team-spec">Communauté &amp; Micro-Influence</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-orange"></span>
+            <span class="ct-team-name">Jonas K.</span>
+            <span class="ct-team-spec">Coups &amp; Viralité</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-rose"></span>
+            <span class="ct-team-name">Albane R.</span>
+            <span class="ct-team-spec">Éditorial Magazine</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-lilac"></span>
+            <span class="ct-team-name">Marc D.</span>
+            <span class="ct-team-spec">Veille</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-mint"></span>
+            <span class="ct-team-name">Inès B.</span>
+            <span class="ct-team-spec">Ops</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-indigo"></span>
+            <span class="ct-team-name">Sébastien L.</span>
+            <span class="ct-team-spec">Analytics</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-blue"></span>
+            <span class="ct-team-name">Valentine D.</span>
+            <span class="ct-team-spec">Crise</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-orange"></span>
+            <span class="ct-team-name">Antoine F.</span>
+            <span class="ct-team-spec">Création Visuelle</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-mint"></span>
+            <span class="ct-team-name">Camille O.</span>
+            <span class="ct-team-spec">Channels</span>
+          </div>
+          <div class="ct-team-row">
+            <span class="ct-team-dot dot-blue"></span>
+            <span class="ct-team-name">Élise M.</span>
+            <span class="ct-team-spec">Archives &amp; Mémoire</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<a class="index-button" href="index.html">↩ Index mockups</a>
+
+<script>
+  (function() {
+    const header = document.getElementById('pageHeader');
+    if (!header) return;
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 60);
+    }, { passive: true });
+  })();
+</script>
+
+</body>
+</html>

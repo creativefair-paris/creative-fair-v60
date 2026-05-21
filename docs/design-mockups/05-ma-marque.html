@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<!--
+  Ma Marque · v61 (audit /cfs-apple-audit 19 mai 2026)
+  Diff v60 → v61 :
+   - wallpaper-saturated → wallpaper-neutral (R1)
+   - sa-statusbar + sa-back + sa-page-header → page-header canonique (R2)
+   - H1 "Identité éditoriale" → H1 "Ma Marque" + subtitle "Identité éditoriale" (R2)
+   - .mm-layout 280px → 260px (R3)
+   - body overflow:hidden → page-scroll canonique
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Ma Marque · Creative Fair</title>
+<link rel="stylesheet" href="cf-tokens.css">
+<link rel="stylesheet" href="cf-systemapps.css">
+<style>
+  body { min-height: 100vh; background: var(--cream); }
+
+  .mm-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .mm-layout { grid-template-columns: 1fr; gap: var(--s-5); }
+  }
+
+  /* Override .sa-sidebar pour s'aligner sur .sub-sidebar canonique */
+  .mm-layout > .sa-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+    overflow: visible;
+    padding: 14px 12px;
+    border-right: 0;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Override .sa-content pour scroll page */
+  .mm-layout > .sa-content {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* ============================================================
+     Sidebar — header carte marque active
+     ============================================================ */
+  .mm-brand-card {
+    margin: 4px 8px 16px;
+    padding: 14px 14px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.62);
+    border: 0.5px solid rgba(255, 255, 255, 0.75);
+    position: relative;
+  }
+  .mm-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .mm-brand-logo {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), transparent 60%),
+      linear-gradient(135deg, #2A2117 0%, #3B2D1C 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .mm-brand-logo span {
+    font-family: "Times New Roman", "Garamond", serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 500;
+    color: #E8D8B5;
+    letter-spacing: -0.02em;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.2);
+  }
+  .mm-brand-body { min-width: 0; flex: 1; }
+  .mm-brand-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mm-brand-tagline {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+  .mm-brand-switch {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 4px 0;
+    border-top: 0.5px solid var(--border-faint);
+  }
+  .mm-brand-multi {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+  .mm-brand-multi b { color: var(--text-secondary); font-weight: 500; }
+  .mm-brand-change {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--blue-cf);
+    cursor: pointer;
+  }
+  .mm-brand-change.is-disabled {
+    color: var(--text-quaternary);
+    cursor: not-allowed;
+  }
+
+  /* Section nav — emoji-prefixed */
+  .mm-nav-emoji {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.55);
+    border: 0.5px solid var(--border-faint);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .sa-nav-item.active .mm-nav-emoji {
+    background: rgba(0,122,255,0.10);
+    border-color: transparent;
+  }
+
+  /* ============================================================
+     Content
+     ============================================================ */
+  .mm-content { max-width: 840px; }
+  .mm-section { margin-bottom: 22px; }
+
+  /* ADN reformulé bloc */
+  .adn-card {
+    padding: 22px 26px 20px;
+  }
+  .mm-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 14px;
+  }
+  .adn-statement {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1.32;
+    max-width: 640px;
+  }
+  .adn-meta {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+  }
+  .adn-meta-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #A5B4F8 0%, #6366F1 100%);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+    flex-shrink: 0;
+  }
+  .adn-meta-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--text-quaternary);
+  }
+  .adn-meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #0B7D58;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* Promesse bloc */
+  .promesse-card {
+    padding: 22px 26px 20px;
+  }
+  .promesse-statement {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    max-width: 640px;
+  }
+  .promesse-actions {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .mm-textlink {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--blue-cf);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .mm-textlink svg { width: 11px; height: 11px; }
+  .mm-textlink:hover { color: #0066D9; }
+
+  /* Tonalité bloc — 3 sliders */
+  .ton-card {
+    padding: 22px 26px 24px;
+  }
+  .ton-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 640px;
+  }
+  .ton-slider {
+    display: grid;
+    grid-template-columns: 110px 1fr 110px;
+    align-items: center;
+    gap: 16px;
+  }
+  .ton-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    letter-spacing: -0.005em;
+  }
+  .ton-label.left  { text-align: right; }
+  .ton-label.right { text-align: left;  }
+  .ton-label.active {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .ton-track {
+    position: relative;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border-subtle);
+  }
+  .ton-handle {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--blue-cf);
+    box-shadow: 0 1px 3px rgba(0,122,255,0.25), inset 0 0.5px 0 rgba(255,255,255,0.3);
+    cursor: grab;
+  }
+  .ton-handle::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+  }
+  .ton-sub {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 0.5px solid var(--border-faint);
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    max-width: 640px;
+  }
+
+  /* Vocabulaire bloc */
+  .voc-card {
+    padding: 22px 26px 22px;
+  }
+  .voc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .voc-col-head {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .voc-col-head.signature .check {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--mint);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+  }
+  .voc-col-head.interdit .cross {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .voc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .voc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(251, 250, 247, 0.78);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 0.5px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .voc-chip.signature {
+    color: #0B7D58;
+    border-color: rgba(16, 185, 129, 0.28);
+    background: rgba(16, 185, 129, 0.08);
+  }
+  .voc-chip.signature::before {
+    content: "✓";
+    color: var(--mint);
+    font-weight: 700;
+    font-size: 11px;
+  }
+  .voc-chip.interdit {
+    color: #B33028;
+    border-color: rgba(255, 59, 48, 0.28);
+    background: rgba(255, 59, 48, 0.06);
+  }
+  .voc-chip.interdit::before {
+    content: "✗";
+    color: var(--red);
+    font-weight: 700;
+    font-size: 11px;
+  }
+
+  /* Footnote — "le calme du pilote" */
+  .mm-footnote {
+    margin-top: 18px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.42);
+    border: 0.5px dashed var(--border-subtle);
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    max-width: 640px;
+  }
+  .mm-footnote strong { color: var(--text-primary); font-weight: 600; }
+</style>
+</head>
+<body data-screen-label="Ma Marque">
+
+<!-- Wallpaper neutral (v61, cf-tokens.css §17.1) -->
+<div class="wallpaper-neutral" aria-hidden="true"></div>
+
+<!-- Page header canonique (v61, cf-tokens.css §17.3) -->
+<header class="page-header" id="pageHeader">
+  <div class="page-shell">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <a href="01-aujourd-hui-v3.html" class="breadcrumb-link">Aujourd'hui</a>
+          <span class="breadcrumb-separator">›</span>
+          <span>Ma Marque</span>
+        </div>
+        <h1 class="header-h1">Ma Marque</h1>
+        <div class="header-subtitle">Identité éditoriale · ce que Carlo Sarrabezolles dit au monde</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell">
+  <div class="mm-layout">
+
+    <!-- ============================================================
+         Sub-sidebar
+         ============================================================ -->
+    <aside class="sa-sidebar" aria-label="Navigation Ma Marque">
+
+      <!-- Carte marque active -->
+      <div class="mm-brand-card">
+        <div class="mm-brand-row">
+          <div class="mm-brand-logo"><span>C</span></div>
+          <div class="mm-brand-body">
+            <div class="mm-brand-name">Carlo Sarrabezolles</div>
+            <div class="mm-brand-tagline">Maison d'archives & d'orfèvrerie</div>
+          </div>
+        </div>
+        <div class="mm-brand-switch">
+          <span class="mm-brand-multi">Plan Pro · une marque active</span>
+          <span class="mm-brand-change is-disabled" title="Une seule marque active dans ton plan Pro">Changer</span>
+        </div>
+      </div>
+
+      <div class="sa-side-search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="7" cy="7" r="5"/>
+          <path d="M11 11 L14 14" stroke-linecap="round"/>
+        </svg>
+        <span>Rechercher</span>
+      </div>
+
+      <nav class="sa-side-section">
+        <div class="sa-side-section-title">Pilotage éditorial</div>
+
+        <div class="sa-nav-item active">
+          <span class="mm-nav-emoji">🧭</span>
+          Identité éditoriale
+        </div>
+        <div class="sa-nav-item">
+          <span class="mm-nav-emoji">🏛</span>
+          Piliers signature
+          <span class="sa-nav-count">5</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="mm-nav-emoji">🎨</span>
+          Univers visuel
+        </div>
+        <div class="sa-nav-item">
+          <span class="mm-nav-emoji">📚</span>
+          Ressources & inputs
+          <span class="sa-nav-count">142</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="mm-nav-emoji">📅</span>
+          Calendrier business
+        </div>
+        <div class="sa-nav-item">
+          <span class="mm-nav-emoji">👥</span>
+          Mon équipe humaine
+          <span class="sa-nav-count">4</span>
+        </div>
+        <div class="sa-nav-item">
+          <span class="mm-nav-emoji">🔗</span>
+          <div style="flex: 1; min-width: 0;">
+            Connexions
+            <small>IG · LinkedIn · Newsletter</small>
+          </div>
+        </div>
+        <div class="sa-nav-item">
+          <span class="mm-nav-emoji">📜</span>
+          <div style="flex: 1; min-width: 0;">
+            Archives & mémoire
+            <small>Élise M. · 142 documents indexés</small>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ============================================================
+         Content
+         ============================================================ -->
+    <section class="sa-content">
+
+      <div class="mm-content" style="padding-top: 4px;">
+
+        <!-- ============================================================
+             Bloc 1 — ADN reformulé
+             ============================================================ -->
+        <section class="mm-section">
+          <div class="sa-card adn-card">
+            <div class="mm-eyebrow">Vérité éditoriale</div>
+            <p class="adn-statement">
+              Une maison qui restaure des archives matérielles oubliées, en orfèvre.
+            </p>
+            <div class="adn-meta">
+              <span class="adn-meta-avatar">H</span>
+              <span>Reformulé par <strong style="color: var(--text-primary); font-weight: 500;">Hélène M.</strong> le 12 mai 2026 · Tu l'as validé.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             Bloc 2 — Promesse fondamentale
+             ============================================================ -->
+        <section class="mm-section">
+          <div class="sa-card promesse-card">
+            <div class="mm-eyebrow">Promesse</div>
+            <p class="promesse-statement">
+              Restaurer ce qui mérite de l'être. Documenter chaque geste.
+            </p>
+            <div class="promesse-actions">
+              <a class="mm-textlink">
+                Affiner avec Hélène
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 2 L9 6 L4.5 10"/></svg>
+              </a>
+              <span style="font-size: 12px; color: var(--text-tertiary);">Dernière relecture 9 mai · stable</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             Bloc 3 — Tonalité narrative
+             ============================================================ -->
+        <section class="mm-section">
+          <div class="sa-card ton-card">
+            <div class="mm-eyebrow">Tonalité narrative</div>
+
+            <div class="ton-sliders">
+              <!-- Slider 1 : Sobre 60 % — poignée au 60 % depuis Sobre -->
+              <div class="ton-slider">
+                <span class="ton-label left active">Sobre</span>
+                <div class="ton-track">
+                  <span class="ton-handle" style="left: 60%;"></span>
+                </div>
+                <span class="ton-label right">Lyrique</span>
+              </div>
+
+              <!-- Slider 2 : Personnel 40 % — poignée au 40 % depuis Personnel -->
+              <div class="ton-slider">
+                <span class="ton-label left active">Personnel</span>
+                <div class="ton-track">
+                  <span class="ton-handle" style="left: 40%;"></span>
+                </div>
+                <span class="ton-label right">Institutionnel</span>
+              </div>
+
+              <!-- Slider 3 : Documenté 80 % — poignée au 80 % depuis Documenté -->
+              <div class="ton-slider">
+                <span class="ton-label left active">Documenté</span>
+                <div class="ton-track">
+                  <span class="ton-handle" style="left: 80%;"></span>
+                </div>
+                <span class="ton-label right">Spontané</span>
+              </div>
+            </div>
+
+            <p class="ton-sub">
+              Ces 3 axes guident chaque post généré. Modifier déclenche une régénération du programme actif.
+            </p>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             Bloc 4 — Vocabulaire de marque
+             ============================================================ -->
+        <section class="mm-section">
+          <div class="sa-card voc-card">
+            <div class="mm-eyebrow">Vocabulaire de marque</div>
+
+            <div class="voc-grid">
+              <!-- Colonne signature -->
+              <div>
+                <div class="voc-col-head signature">
+                  <span class="check">✓</span>
+                  Mots-signature
+                </div>
+                <div class="voc-chips">
+                  <span class="voc-chip signature">archive</span>
+                  <span class="voc-chip signature">orfèvrerie</span>
+                  <span class="voc-chip signature">geste</span>
+                  <span class="voc-chip signature">restaurer</span>
+                  <span class="voc-chip signature">patience</span>
+                  <span class="voc-chip signature">matière</span>
+                </div>
+              </div>
+
+              <!-- Colonne interdits -->
+              <div>
+                <div class="voc-col-head interdit">
+                  <span class="cross">✗</span>
+                  Mots interdits
+                </div>
+                <div class="voc-chips">
+                  <span class="voc-chip interdit">growth</span>
+                  <span class="voc-chip interdit">boost</span>
+                  <span class="voc-chip interdit">viral</span>
+                  <span class="voc-chip interdit">contenu</span>
+                  <span class="voc-chip interdit">engagement</span>
+                  <span class="voc-chip interdit">audience</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mm-footnote">
+            <strong>Le calme du pilote.</strong> Cette page n'est pas un configurateur — la doctrine est déjà cadrée par Hélène. Toute modification est une décision réfléchie, jamais un geste de curiosité.
+          </div>
+        </section>
+
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<a class="index-button" href="index.html">↩ Index mockups</a>
+
+<script>
+  (function() {
+    const header = document.getElementById('pageHeader');
+    if (!header) return;
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 60);
+    }, { passive: true });
+  })();
+</script>
+
+</body>
+</html>

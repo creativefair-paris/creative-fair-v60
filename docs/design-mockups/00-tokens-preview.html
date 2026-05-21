@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>CF · Tokens preview — DA système v60</title>
+<link rel="stylesheet" href="cf-tokens.css">
+<style>
+  /* ============================================================
+     Preview-only styles — NE PAS RÉUTILISER ailleurs.
+     Tout ici sert uniquement à exposer les tokens.
+     ============================================================ */
+
+  body {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .preview-shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 40px 140px;
+  }
+
+  /* ------- Header ------- */
+  .preview-header {
+    padding: 32px 0 24px;
+  }
+  .preview-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.55);
+    border: 0.5px solid var(--border-faint);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+  .preview-eyebrow-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue-cf);
+  }
+  .preview-title {
+    font-size: 52px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    color: var(--text-primary);
+    margin: 0 0 12px;
+    max-width: 920px;
+  }
+  .preview-lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin: 0;
+  }
+
+  /* ------- Section card ------- */
+  .section {
+    margin-top: 28px;
+    border-radius: var(--r-2xl);
+    padding: 28px 32px 32px;
+    background: rgba(251, 250, 247, 0.72);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.75);
+    box-shadow: var(--shadow-md), var(--shadow-glass-inset);
+    position: relative;
+    overflow: hidden;
+  }
+  .section::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.18), transparent);
+    pointer-events: none;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 24px;
+    position: relative;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  .section-meta {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .section-desc {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin: -8px 0 20px;
+    position: relative;
+  }
+
+  /* ============================================================
+     §1 — Palette swatches
+     ============================================================ */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    position: relative;
+  }
+  .swatch {
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: #fff;
+    border: 0.5px solid var(--border-faint);
+    box-shadow: var(--shadow-xs);
+  }
+  .swatch-color {
+    height: 76px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.04);
+  }
+  .swatch-meta {
+    padding: 10px 12px 12px;
+  }
+  .swatch-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+  }
+  .swatch-hex {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Sub-row title */
+  .sub-row-title {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin: 14px 0 -4px;
+  }
+  .sub-row-title:first-child { margin-top: 0; }
+
+  /* ============================================================
+     §2 — Typo scale
+     ============================================================ */
+  .typo-row {
+    display: grid;
+    grid-template-columns: 130px 90px 1fr;
+    align-items: baseline;
+    gap: 24px;
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--border-faint);
+    position: relative;
+  }
+  .typo-row:last-child { border-bottom: 0; }
+  .typo-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+  .typo-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .typo-sample {
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ============================================================
+     §3 — Glass z1 z2 z3
+     ============================================================ */
+  .glass-demo {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    position: relative;
+  }
+  .glass-tile {
+    position: relative;
+    border-radius: var(--r-2xl);
+    padding: 22px;
+    min-height: 200px;
+    overflow: hidden;
+  }
+  .glass-tile-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .glass-tile-value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 6px 0 14px;
+  }
+  .glass-tile-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+  .glass-tile-meta {
+    position: absolute;
+    bottom: 18px; left: 22px; right: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: -0.005em;
+  }
+
+  /* Decorative gradient behind glass tiles to show transparency */
+  .glass-demo-bg {
+    position: absolute;
+    inset: 12px 12px auto 12px;
+    height: 240px;
+    border-radius: var(--r-xl);
+    background:
+      radial-gradient(circle at 20% 30%, rgba(167, 139, 250, 0.55), transparent 60%),
+      radial-gradient(circle at 75% 70%, rgba(251, 146, 60, 0.50), transparent 60%),
+      radial-gradient(circle at 50% 50%, rgba(0, 122, 255, 0.30), transparent 70%);
+    filter: blur(2px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ============================================================
+     §4 — Radii / Shadows / Spacings
+     ============================================================ */
+  .specimen-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 14px;
+    position: relative;
+  }
+  .specimen {
+    text-align: center;
+  }
+  .specimen-shape {
+    height: 76px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 0.5px solid var(--border-faint);
+    margin-bottom: 8px;
+  }
+  .specimen-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .specimen-sublabel {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  /* Shadow specimens need extra room */
+  .shadow-grid { grid-template-columns: repeat(5, 1fr); }
+  .shadow-shape {
+    height: 76px;
+    background: #fff;
+    border-radius: var(--r-lg);
+    margin: 8px 14px 16px;
+  }
+
+  /* Spacings: horizontal bar with labels */
+  .spacing-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 70px;
+    align-items: center;
+    gap: 14px;
+    padding: 6px 0;
+    position: relative;
+  }
+  .spacing-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--blue-cf);
+    opacity: 0.85;
+  }
+  .spacing-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .spacing-value {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ============================================================
+     §5 — App icons CF
+     ============================================================ */
+  .icons-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 18px;
+    position: relative;
+  }
+  .icons-row .app-tile { min-height: 110px; }
+
+  /* SVG glyph inside icons */
+  .glyph { width: 38px; height: 38px; }
+
+  /* ============================================================
+     §6 — Dock demo
+     ============================================================ */
+  .dock-demo-frame {
+    position: relative;
+    height: 180px;
+    border-radius: var(--r-2xl);
+    overflow: hidden;
+    border: 0.5px solid var(--border-faint);
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, rgba(255, 215, 200, 0.7), transparent 70%),
+      radial-gradient(ellipse 50% 45% at 80% 60%, rgba(180, 205, 245, 0.55), transparent 70%),
+      radial-gradient(ellipse 55% 50% at 50% 90%, rgba(200, 230, 220, 0.45), transparent 70%),
+      linear-gradient(135deg, #FAF6EE 0%, #F2EADD 100%);
+  }
+  .dock-demo {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: rgba(251, 250, 247, 0.45);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.55);
+    border-radius: 28px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+  .dock-demo .app-icon { --icon-size: 60px; }
+
+  /* ============================================================
+     §7 — Controls (banners, pills, buttons, search)
+     ============================================================ */
+  .controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .controls-row:last-child { margin-bottom: 0; }
+  .control-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    min-width: 130px;
+  }
+  .search-demo {
+    flex: 1;
+    max-width: 420px;
+  }
+
+  /* ============================================================
+     §8 — Animations interactives
+     ============================================================ */
+  .anim-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    position: relative;
+  }
+  .anim-card {
+    position: relative;
+    padding: 22px;
+    border-radius: var(--r-lg);
+    background: rgba(255, 255, 255, 0.65);
+    border: 0.5px solid var(--border-faint);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+  }
+  .anim-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .anim-card-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .anim-stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+  }
+  .anim-cta {
+    margin-top: 16px;
+    align-self: flex-start;
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    background: var(--text-primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .anim-cta:hover { background: #000; }
+  .anim-cta:active { transform: scale(0.96); }
+
+  /* Tab shrink demo */
+  .tab-demo {
+    display: inline-flex;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: var(--r-pill);
+    background: rgba(251, 250, 247, 0.85);
+    border: 0.5px solid var(--border-faint);
+    box-shadow: var(--shadow-sm);
+    transition: padding 0.3s ease, transform 0.3s ease;
+  }
+  .tab-demo.shrunk { padding: 5px 10px; transform: scale(0.85); }
+  .tab-demo-item {
+    padding: 5px 10px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .tab-demo-item.active { background: var(--text-primary); color: #fff; }
+
+  /* Modal morph demo */
+  .modal-demo-frame {
+    position: relative;
+    width: 100%; height: 100px;
+    border-radius: var(--r-md);
+    background: rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+  .modal-demo-sheet {
+    position: absolute;
+    top: 12px; left: 12px; right: 12px; bottom: 12px;
+    border-radius: var(--r-md);
+    background: rgba(251, 250, 247, 0.94);
+    backdrop-filter: blur(60px) saturate(200%);
+    -webkit-backdrop-filter: blur(60px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    transform: scale(0);
+    transform-origin: 0% 100%;
+  }
+  .modal-demo-sheet.in { animation: cf-morph-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+  /* Photo zoom demo */
+  .photo-demo-frame {
+    position: relative;
+    width: 100%; height: 100px;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: rgba(0,0,0,0.04);
+  }
+  .photo-demo {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 30%, #FFB061 0%, #FB923C 50%, #E07A14 100%);
+    transform: scale(0.2);
+    opacity: 0.6;
+    transform-origin: 20% 80%;
+  }
+  .photo-demo.in { animation: cf-photo-zoom 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+  /* Bubble in demo */
+  .bubble-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+  }
+  .bubble {
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .bubble.me { background: var(--blue-cf); color: #fff; border-bottom-right-radius: 6px; }
+  .bubble.them { align-self: flex-start; background: rgba(255,255,255,0.92); color: var(--text-primary); border-bottom-left-radius: 6px; border: 0.5px solid var(--border-faint); }
+
+  /* Footer caption */
+  .footer-note {
+    margin-top: 36px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.02em;
+  }
+
+  /* Section grid that holds 2 sections side by side */
+  .two-up {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 28px;
+  }
+  .two-up .section { margin-top: 0; }
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Wallpaper crème CF — fond fixe partagé
+     ============================================================ -->
+<div class="wallpaper" aria-hidden="true"></div>
+
+<!-- SVG symbols — synced from 00b-icons-preview.html (v4) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+
+    <!-- ============================================
+         Shared defs — grammaire CF v5 unifiée
+         ============================================ -->
+    <!-- Gradient blanc-glass pour donner volume aux glyphes -->
+    <linearGradient id="cf-glass-white" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.84"/>
+    </linearGradient>
+    <!-- Gradient bleu CF-glass pour les glyphes colorés actifs -->
+    <linearGradient id="cf-glass-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#3D9BFF" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#007AFF" stop-opacity="1"/>
+    </linearGradient>
+    <!-- Gradient rouge-glass pour les accents chauds (Calendrier jour actif) -->
+    <linearGradient id="cf-glass-red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#FF6B5C" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#FF3B30" stop-opacity="1"/>
+    </linearGradient>
+
+    <!-- ============================================
+         01 · MON PROGRAMME — sparkline
+         Fond : rouge doux désaturé (mesh subtil)
+         Glyphe : UNE courbe sparkline ascendante
+         ============================================ -->
+    <symbol id="ic-programme" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-prog-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#FF8E94" stop-opacity="0.65"/>
+          <stop offset="60%" stop-color="#FF8E94" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-prog-m2" cx="82%" cy="55%" r="58%">
+          <stop offset="0%"  stop-color="#F8B4D1" stop-opacity="0.45"/>
+          <stop offset="80%" stop-color="#F8B4D1" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-prog-m3" cx="60%" cy="92%" r="55%">
+          <stop offset="0%"  stop-color="#8B92E8" stop-opacity="0.25"/>
+          <stop offset="80%" stop-color="#8B92E8" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#CC4A55"/>
+      <rect width="100" height="100" fill="url(#ic-prog-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-prog-m2)"/>
+      <rect width="100" height="100" fill="url(#ic-prog-m3)"/>
+
+      <!-- Sparkline : courbe blanche fine ascendante avec un creux — volume Liquid Glass -->
+      <path d="M 24 64 Q 32 50 40 54 Q 50 60 56 44 Q 64 28 76 32"
+            fill="none"
+            stroke="url(#cf-glass-white)"
+            stroke-width="3.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.20)) drop-shadow(0 0.4px 0.6px rgba(0,0,0,0.10))"/>
+    </symbol>
+
+    <!-- ============================================
+         02 · BIBLIOTHÈQUE — 2 rectangles empilés
+         Fond : orange doux pastel (mesh subtil)
+         Glyphe : 2 rectangles blancs identiques
+                  avec léger décalage — 1 seul élément
+         ============================================ -->
+    <symbol id="ic-bibliotheque" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-bib-m1" cx="20%" cy="15%" r="70%">
+          <stop offset="0%"  stop-color="#FFD5A8" stop-opacity="0.75"/>
+          <stop offset="60%" stop-color="#FFD5A8" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-bib-m2" cx="85%" cy="45%" r="55%">
+          <stop offset="0%"  stop-color="#FBB9D9" stop-opacity="0.50"/>
+          <stop offset="80%" stop-color="#FBB9D9" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-bib-m3" cx="55%" cy="95%" r="50%">
+          <stop offset="0%"  stop-color="#FFE0B8" stop-opacity="0.50"/>
+          <stop offset="80%" stop-color="#FFE0B8" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#F5A864"/>
+      <rect width="100" height="100" fill="url(#ic-bib-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-bib-m2)"/>
+      <rect width="100" height="100" fill="url(#ic-bib-m3)"/>
+
+      <!-- Rect arrière — décalé vers haut-gauche, volume Liquid Glass -->
+      <rect x="22" y="28" width="48" height="44" rx="5"
+            fill="url(#cf-glass-white)"
+            filter="drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.14))"/>
+      <!-- Rect avant — mêmes dimensions, décalé vers bas-droite, volume Liquid Glass -->
+      <rect x="30" y="36" width="48" height="44" rx="5"
+            fill="url(#cf-glass-white)"
+            filter="drop-shadow(0 2.5px 4px rgba(0,0,0,0.18))"/>
+      <!-- Top highlight micro sur le rect avant pour le volume verre -->
+      <rect x="30" y="36" width="48" height="5" rx="5" fill="rgba(255,255,255,0.55)"/>
+    </symbol>
+
+    <!-- ============================================
+         03 · MA MARQUE — signature manuscrite stylisée
+         Fond : lilas doux désaturé (mesh subtil)
+         Glyphe : un trait cursif organique abstrait
+                  — 1 seul élément
+         ============================================ -->
+    <symbol id="ic-marque" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-mar-m1" cx="22%" cy="14%" r="70%">
+          <stop offset="0%"  stop-color="#C4B5FD" stop-opacity="0.70"/>
+          <stop offset="60%" stop-color="#C4B5FD" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-mar-m2" cx="85%" cy="50%" r="55%">
+          <stop offset="0%"  stop-color="#DDD6FE" stop-opacity="0.55"/>
+          <stop offset="80%" stop-color="#DDD6FE" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-mar-m3" cx="50%" cy="92%" r="55%">
+          <stop offset="0%"  stop-color="#A5B4F8" stop-opacity="0.35"/>
+          <stop offset="80%" stop-color="#A5B4F8" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#9B82F5"/>
+      <rect width="100" height="100" fill="url(#ic-mar-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-mar-m2)"/>
+      <rect width="100" height="100" fill="url(#ic-mar-m3)"/>
+
+      <!-- Signature manuscrite : C cursif + 2 ondulations + point final espacé -->
+      <!-- C initial — ouvre le tracé par la gauche, puis ondulations à droite -->
+      <path d="M 38 30 C 22 30, 22 70, 38 70 C 48 66, 52 52, 58 52 C 64 52, 64 42, 70 46"
+            fill="none"
+            stroke="url(#cf-glass-white)"
+            stroke-width="3.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.18)) drop-shadow(0 0.4px 0.6px rgba(0,0,0,0.10))"/>
+      <!-- Point final épuré — espacé du trait -->
+      <circle cx="78" cy="46" r="2.8" fill="url(#cf-glass-white)"
+              filter="drop-shadow(0 0.6px 1px rgba(0,0,0,0.15))"/>
+    </symbol>
+
+    <!-- ============================================
+         04 · MES OUTILS — 4 cercles 2×2
+         Fond : crème quasi neutre (mesh subtil)
+         Glyphe : 4 cercles palette en grille 2×2
+                  — 1 motif unifié
+         ============================================ -->
+    <symbol id="ic-outils" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-out-m1" cx="18%" cy="16%" r="68%">
+          <stop offset="0%"  stop-color="#FFEDC8" stop-opacity="0.65"/>
+          <stop offset="60%" stop-color="#FFEDC8" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-out-m2" cx="85%" cy="40%" r="55%">
+          <stop offset="0%"  stop-color="#F2E2C6" stop-opacity="0.50"/>
+          <stop offset="80%" stop-color="#F2E2C6" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-out-m3" cx="50%" cy="92%" r="55%">
+          <stop offset="0%"  stop-color="#E8DCC2" stop-opacity="0.35"/>
+          <stop offset="80%" stop-color="#E8DCC2" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#F5EFE5"/>
+      <rect width="100" height="100" fill="url(#ic-out-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-out-m2)"/>
+      <rect width="100" height="100" fill="url(#ic-out-m3)"/>
+
+      <!-- 4 cercles en grille 2×2 — volume Liquid Glass sur chaque pastille -->
+      <g filter="drop-shadow(0 1.5px 2px rgba(0,0,0,0.10))">
+        <circle cx="36" cy="36" r="9" fill="#007AFF"/>
+        <circle cx="64" cy="36" r="9" fill="#A78BFA"/>
+        <circle cx="36" cy="64" r="9" fill="#FB923C"/>
+        <circle cx="64" cy="64" r="9" fill="#10B981"/>
+      </g>
+      <!-- Specular micro top sur chaque cercle (volume verre) -->
+      <g fill="rgba(255,255,255,0.50)">
+        <ellipse cx="34" cy="33" rx="4" ry="2.2"/>
+        <ellipse cx="62" cy="33" rx="4" ry="2.2"/>
+        <ellipse cx="34" cy="61" rx="4" ry="2.2"/>
+        <ellipse cx="62" cy="61" rx="4" ry="2.2"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         05 · COMPTE — silhouette v6 sur fond sidéral
+         Fond : mesh gris-bleu profond
+         Glyphe : grand cercle gris + tête + buste blancs
+         ============================================ -->
+    <symbol id="ic-compte" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-com-m1" cx="22%" cy="18%" r="68%">
+          <stop offset="0%"  stop-color="#FFFFFF" stop-opacity="0.55"/>
+          <stop offset="80%" stop-color="#FFFFFF" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-com-m2" cx="80%" cy="82%" r="55%">
+          <stop offset="0%"  stop-color="#5C6B85" stop-opacity="0.30"/>
+          <stop offset="80%" stop-color="#5C6B85" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="ic-com-gray" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#CFD6E0"/>
+          <stop offset="100%" stop-color="#B0BAC8"/>
+        </linearGradient>
+        <clipPath id="ic-com-clip">
+          <circle cx="50" cy="50" r="36"/>
+        </clipPath>
+      </defs>
+      <rect width="100" height="100" fill="#8E9AAF"/>
+      <rect width="100" height="100" fill="url(#ic-com-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-com-m2)"/>
+
+      <!-- Grand cercle gris extérieur (légèrement plus clair que le fond) -->
+      <circle cx="50" cy="50" r="36" fill="url(#ic-com-gray)"
+              filter="drop-shadow(0 2px 4px rgba(0,0,0,0.18))"/>
+
+      <!-- Silhouette blanche v6 — tête + buste, clippées par le cercle gris -->
+      <g clip-path="url(#ic-com-clip)">
+        <circle cx="50" cy="40" r="15" fill="rgba(255,255,255,0.95)"/>
+        <path d="M 18 100 Q 18 64 50 64 Q 82 64 82 100 Z" fill="rgba(255,255,255,0.95)"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         06 · CALENDRIER — 7 cartes + jour actif rouge
+         Fond : Liquid Glass rose pâle (peach)
+         Glyphe : barre haute gris + 7 cartes (1 active rouge)
+         ============================================ -->
+    <symbol id="ic-calendrier" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="ic-cal-bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"  stop-color="#FFE4E6"/>
+          <stop offset="100%" stop-color="#FED7AA"/>
+        </linearGradient>
+      </defs>
+      <rect width="100" height="100" fill="url(#ic-cal-bg)"/>
+      <rect width="100" height="50" fill="rgba(255,255,255,0.18)"/>
+      <!-- Grille 3x3 STRICTEMENT centrée : marges égales 20px chaque côté -->
+      <g>
+        <rect x="20" y="20" width="16" height="16" rx="3" fill="rgba(255,255,255,0.85)"/>
+        <rect x="42" y="20" width="16" height="16" rx="3" fill="rgba(255,255,255,0.85)"/>
+        <rect x="64" y="20" width="16" height="16" rx="3" fill="rgba(255,255,255,0.85)"/>
+        <rect x="20" y="42" width="16" height="16" rx="3" fill="rgba(255,255,255,0.85)"/>
+        <rect x="42" y="42" width="16" height="16" rx="3" fill="#FF3B30" fill-opacity="0.95"/>
+        <rect x="64" y="42" width="16" height="16" rx="3" fill="rgba(255,255,255,0.85)"/>
+        <rect x="20" y="64" width="16" height="16" rx="3" fill="rgba(255,255,255,0.85)"/>
+        <rect x="42" y="64" width="16" height="16" rx="3" fill="rgba(255,255,255,0.85)"/>
+        <rect x="64" y="64" width="16" height="16" rx="3" fill="rgba(255,255,255,0.85)"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         07 · RAPPELS — 3 cercles vert + 3 lignes
+         Fond : blanc Liquid Glass quasi-crème
+         Glyphe : 3 cercles alignés + 3 lignes grises
+                  premier cercle rempli bleu CF
+         ============================================ -->
+    <symbol id="ic-rappels" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-rap-m1" cx="22%" cy="18%" r="68%">
+          <stop offset="0%"  stop-color="#FFFFFF" stop-opacity="0.95"/>
+          <stop offset="80%" stop-color="#FFFFFF" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-rap-m2" cx="82%" cy="62%" r="55%">
+          <stop offset="0%"  stop-color="#C9D7F0" stop-opacity="0.55"/>
+          <stop offset="80%" stop-color="#C9D7F0" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#F2F6FE"/>
+      <rect width="100" height="100" fill="url(#ic-rap-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-rap-m2)"/>
+
+      <!-- Cercle 1 (haut) : rempli bleu CF — tâche validée -->
+      <circle cx="26" cy="30" r="7.5" fill="url(#cf-glass-blue)"
+              filter="drop-shadow(0 1.5px 2.5px rgba(0,122,255,0.32)) drop-shadow(0 0.6px 1px rgba(0,0,0,0.10))"/>
+      <ellipse cx="24" cy="28" rx="3" ry="2" fill="rgba(255,255,255,0.45)"/>
+
+      <!-- Cercle 2 (milieu) : vide contour gris fin — à faire -->
+      <circle cx="26" cy="50" r="7" fill="none"
+              stroke="rgba(28,28,30,0.22)" stroke-width="1.8"/>
+
+      <!-- Cercle 3 (bas) : vide contour gris fin — à faire -->
+      <circle cx="26" cy="70" r="7" fill="none"
+              stroke="rgba(28,28,30,0.22)" stroke-width="1.8"/>
+
+      <!-- 3 lignes grises identiques (même longueur, même opacité, alignées) -->
+      <g fill="rgba(28,28,30,0.22)">
+        <rect x="42" y="28.5" width="42" height="3" rx="1.5"/>
+        <rect x="42" y="48.5" width="42" height="3" rx="1.5"/>
+        <rect x="42" y="68.5" width="42" height="3" rx="1.5"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         08 · MESSAGES — ovale blanc pur centré
+         Fond : mesh vert iMessage #34C759 doux
+         Glyphe : 1 ellipse blanche, pas d'ergot
+         ============================================ -->
+    <symbol id="ic-messages" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="ic-msg-bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"  stop-color="#D1FAE5"/>
+          <stop offset="100%" stop-color="#DBEAFE"/>
+        </linearGradient>
+        <filter id="ic-msg-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="3" stdDeviation="5" flood-opacity="0.10"/>
+        </filter>
+      </defs>
+      <rect width="100" height="100" fill="url(#ic-msg-bg)"/>
+      <rect width="100" height="50" fill="rgba(255,255,255,0.20)"/>
+      <!-- Bulle centrée : ovale + queue triangulaire bas-gauche, marges 22px top et bottom -->
+      <path d="M 15 32
+               Q 15 22 25 22
+               L 75 22
+               Q 85 22 85 32
+               L 85 58
+               Q 85 68 75 68
+               L 38 68
+               L 25 78
+               L 30 68
+               Q 15 68 15 58
+               Z"
+            fill="rgba(255,255,255,0.95)"
+            filter="url(#ic-msg-shadow)"/>
+    </symbol>
+
+    <!-- ============================================
+         09 · CONTACTS — silhouette standard + index
+         Silhouette dans 75% gauche + 4 bandes à droite
+         ============================================ -->
+    <symbol id="ic-contacts" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-con-m1" cx="22%" cy="18%" r="68%">
+          <stop offset="0%"  stop-color="#FFFFFF" stop-opacity="0.95"/>
+          <stop offset="80%" stop-color="#FFFFFF" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-con-m2" cx="82%" cy="62%" r="55%">
+          <stop offset="0%"  stop-color="#FFE9DC" stop-opacity="0.40"/>
+          <stop offset="80%" stop-color="#FFE9DC" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="ic-con-gray" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#B8C0CC"/>
+          <stop offset="100%" stop-color="#9CA5B0"/>
+        </linearGradient>
+        <clipPath id="ic-con-clip">
+          <circle cx="37" cy="50" r="30"/>
+        </clipPath>
+      </defs>
+      <rect width="100" height="100" fill="#FAF6EE"/>
+      <rect width="100" height="100" fill="url(#ic-con-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-con-m2)"/>
+
+      <!-- Cercle gris (silhouette dans 75% gauche) -->
+      <circle cx="37" cy="50" r="30" fill="url(#ic-con-gray)"
+              filter="drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.12))"/>
+      <g clip-path="url(#ic-con-clip)">
+        <!-- Tête — réhaussée, ~42 % du diamètre du cercle gris -->
+        <circle cx="37" cy="42" r="12.5" fill="url(#cf-glass-white)"/>
+        <path d="M 10 100 Q 10 64 37 64 Q 64 64 64 100 Z" fill="url(#cf-glass-white)"/>
+      </g>
+
+      <!-- 4 bandes index colorées (25% droite, x=76–90) -->
+      <g filter="drop-shadow(0 0.6px 1px rgba(0,0,0,0.10))">
+        <rect x="76" y="22" width="14" height="13" rx="2" fill="#FBBF24"/>
+        <rect x="76" y="38" width="14" height="13" rx="2" fill="#FB923C"/>
+        <rect x="76" y="54" width="14" height="13" rx="2" fill="#10B981"/>
+        <rect x="76" y="70" width="14" height="13" rx="2" fill="#007AFF"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         10 · POST CREATOR — outil (bleu CF)
+         Carré arrondi blanc + petit + haut-droite
+         ============================================ -->
+    <symbol id="ic-post" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-post-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#5EA9FF" stop-opacity="0.75"/>
+          <stop offset="70%" stop-color="#5EA9FF" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-post-m2" cx="80%" cy="80%" r="55%">
+          <stop offset="0%"  stop-color="#0052CC" stop-opacity="0.35"/>
+          <stop offset="80%" stop-color="#0052CC" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#007AFF"/>
+      <rect width="100" height="100" fill="url(#ic-post-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-post-m2)"/>
+
+      <rect x="28" y="32" width="40" height="40" rx="6" fill="url(#cf-glass-white)"
+            filter="drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.18))"/>
+      <g stroke="url(#cf-glass-white)" stroke-width="2.8" stroke-linecap="round"
+         filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.18))">
+        <line x1="76" y1="22" x2="76" y2="34"/>
+        <line x1="70" y1="28" x2="82" y2="28"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         11 · MOODBOARD — outil (lilas)
+         4 carrés blancs grille 2×2 décalés
+         ============================================ -->
+    <symbol id="ic-mood" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-mood-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#C4B5FD" stop-opacity="0.78"/>
+          <stop offset="70%" stop-color="#C4B5FD" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-mood-m2" cx="80%" cy="80%" r="55%">
+          <stop offset="0%"  stop-color="#6D28D9" stop-opacity="0.30"/>
+          <stop offset="80%" stop-color="#6D28D9" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#A78BFA"/>
+      <rect width="100" height="100" fill="url(#ic-mood-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-mood-m2)"/>
+
+      <!-- 4 carrés blancs en grille 2×2 strictement symétrique -->
+      <g fill="url(#cf-glass-white)" filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.15))">
+        <rect x="22" y="22" width="24" height="24" rx="3"/>
+        <rect x="54" y="22" width="24" height="24" rx="3"/>
+        <rect x="22" y="54" width="24" height="24" rx="3"/>
+        <rect x="54" y="54" width="24" height="24" rx="3"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         12 · VARIATIONS — outil (indigo)
+         3 cercles blancs superposés horizontalement
+         ============================================ -->
+    <symbol id="ic-variations" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-var-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#A5B4F8" stop-opacity="0.78"/>
+          <stop offset="70%" stop-color="#A5B4F8" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-var-m2" cx="80%" cy="80%" r="55%">
+          <stop offset="0%"  stop-color="#3730A3" stop-opacity="0.30"/>
+          <stop offset="80%" stop-color="#3730A3" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#6366F1"/>
+      <rect width="100" height="100" fill="url(#ic-var-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-var-m2)"/>
+
+      <g filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.18))">
+        <circle cx="34" cy="50" r="15" fill="rgba(255,255,255,0.55)"/>
+        <circle cx="50" cy="50" r="15" fill="rgba(255,255,255,0.75)"/>
+        <circle cx="66" cy="50" r="15" fill="url(#cf-glass-white)"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         13 · REVIEWS — outil (orange)
+         Cercle vide blanc + coche
+         ============================================ -->
+    <symbol id="ic-reviews" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-rev-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#FFD194" stop-opacity="0.78"/>
+          <stop offset="70%" stop-color="#FFD194" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-rev-m2" cx="80%" cy="80%" r="55%">
+          <stop offset="0%"  stop-color="#C2410C" stop-opacity="0.30"/>
+          <stop offset="80%" stop-color="#C2410C" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#FB923C"/>
+      <rect width="100" height="100" fill="url(#ic-rev-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-rev-m2)"/>
+
+      <g fill="none" stroke="url(#cf-glass-white)" stroke-width="3"
+         stroke-linecap="round" stroke-linejoin="round"
+         filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.18))">
+        <circle cx="50" cy="50" r="22"/>
+        <path d="M 40 50 L 47 57 L 60 43"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         14 · EMAILING — outil (rose)
+         Rectangle horizontal blanc + V pli enveloppe
+         ============================================ -->
+    <symbol id="ic-emailing" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-eml-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#FBCFE8" stop-opacity="0.78"/>
+          <stop offset="70%" stop-color="#FBCFE8" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-eml-m2" cx="80%" cy="80%" r="55%">
+          <stop offset="0%"  stop-color="#BE185D" stop-opacity="0.30"/>
+          <stop offset="80%" stop-color="#BE185D" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#F472B6"/>
+      <rect width="100" height="100" fill="url(#ic-eml-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-eml-m2)"/>
+
+      <rect x="20" y="32" width="60" height="38" rx="5" fill="url(#cf-glass-white)"
+            filter="drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.18))"/>
+      <path d="M 26 38 L 50 56 L 74 38" fill="none" stroke="rgba(244,114,182,0.65)" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+
+    <!-- ============================================
+         15 · FILMS — outil (mint)
+         Rectangle horizontal blanc + triangle play
+         ============================================ -->
+    <symbol id="ic-films" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-flm-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#86EFAC" stop-opacity="0.78"/>
+          <stop offset="70%" stop-color="#86EFAC" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-flm-m2" cx="80%" cy="80%" r="55%">
+          <stop offset="0%"  stop-color="#047857" stop-opacity="0.30"/>
+          <stop offset="80%" stop-color="#047857" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#10B981"/>
+      <rect width="100" height="100" fill="url(#ic-flm-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-flm-m2)"/>
+
+      <rect x="20" y="30" width="60" height="40" rx="5" fill="url(#cf-glass-white)"
+            filter="drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.18))"/>
+      <path d="M 44 40 L 60 50 L 44 60 Z" fill="rgba(16,185,129,0.75)"/>
+    </symbol>
+
+    <!-- ============================================
+         16 · REELS — outil (indigo saturé)
+         Rectangle vertical blanc + triangle play
+         ============================================ -->
+    <symbol id="ic-reels" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-rls-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#818CF8" stop-opacity="0.78"/>
+          <stop offset="70%" stop-color="#818CF8" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-rls-m2" cx="80%" cy="80%" r="55%">
+          <stop offset="0%"  stop-color="#312E81" stop-opacity="0.30"/>
+          <stop offset="80%" stop-color="#312E81" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#4F46E5"/>
+      <rect width="100" height="100" fill="url(#ic-rls-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-rls-m2)"/>
+
+      <rect x="32" y="18" width="36" height="64" rx="5" fill="url(#cf-glass-white)"
+            filter="drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.18))"/>
+      <path d="M 44 40 L 60 50 L 44 60 Z" fill="rgba(79,70,229,0.75)"/>
+    </symbol>
+
+    <!-- ============================================
+         17 · ADS — outil (orange saturé)
+         Cercle blanc + 3 arcs concentriques sortants
+         ============================================ -->
+    <symbol id="ic-ads" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-ads-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#FDBA74" stop-opacity="0.78"/>
+          <stop offset="70%" stop-color="#FDBA74" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-ads-m2" cx="80%" cy="80%" r="55%">
+          <stop offset="0%"  stop-color="#9A3412" stop-opacity="0.30"/>
+          <stop offset="80%" stop-color="#9A3412" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#EA580C"/>
+      <rect width="100" height="100" fill="url(#ic-ads-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-ads-m2)"/>
+
+      <circle cx="32" cy="50" r="10" fill="url(#cf-glass-white)"
+              filter="drop-shadow(0 1.5px 2px rgba(0,0,0,0.18))"/>
+      <g fill="none" stroke="url(#cf-glass-white)" stroke-width="2.8" stroke-linecap="round"
+         filter="drop-shadow(0 0.6px 1px rgba(0,0,0,0.10))">
+        <path d="M 48 38 A 14 14 0 0 1 48 62"/>
+        <path d="M 58 32 A 22 22 0 0 1 58 68" opacity="0.75"/>
+        <path d="M 68 26 A 30 30 0 0 1 68 74" opacity="0.45"/>
+      </g>
+    </symbol>
+
+    <!-- ============================================
+         18 · RAPPORT — outil (bleu profond)
+         Page document blanche + 4 lignes de texte
+         Livrable ponctuel formel (présentation, bilan)
+         ============================================ -->
+    <symbol id="ic-rapport" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="ic-rpt-m1" cx="22%" cy="14%" r="72%">
+          <stop offset="0%"  stop-color="#3B5BC2" stop-opacity="0.70"/>
+          <stop offset="70%" stop-color="#3B5BC2" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ic-rpt-m2" cx="80%" cy="82%" r="55%">
+          <stop offset="0%"  stop-color="#0A2356" stop-opacity="0.40"/>
+          <stop offset="80%" stop-color="#0A2356" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="100" height="100" fill="#1E3A8A"/>
+      <rect width="100" height="100" fill="url(#ic-rpt-m1)"/>
+      <rect width="100" height="100" fill="url(#ic-rpt-m2)"/>
+
+      <!-- Page document blanche verticale -->
+      <rect x="30" y="18" width="40" height="64" rx="5" fill="url(#cf-glass-white)"
+            filter="drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.22))"/>
+
+      <!-- 4 lignes de texte stylisées (longueurs variables, sobres) -->
+      <g fill="rgba(30,58,138,0.55)">
+        <rect x="36" y="30" width="28" height="2.6" rx="1.3"/>
+        <rect x="36" y="40" width="22" height="2.6" rx="1.3"/>
+        <rect x="36" y="50" width="28" height="2.6" rx="1.3"/>
+        <rect x="36" y="60" width="20" height="2.6" rx="1.3"/>
+      </g>
+    </symbol>
+
+  </defs>
+</svg>
+
+
+<!-- ============================================================
+     Status bar iPad (démo)
+     ============================================================ -->
+<div class="statusbar">
+  <span class="statusbar-time">14:32</span>
+  <div class="statusbar-right">
+    <!-- Signal -->
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor" aria-hidden="true">
+      <path d="M0 7.5a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-1zm6-2.5a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5zm6-3a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V2z" opacity="0.85"/>
+    </svg>
+    <!-- Wifi -->
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+      <path d="M2 5.5a8 8 0 0 1 12 0M4.5 7.5a5 5 0 0 1 7 0M7 9.5a2.5 2.5 0 0 1 2 0"/>
+    </svg>
+    <!-- Battery -->
+    <svg width="25" height="11" viewBox="0 0 25 11" fill="none" aria-hidden="true">
+      <rect x="0.5" y="0.5" width="21" height="10" rx="2.5" stroke="currentColor" stroke-opacity="0.7" stroke-width="1"/>
+      <rect x="22.5" y="3.5" width="1.5" height="4" rx="0.5" fill="currentColor" fill-opacity="0.4"/>
+      <rect x="2" y="2" width="14" height="7" rx="1.5" fill="currentColor" fill-opacity="0.85"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ============================================================
+     Shell
+     ============================================================ -->
+<main class="preview-shell">
+
+  <!-- ------- Header ------- -->
+  <header class="preview-header">
+    <span class="preview-eyebrow"><span class="preview-eyebrow-dot"></span>Phase B · Fondation</span>
+    <h1 class="preview-title">cf-tokens.css — DA système v60</h1>
+    <p class="preview-lede">
+      Source de vérité visuelle pour l'ensemble des mockups vague 2A/2B/2C. Palette, typographie,
+      matériaux Liquid Glass z1/z2/z3, animations canoniques, status bar, dock, bouton index.
+      Tous les écrans Creative Fair partent d'ici.
+    </p>
+  </header>
+
+  <!-- ============================================================
+       §1 — Palette
+       ============================================================ -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Palette CF v60</h2>
+      <span class="section-meta">12 couleurs · forest green déprécié</span>
+    </div>
+    <p class="section-desc">
+      Palette post-pivot du 6 mai 2026. Base crème nuancée, bleu CF en accent primaire,
+      secondaires pastels. La couleur sémantique d'un flux dérive toujours d'une de ces valeurs.
+    </p>
+
+    <div class="palette-grid">
+      <div class="sub-row-title">Base · crème</div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--cream);"></div>          <div class="swatch-meta"><div class="swatch-name">cream</div><div class="swatch-hex">#FBFAF7</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--cream-deeper);"></div>   <div class="swatch-meta"><div class="swatch-name">cream-deeper</div><div class="swatch-hex">#F5F0EA</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--cream-deepest);"></div>  <div class="swatch-meta"><div class="swatch-name">cream-deepest</div><div class="swatch-hex">#EEE8DF</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--text-primary);"></div>   <div class="swatch-meta"><div class="swatch-name">text-primary</div><div class="swatch-hex">#1C1C1E</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--text-secondary);"></div> <div class="swatch-meta"><div class="swatch-name">text-secondary</div><div class="swatch-hex">#737373</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--text-tertiary);"></div>  <div class="swatch-meta"><div class="swatch-name">text-tertiary</div><div class="swatch-hex">#A0A0A0</div></div></div>
+
+      <div class="sub-row-title">Accent · bleu CF</div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--blue-cf);"></div>        <div class="swatch-meta"><div class="swatch-name">blue-cf</div><div class="swatch-hex">#007AFF</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--blue-cf-soft);"></div>   <div class="swatch-meta"><div class="swatch-name">blue-cf-soft</div><div class="swatch-hex">#E6F2FF</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--lilac);"></div>          <div class="swatch-meta"><div class="swatch-name">lilac</div><div class="swatch-hex">#A78BFA</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--indigo);"></div>         <div class="swatch-meta"><div class="swatch-name">indigo</div><div class="swatch-hex">#6366F1</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--orange);"></div>         <div class="swatch-meta"><div class="swatch-name">orange</div><div class="swatch-hex">#FB923C</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--rose);"></div>           <div class="swatch-meta"><div class="swatch-name">rose</div><div class="swatch-hex">#F472B6</div></div></div>
+
+      <div class="sub-row-title">Sémantique · flux</div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--mint);"></div>           <div class="swatch-meta"><div class="swatch-name">mint</div><div class="swatch-hex">#10B981</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--red);"></div>            <div class="swatch-meta"><div class="swatch-name">red</div><div class="swatch-hex">#FF3B30</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--lilac-soft);"></div>     <div class="swatch-meta"><div class="swatch-name">lilac-soft</div><div class="swatch-hex">#F0EBFE</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--orange-soft);"></div>    <div class="swatch-meta"><div class="swatch-name">orange-soft</div><div class="swatch-hex">#FEF1E6</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--mint-soft);"></div>      <div class="swatch-meta"><div class="swatch-name">mint-soft</div><div class="swatch-hex">#D1FAE5</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--rose-soft);"></div>      <div class="swatch-meta"><div class="swatch-name">rose-soft</div><div class="swatch-hex">#FEEDF6</div></div></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       §2 — Typo
+       ============================================================ -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Échelle typographique</h2>
+      <span class="section-meta">9 niveaux · stack système</span>
+    </div>
+    <p class="section-desc">
+      Stack <code style="font-family:var(--font-mono); font-size:12px;">system-ui, -apple-system, "SF Pro Display", "Helvetica Neue"</code> —
+      rendu natif sur macOS/iPadOS, fallback Helvetica Neue ailleurs. Tabular-nums obligatoires
+      sur tout numérique (heures, counts, indicateurs).
+    </p>
+
+    <div class="typo-row"><div class="typo-tag">--t-title-xxl</div><div class="typo-meta">52 · 700 · −0.025</div><div class="typo-sample t-title-xxl">Bonjour Floriane</div></div>
+    <div class="typo-row"><div class="typo-tag">--t-title-xl</div> <div class="typo-meta">38 · 700 · −0.025</div><div class="typo-sample t-title-xl">Mon Programme</div></div>
+    <div class="typo-row"><div class="typo-tag">--t-title-lg</div> <div class="typo-meta">28 · 700 · −0.015</div><div class="typo-sample t-title-lg">L'audit du jour</div></div>
+    <div class="typo-row"><div class="typo-tag">--t-title-md</div> <div class="typo-meta">22 · 600 · −0.015</div><div class="typo-sample t-title-md">Épinglés · mai 2026</div></div>
+    <div class="typo-row"><div class="typo-tag">--t-title-sm</div> <div class="typo-meta">17 · 600 · −0.005</div><div class="typo-sample t-title-sm">Cohérence éditoriale</div></div>
+    <div class="typo-row"><div class="typo-tag">--t-body</div>     <div class="typo-meta">15 · 400 · −0.005</div><div class="typo-sample t-body">Le pilier Manifeste a perdu en intensité — 15 % au lieu de 25 % objectif.</div></div>
+    <div class="typo-row"><div class="typo-tag">--t-body-md</div>  <div class="typo-meta">14 · 400 · −0.005</div><div class="typo-sample t-body-md">Briefer photographe shoot juin</div></div>
+    <div class="typo-row"><div class="typo-tag">--t-caption</div>  <div class="typo-meta">13 · 500</div>         <div class="typo-sample t-caption tabular">il y a 14 min · Hélène M.</div></div>
+    <div class="typo-row"><div class="typo-tag">--t-micro</div>    <div class="typo-meta">11 · 600 · +0.08</div> <div class="typo-sample t-micro">Suggéré par mon programme</div></div>
+  </section>
+
+  <!-- ============================================================
+       §3 — Liquid Glass z1 z2 z3
+       ============================================================ -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Matériau Liquid Glass · 3 niveaux</h2>
+      <span class="section-meta">backdrop-filter blur</span>
+    </div>
+    <p class="section-desc">
+      Trois niveaux canoniques. z1 = ambient (sidebars passives), z2 = interactif (cards, widgets),
+      z3 = flottant (popovers, sheets, dock). Le wallpaper du fond reste perceptible à travers
+      chaque niveau — c'est le test que le matériau "respire".
+    </p>
+
+    <div class="glass-demo">
+      <div class="glass-demo-bg" aria-hidden="true"></div>
+
+      <article class="glass-tile glass-z1 glass-highlight">
+        <span class="glass-tile-label">z1 · ambient</span>
+        <div class="glass-tile-value tabular">0.55</div>
+        <p class="glass-tile-desc">Sidebars passives, widgets discrets. Le wallpaper teinte visiblement la surface.</p>
+        <div class="glass-tile-meta"><span>blur 20px</span><span>sat 180 %</span></div>
+      </article>
+
+      <article class="glass-tile glass-z2 glass-highlight">
+        <span class="glass-tile-label">z2 · interactif</span>
+        <div class="glass-tile-value tabular">0.72</div>
+        <p class="glass-tile-desc">Cards, widgets actifs, cells hover. Lisibilité prime, mais le matériau reste vivant.</p>
+        <div class="glass-tile-meta"><span>blur 40px</span><span>sat 200 %</span></div>
+      </article>
+
+      <article class="glass-tile glass-z3 glass-highlight">
+        <span class="glass-tile-label">z3 · flottant</span>
+        <div class="glass-tile-value tabular">0.94</div>
+        <p class="glass-tile-desc">Sheets, popovers, dock, search bar. Contraste maximum, ombre profonde.</p>
+        <div class="glass-tile-meta"><span>blur 60px</span><span>sat 200 %</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       §4 — Radii / Shadows / Spacings — three sections compact
+       ============================================================ -->
+  <div class="two-up">
+
+    <section class="section">
+      <div class="section-head"><h2 class="section-title">Border radius</h2><span class="section-meta">8 paliers</span></div>
+      <div class="specimen-grid">
+        <div class="specimen"><div class="specimen-shape" style="border-radius: var(--r-xs);"></div><div class="specimen-label">--r-xs</div><div class="specimen-sublabel">4 px</div></div>
+        <div class="specimen"><div class="specimen-shape" style="border-radius: var(--r-sm);"></div><div class="specimen-label">--r-sm</div><div class="specimen-sublabel">6 px</div></div>
+        <div class="specimen"><div class="specimen-shape" style="border-radius: var(--r-md);"></div><div class="specimen-label">--r-md</div><div class="specimen-sublabel">10 px</div></div>
+        <div class="specimen"><div class="specimen-shape" style="border-radius: var(--r-lg);"></div><div class="specimen-label">--r-lg</div><div class="specimen-sublabel">14 px</div></div>
+        <div class="specimen"><div class="specimen-shape" style="border-radius: var(--r-xl);"></div><div class="specimen-label">--r-xl</div><div class="specimen-sublabel">20 px</div></div>
+        <div class="specimen"><div class="specimen-shape" style="border-radius: var(--r-2xl);"></div><div class="specimen-label">--r-2xl</div><div class="specimen-sublabel">24 px</div></div>
+        <div class="specimen"><div class="specimen-shape" style="border-radius: var(--r-3xl);"></div><div class="specimen-label">--r-3xl</div><div class="specimen-sublabel">32 px</div></div>
+        <div class="specimen"><div class="specimen-shape" style="border-radius: var(--r-pill);"></div><div class="specimen-label">--r-pill</div><div class="specimen-sublabel">999 px</div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2 class="section-title">Shadows</h2><span class="section-meta">5 paliers</span></div>
+      <div class="specimen-grid shadow-grid">
+        <div class="specimen"><div class="shadow-shape" style="box-shadow: var(--shadow-xs);"></div><div class="specimen-label">--shadow-xs</div></div>
+        <div class="specimen"><div class="shadow-shape" style="box-shadow: var(--shadow-sm);"></div><div class="specimen-label">--shadow-sm</div></div>
+        <div class="specimen"><div class="shadow-shape" style="box-shadow: var(--shadow-md);"></div><div class="specimen-label">--shadow-md</div></div>
+        <div class="specimen"><div class="shadow-shape" style="box-shadow: var(--shadow-lg);"></div><div class="specimen-label">--shadow-lg</div></div>
+        <div class="specimen"><div class="shadow-shape" style="box-shadow: var(--shadow-xl);"></div><div class="specimen-label">--shadow-xl</div></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="section">
+    <div class="section-head"><h2 class="section-title">Espacement · système 4</h2><span class="section-meta">multiples de 4 px</span></div>
+    <div>
+      <div class="spacing-row"><span class="spacing-label">--s-1</span><div class="spacing-bar" style="width: 4px;"></div><span class="spacing-value">4 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-2</span><div class="spacing-bar" style="width: 8px;"></div><span class="spacing-value">8 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-3</span><div class="spacing-bar" style="width: 12px;"></div><span class="spacing-value">12 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-4</span><div class="spacing-bar" style="width: 16px;"></div><span class="spacing-value">16 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-5</span><div class="spacing-bar" style="width: 20px;"></div><span class="spacing-value">20 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-6</span><div class="spacing-bar" style="width: 24px;"></div><span class="spacing-value">24 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-8</span><div class="spacing-bar" style="width: 32px;"></div><span class="spacing-value">32 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-10</span><div class="spacing-bar" style="width: 40px;"></div><span class="spacing-value">40 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-12</span><div class="spacing-bar" style="width: 48px;"></div><span class="spacing-value">48 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-16</span><div class="spacing-bar" style="width: 64px;"></div><span class="spacing-value">64 px</span></div>
+      <div class="spacing-row"><span class="spacing-label">--s-20</span><div class="spacing-bar" style="width: 80px;"></div><span class="spacing-value">80 px</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       §5 — App icons CF (glyphes originaux)
+       ============================================================ -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Icônes d'apps CF</h2>
+      <span class="section-meta">Liquid Glass v4 · radius 22.5 %</span>
+    </div>
+    <p class="section-desc">
+      8 icônes CF — 1 élément central + 1 fond doux. Signature CF sur les 3 apps métier
+      (Mon Programme, Bibliothèque, Ma Marque), patterns universels sur les 5 apps système.
+      Voir <code style="font-family:var(--font-mono); font-size:12px;">00b-icons-preview.html</code>
+      pour les spécifications détaillées et le test multi-tailles.
+    </p>
+
+    <div class="icons-row">
+      <div class="app-tile"><span class="app-icon with-glint"><svg viewBox="0 0 100 100"><use href="#ic-programme"/></svg></span><span class="app-tile-label">Mon Programme</span></div>
+      <div class="app-tile"><span class="app-icon with-glint"><svg viewBox="0 0 100 100"><use href="#ic-bibliotheque"/></svg></span><span class="app-tile-label">Bibliothèque</span></div>
+      <div class="app-tile"><span class="app-icon with-glint"><svg viewBox="0 0 100 100"><use href="#ic-marque"/></svg></span><span class="app-tile-label">Ma Marque</span></div>
+      <div class="app-tile"><span class="app-icon with-glint"><svg viewBox="0 0 100 100"><use href="#ic-outils"/></svg></span><span class="app-tile-label">Mes Outils</span></div>
+      <div class="app-tile"><span class="app-icon with-glint"><svg viewBox="0 0 100 100"><use href="#ic-compte"/></svg></span><span class="app-tile-label">Compte</span></div>
+      <div class="app-tile"><span class="app-icon with-glint"><svg viewBox="0 0 100 100"><use href="#ic-calendrier"/></svg></span><span class="app-tile-label">Calendrier</span></div>
+      <div class="app-tile"><span class="app-icon with-glint"><svg viewBox="0 0 100 100"><use href="#ic-rappels"/></svg></span><span class="app-tile-label">Rappels</span></div>
+      <div class="app-tile"><span class="app-icon with-glint"><svg viewBox="0 0 100 100"><use href="#ic-messages"/></svg></span><span class="app-tile-label">Messages</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       §6 — Dock + Status bar in situ
+       ============================================================ -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Dock Liquid Glass</h2>
+      <span class="section-meta">4 apps système · z3</span>
+    </div>
+    <p class="section-desc">
+      Le dock est fixe en bas-centre uniquement sur l'écran Aujourd'hui. Il disparaît dans les apps
+      ouvertes qui prennent toute la viewport.
+    </p>
+    <div class="dock-demo-frame">
+      <div class="dock-demo">
+        <span class="app-icon"><svg viewBox="0 0 100 100"><use href="#ic-compte"/></svg></span>
+        <span class="app-icon"><svg viewBox="0 0 100 100"><use href="#ic-calendrier"/></svg></span>
+        <span class="app-icon"><svg viewBox="0 0 100 100"><use href="#ic-rappels"/></svg></span>
+        <span class="app-icon"><svg viewBox="0 0 100 100"><use href="#ic-messages"/></svg></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       §7 — ContextBanner + contrôles
+       ============================================================ -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Contrôles transverses</h2>
+      <span class="section-meta">banner · pills · buttons · search</span>
+    </div>
+    <p class="section-desc">
+      Pattern <code style="font-family:var(--font-mono); font-size:12px;">&lt;ContextBanner&gt;</code>
+      affiché en haut quand <code style="font-family:var(--font-mono); font-size:12px;">?from=</code>
+      est présent dans l'URL. Pills sémantiques pour les piliers et statuts. Boutons primaire/secondaire.
+      Search bar Liquid Glass z3 pour Bibliothèque, Messages, Rappels, Contacts.
+    </p>
+
+    <div class="controls-row">
+      <span class="control-label">ContextBanner</span>
+      <a class="context-banner" href="#">
+        <svg class="context-banner-arrow" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 L4 7 L9 11"/></svg>
+        Retour à Mon Programme
+      </a>
+      <a class="context-banner" href="#">
+        <svg class="context-banner-arrow" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 L4 7 L9 11"/></svg>
+        Retour à Messages · Hélène M.
+      </a>
+    </div>
+
+    <div class="controls-row">
+      <span class="control-label">Pills sémantiques</span>
+      <span class="pill"><span class="pill-dot" style="background: var(--c-publications)"></span>Publications</span>
+      <span class="pill"><span class="pill-dot" style="background: var(--c-business)"></span>Business</span>
+      <span class="pill"><span class="pill-dot" style="background: var(--c-echeances)"></span>Échéances</span>
+      <span class="pill"><span class="pill-dot" style="background: var(--c-validations)"></span>Validations</span>
+      <span class="pill"><span class="pill-dot" style="background: var(--c-doyens)"></span>Doyens IA</span>
+      <span class="pill"><span class="pill-dot" style="background: var(--c-crise)"></span>Alerte</span>
+    </div>
+
+    <div class="controls-row">
+      <span class="control-label">Boutons</span>
+      <button class="btn btn-primary">Ajouter au Calendrier</button>
+      <button class="btn btn-secondary">Refuser</button>
+      <button class="btn btn-secondary">Demander à Hélène</button>
+    </div>
+
+    <div class="controls-row">
+      <span class="control-label">Search bar z3</span>
+      <div class="search-demo">
+        <div class="search-bar">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5"/><path d="M11 11 L14 14" stroke-linecap="round"/></svg>
+          <span>Rechercher dans la bibliothèque</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       §8 — Animations canoniques (interactives)
+       ============================================================ -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Animations canoniques</h2>
+      <span class="section-meta">cubic-bezier · max 0.6 s</span>
+    </div>
+    <p class="section-desc">
+      Cliquer chaque carte pour rejouer l'animation. Toutes les durées sont sous 600 ms et utilisent
+      un easing non-linéaire. Fallback <code style="font-family:var(--font-mono); font-size:12px;">prefers-reduced-motion</code>
+      neutralise toutes les transitions pour les personnes sensibles.
+    </p>
+
+    <div class="anim-grid">
+
+      <article class="anim-card" data-anim="tab-shrink">
+        <div class="anim-card-title">A · Tab bar shrink-on-scroll</div>
+        <div class="anim-card-desc">Les tab bars rétrécissent quand on scrolle vers le bas, ré-expansent au scroll back.</div>
+        <div class="anim-stage">
+          <div class="tab-demo" id="tab-demo">
+            <span class="tab-demo-item active">Aperçu</span>
+            <span class="tab-demo-item">Stratégie</span>
+            <span class="tab-demo-item">Performance</span>
+          </div>
+        </div>
+        <button class="anim-cta" data-target="tab">Rejouer</button>
+      </article>
+
+      <article class="anim-card" data-anim="morph">
+        <div class="anim-card-title">B · Modal morph-in</div>
+        <div class="anim-card-desc">Les sheets émergent depuis leur point d'origine (transform-origin du déclencheur).</div>
+        <div class="anim-stage">
+          <div class="modal-demo-frame">
+            <div class="modal-demo-sheet" id="modal-demo">Sheet 0.4s</div>
+          </div>
+        </div>
+        <button class="anim-cta" data-target="modal">Rejouer</button>
+      </article>
+
+      <article class="anim-card" data-anim="photo">
+        <div class="anim-card-title">G · Photo zoom plein écran</div>
+        <div class="anim-card-desc">Une photo Bibliothèque s'agrandit depuis sa cellule d'origine vers le plein écran.</div>
+        <div class="anim-stage">
+          <div class="photo-demo-frame">
+            <div class="photo-demo" id="photo-demo"></div>
+          </div>
+        </div>
+        <button class="anim-cta" data-target="photo">Rejouer</button>
+      </article>
+
+      <article class="anim-card" data-anim="check">
+        <div class="anim-card-title">F · Checkbox pop (Rappels)</div>
+        <div class="anim-card-desc">Cocher un rappel fait apparaître le check avec un overshoot subtil.</div>
+        <div class="anim-stage" style="gap: 14px; display: flex;">
+          <button class="cf-check" id="check-demo-1" aria-label="Tâche 1"></button>
+          <button class="cf-check done" id="check-demo-2" aria-label="Tâche 2"></button>
+          <button class="cf-check" id="check-demo-3" aria-label="Tâche 3"></button>
+        </div>
+        <button class="anim-cta" data-target="check">Rejouer</button>
+      </article>
+
+      <article class="anim-card" data-anim="typing">
+        <div class="anim-card-title">E · Typing indicator (Messages)</div>
+        <div class="anim-card-desc">Trois dots qui rebondissent en séquence quand un doyen est en train d'écrire.</div>
+        <div class="anim-stage">
+          <div class="typing-indicator">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <button class="anim-cta" data-target="typing">En continu</button>
+      </article>
+
+      <article class="anim-card" data-anim="bubble">
+        <div class="anim-card-title">D · Bulles spring-in</div>
+        <div class="anim-card-desc">Les bulles de messages apparaissent avec un léger overshoot (cubic-bezier 0.34, 1.56).</div>
+        <div class="anim-stage">
+          <div class="bubble-demo" id="bubble-demo">
+            <div class="bubble them bubble-in" style="animation-delay: 0s;">L'angle est juste, je valide.</div>
+            <div class="bubble me bubble-in" style="animation-delay: 0.2s;">Je publie demain matin alors.</div>
+          </div>
+        </div>
+        <button class="anim-cta" data-target="bubble">Rejouer</button>
+      </article>
+
+    </div>
+  </section>
+
+  <p class="footer-note">cf-tokens.css v1 · Phase B Creative Fair · 17 mai 2026</p>
+
+</main>
+
+<!-- ============================================================
+     Bouton "Index mockups" universel
+     ============================================================ -->
+<a class="index-button" href="#">↩ Index mockups</a>
+
+<!-- ============================================================
+     JS minimal — rejouer animations + tab shrink toggle
+     ============================================================ -->
+<script>
+  (function () {
+    const replayAnimation = (el, className) => {
+      el.classList.remove(className);
+      // force reflow
+      void el.offsetWidth;
+      el.classList.add(className);
+    };
+
+    document.querySelectorAll('.anim-cta').forEach(cta => {
+      cta.addEventListener('click', () => {
+        const t = cta.dataset.target;
+
+        if (t === 'tab') {
+          const tab = document.getElementById('tab-demo');
+          tab.classList.add('is-scrolled');
+          setTimeout(() => tab.classList.remove('is-scrolled'), 900);
+        }
+
+        if (t === 'modal') {
+          const sheet = document.getElementById('modal-demo');
+          replayAnimation(sheet, 'in');
+        }
+
+        if (t === 'photo') {
+          const photo = document.getElementById('photo-demo');
+          replayAnimation(photo, 'in');
+        }
+
+        if (t === 'check') {
+          [1, 2, 3].forEach(i => {
+            const el = document.getElementById('check-demo-' + i);
+            el.classList.remove('done');
+          });
+          setTimeout(() => {
+            [1, 2, 3].forEach(i => {
+              const el = document.getElementById('check-demo-' + i);
+              setTimeout(() => el.classList.add('done'), i * 200);
+            });
+          }, 50);
+        }
+
+        if (t === 'bubble') {
+          document.querySelectorAll('#bubble-demo .bubble').forEach(b => replayAnimation(b, 'bubble-in'));
+        }
+      });
+    });
+
+    // Auto-play modal & photo on load
+    setTimeout(() => {
+      const sheet = document.getElementById('modal-demo');
+      if (sheet) sheet.classList.add('in');
+      const photo = document.getElementById('photo-demo');
+      if (photo) photo.classList.add('in');
+    }, 400);
+
+    // Checkbox individual toggle on click
+    document.querySelectorAll('.cf-check').forEach(c => {
+      c.addEventListener('click', () => c.classList.toggle('done'));
+    });
+  })();
+</script>
+
+</body>
+</html>

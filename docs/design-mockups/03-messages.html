@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<!--
+  Messages · v61 patch ciblé (audit /cfs-apple-audit 19 mai 2026)
+  ============================================================
+  Refonte stricte selon brief Ulysse :
+   - Wallpaper neutre (pas blanc plat, pas violet saturé)
+   - Page-header canonique (breadcrumb + H1 "Messages", pas de back btn)
+   - Layout 2-pane 260px + 1fr (comme Rappels)
+   - 3 sections : ÉPINGLÉS / CONVERSATIONS / GROUPES (eyebrows 10px uppercase)
+   - Badges Expert IA / Interne / Externe sur les avatars
+   - Pas de "Ouvrir dans Post Creator" (V2)
+   - Pas de citation Aman inventée
+   - Quick replies sous le dernier message Hélène
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Messages · Creative Fair</title>
+<link rel="stylesheet" href="cf-tokens.css">
+<style>
+  body { min-height: 100vh; background: var(--cream); }
+
+  /* ============================================================
+     Layout 2-pane 260px + 1fr
+     ============================================================ */
+  .ms-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--s-6);
+    align-items: start;
+    padding: var(--s-2) 0 var(--s-20);
+  }
+  @media (max-width: 900px) {
+    .ms-layout { grid-template-columns: 1fr; gap: var(--s-5); }
+  }
+
+  /* ============================================================
+     PANE 1 — Liste conversations
+     ============================================================ */
+  .ms-pane-list {
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 140px);
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex; flex-direction: column;
+    gap: 2px;
+  }
+  .ms-pane-list::-webkit-scrollbar { width: 0; }
+
+  .ms-search-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .ms-search {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: rgba(251, 250, 247, 0.94);
+    -webkit-backdrop-filter: blur(60px) saturate(200%);
+    backdrop-filter: blur(60px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-tertiary);
+    font-size: 13px;
+  }
+  .ms-search svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .ms-compose-btn {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: var(--blue-cf);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-xs);
+    transition: background 150ms ease, transform 100ms ease;
+  }
+  .ms-compose-btn:hover { background: #0066D9; }
+  .ms-compose-btn:active { transform: scale(0.94); }
+  .ms-compose-btn svg { width: 14px; height: 14px; }
+
+  .ms-section-h {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(60, 60, 67, 0.30);
+    padding: 12px 8px 6px;
+    margin: 0;
+  }
+
+  /* Conversation row */
+  .ms-conv {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 150ms ease;
+    min-height: 56px;
+  }
+  .ms-conv:hover { background: rgba(0, 0, 0, 0.04); }
+  .ms-conv.is-active { background: rgba(0, 122, 255, 0.10); }
+  .ms-conv.is-active .ms-conv-name { color: var(--blue-cf); }
+
+  .ms-conv-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .ms-conv-avatar.av-indigo  { background: linear-gradient(135deg, #C7C9F9 0%, #6366F1 100%); }
+  .ms-conv-avatar.av-blue    { background: linear-gradient(135deg, #B6D6FF 0%, #007AFF 100%); }
+  .ms-conv-avatar.av-rose    { background: linear-gradient(135deg, #FBCFE8 0%, #F472B6 100%); }
+  .ms-conv-avatar.av-orange  { background: linear-gradient(135deg, #FFD4A8 0%, #FB923C 100%); }
+  .ms-conv-avatar.av-lilac   { background: linear-gradient(135deg, #DBCFFC 0%, #A78BFA 100%); }
+  .ms-conv-avatar.av-mint    { background: linear-gradient(135deg, #B5EAD3 0%, #10B981 100%); }
+  .ms-conv-avatar.av-graphite{ background: linear-gradient(135deg, #D1D5DB 0%, #6B7280 100%); }
+  .ms-conv-avatar.is-group   { font-size: 13px; }
+
+  .ms-conv-body {
+    min-width: 0;
+    display: flex; flex-direction: column;
+    gap: 2px;
+  }
+  .ms-conv-line1 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+  .ms-conv-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ms-conv-pin {
+    font-size: 9px;
+    color: rgba(60, 60, 67, 0.4);
+    flex-shrink: 0;
+  }
+  .ms-conv-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .ms-conv-badge.b-expert   { background: rgba(167, 139, 250, 0.16); color: #7B5BD8; }
+  .ms-conv-badge.b-interne  { background: rgba(16, 185, 129, 0.14); color: #0B825B; }
+  .ms-conv-badge.b-externe  { background: rgba(251, 146, 60, 0.16); color: #C75A12; }
+
+  .ms-conv-preview {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ms-conv-time {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    align-self: start;
+    margin-top: 2px;
+  }
+
+  /* ============================================================
+     PANE 2 — Thread actif
+     ============================================================ */
+  .ms-pane-thread {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+    background: rgba(251, 250, 247, 0.72);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(40px) saturate(200%);
+    border: 0.5px solid rgba(255, 255, 255, 0.75);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.8);
+    position: sticky;
+    top: 100px;
+    overflow: hidden;
+  }
+
+  /* Thread header */
+  .ms-th-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 22px;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.4);
+    flex-shrink: 0;
+  }
+  .ms-th-head-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C7C9F9 0%, #6366F1 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .ms-th-head-body { flex: 1; min-width: 0; }
+  .ms-th-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ms-th-status {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 1px;
+  }
+  .ms-th-status .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #34C759;
+  }
+  .ms-th-info-btn {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 0.5px solid var(--border-subtle);
+    color: var(--text-primary);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .ms-th-info-btn:hover { background: #fff; }
+  .ms-th-info-btn svg { width: 14px; height: 14px; }
+
+  /* Thread body */
+  .ms-th-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 26px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ms-th-body::-webkit-scrollbar { width: 0; }
+
+  .ms-date-sep {
+    align-self: center;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(60, 60, 67, 0.4);
+    padding: 8px 0;
+  }
+
+  /* Bubble */
+  @keyframes cf-bubble-in {
+    from { transform: scale(0.7) translateY(8px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .ms-bubble {
+    max-width: 480px;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    animation: cf-bubble-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .ms-bubble.from-them {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.82);
+    border: 0.5px solid rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xs);
+    border-bottom-left-radius: 6px;
+  }
+  .ms-bubble.from-me {
+    align-self: flex-end;
+    background: var(--blue-cf);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 122, 255, 0.3);
+    border-bottom-right-radius: 6px;
+  }
+
+  /* Quick replies */
+  .ms-quick {
+    align-self: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+    margin-bottom: 6px;
+  }
+  .ms-quick-btn {
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: background 150ms ease, transform 100ms ease;
+  }
+  .ms-quick-btn:active { transform: scale(0.96); }
+  .ms-quick-btn.primary {
+    background: rgba(0, 122, 255, 0.12);
+    color: var(--blue-cf);
+    border: 0.5px solid rgba(0, 122, 255, 0.20);
+  }
+  .ms-quick-btn.primary:hover { background: rgba(0, 122, 255, 0.18); }
+  .ms-quick-btn.secondary {
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--text-primary);
+    border: 0.5px solid var(--border-subtle);
+  }
+  .ms-quick-btn.secondary:hover { background: #fff; }
+
+  /* Compositor */
+  .ms-compositor {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px 16px;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.4);
+    flex-shrink: 0;
+  }
+  .ms-comp-input {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 0.5px solid var(--border-subtle);
+    font-size: 14px;
+    color: var(--text-tertiary);
+    letter-spacing: -0.005em;
+  }
+  .ms-comp-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    border: 0.5px solid var(--border-subtle);
+    color: var(--text-primary);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .ms-comp-btn:hover { background: #fff; }
+  .ms-comp-btn.send {
+    background: var(--blue-cf);
+    color: #fff;
+    border-color: transparent;
+  }
+  .ms-comp-btn.send:hover { background: #0066D9; }
+  .ms-comp-btn svg { width: 15px; height: 15px; }
+</style>
+</head>
+<body data-screen-label="Messages">
+
+<!-- Wallpaper neutral -->
+<div class="wallpaper-neutral" aria-hidden="true"></div>
+
+<!-- Page header canonique -->
+<header class="page-header" id="pageHeader">
+  <div class="page-shell">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <a href="01-aujourd-hui-v3.html" class="breadcrumb-link">Aujourd'hui</a>
+          <span class="breadcrumb-separator">›</span>
+          <span>Messages</span>
+        </div>
+        <h1 class="header-h1">Messages</h1>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SVG sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="lc-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g></symbol>
+    <symbol id="lc-edit" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></g></symbol>
+    <symbol id="lc-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></g></symbol>
+    <symbol id="lc-plus" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></g></symbol>
+    <symbol id="lc-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></g></symbol>
+    <symbol id="lc-arrow-up" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></g></symbol>
+    <symbol id="lc-users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g></symbol>
+  </defs>
+</svg>
+
+<main class="page-shell">
+  <div class="ms-layout">
+
+    <!-- ============================================================
+         PANE 1 — Conversations
+         ============================================================ -->
+    <aside class="ms-pane-list" aria-label="Liste conversations">
+
+      <div class="ms-search-row">
+        <div class="ms-search">
+          <svg><use href="#lc-search"/></svg>
+          <span>Rechercher</span>
+        </div>
+        <button class="ms-compose-btn" aria-label="Nouvelle conversation">
+          <svg><use href="#lc-edit"/></svg>
+        </button>
+      </div>
+
+      <!-- ÉPINGLÉS -->
+      <h3 class="ms-section-h">Épinglés</h3>
+      <div class="ms-conv is-active">
+        <div class="ms-conv-avatar av-indigo">H</div>
+        <div class="ms-conv-body">
+          <div class="ms-conv-line1">
+            <span class="ms-conv-name">Hélène M.</span>
+            <span class="ms-conv-pin">📌</span>
+            <span class="ms-conv-badge b-expert">Expert IA</span>
+          </div>
+          <div class="ms-conv-preview">Propose-moi trois angles sur la capsule…</div>
+        </div>
+        <span class="ms-conv-time">14h12</span>
+      </div>
+
+      <!-- CONVERSATIONS -->
+      <h3 class="ms-section-h">Conversations</h3>
+      <div class="ms-conv">
+        <div class="ms-conv-avatar av-orange">A</div>
+        <div class="ms-conv-body">
+          <div class="ms-conv-line1">
+            <span class="ms-conv-name">Antoine · DA</span>
+            <span class="ms-conv-badge b-interne">Interne</span>
+          </div>
+          <div class="ms-conv-preview">J'ai recadré les visuels, regarde quand tu veux.</div>
+        </div>
+        <span class="ms-conv-time">12h48</span>
+      </div>
+      <div class="ms-conv">
+        <div class="ms-conv-avatar av-rose">É</div>
+        <div class="ms-conv-body">
+          <div class="ms-conv-line1">
+            <span class="ms-conv-name">Émilie · Stratégie</span>
+            <span class="ms-conv-badge b-interne">Interne</span>
+          </div>
+          <div class="ms-conv-preview">Brief Anecdote validé, je passe sur Manifeste.</div>
+        </div>
+        <span class="ms-conv-time">11h30</span>
+      </div>
+      <div class="ms-conv">
+        <div class="ms-conv-avatar av-mint">M</div>
+        <div class="ms-conv-body">
+          <div class="ms-conv-line1">
+            <span class="ms-conv-name">Mathilde · Marque</span>
+            <span class="ms-conv-badge b-interne">Interne</span>
+          </div>
+          <div class="ms-conv-preview">Le doc piliers est à jour pour le point de 16h.</div>
+        </div>
+        <span class="ms-conv-time">10h22</span>
+      </div>
+      <div class="ms-conv">
+        <div class="ms-conv-avatar av-blue">L</div>
+        <div class="ms-conv-body">
+          <div class="ms-conv-line1">
+            <span class="ms-conv-name">Laurent · Analyse</span>
+            <span class="ms-conv-badge b-interne">Interne</span>
+          </div>
+          <div class="ms-conv-preview">Lecture qualitative de la newsletter prête.</div>
+        </div>
+        <span class="ms-conv-time">Hier</span>
+      </div>
+      <div class="ms-conv">
+        <div class="ms-conv-avatar av-orange">S</div>
+        <div class="ms-conv-body">
+          <div class="ms-conv-line1">
+            <span class="ms-conv-name">Sophie · Studio externe</span>
+            <span class="ms-conv-badge b-externe">Externe</span>
+          </div>
+          <div class="ms-conv-preview">Devis shoot juin envoyé, tu confirmes la date ?</div>
+        </div>
+        <span class="ms-conv-time">15 mai</span>
+      </div>
+
+      <!-- GROUPES -->
+      <h3 class="ms-section-h">Groupes</h3>
+      <div class="ms-conv">
+        <div class="ms-conv-avatar av-graphite is-group">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        </div>
+        <div class="ms-conv-body">
+          <div class="ms-conv-line1">
+            <span class="ms-conv-name">Capsule SS25</span>
+          </div>
+          <div class="ms-conv-preview">Hélène, Albane, Antoine · 4 messages</div>
+        </div>
+        <span class="ms-conv-time">13 mai</span>
+      </div>
+      <div class="ms-conv">
+        <div class="ms-conv-avatar av-graphite is-group">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        </div>
+        <div class="ms-conv-body">
+          <div class="ms-conv-line1">
+            <span class="ms-conv-name">Équipe éditoriale</span>
+          </div>
+          <div class="ms-conv-preview">Hélène, Émilie, Mathilde · 2 messages</div>
+        </div>
+        <span class="ms-conv-time">12 mai</span>
+      </div>
+
+    </aside>
+
+    <!-- ============================================================
+         PANE 2 — Thread Hélène M.
+         ============================================================ -->
+    <section class="ms-pane-thread">
+
+      <!-- Header thread -->
+      <div class="ms-th-head">
+        <div class="ms-th-head-avatar">H</div>
+        <div class="ms-th-head-body">
+          <div class="ms-th-name">
+            Hélène M.
+            <span class="ms-conv-pin">📌</span>
+          </div>
+          <span class="ms-th-status">
+            <span class="dot"></span>
+            Disponible
+          </span>
+        </div>
+        <button class="ms-th-info-btn" aria-label="Informations">
+          <svg><use href="#lc-info"/></svg>
+        </button>
+      </div>
+
+      <!-- Body messages -->
+      <div class="ms-th-body">
+        <div class="ms-date-sep">Vendredi 17 mai</div>
+
+        <div class="ms-bubble from-them">
+          Bonjour Floriane. J'ai relu le brouillon de la série Anecdote — l'angle artisanat tient, mais il manque la voix du fondateur sur la deuxième publication.
+        </div>
+
+        <div class="ms-bubble from-me">
+          D'accord, je rappelle Antoine pour qu'il sorte la captation du 12 avril.
+        </div>
+
+        <div class="ms-bubble from-them">
+          Bon réflexe. Et pour la capsule SS25, dis-moi avant lundi si tu veux que je propose trois angles éditoriaux ou si tu préfères qu'on les construise ensemble en point.
+        </div>
+
+        <div class="ms-quick">
+          <button class="ms-quick-btn primary">Propose-moi trois angles</button>
+          <button class="ms-quick-btn secondary">Ok, je publie cette semaine</button>
+          <button class="ms-quick-btn secondary">Pas cette semaine</button>
+        </div>
+      </div>
+
+      <!-- Compositor -->
+      <div class="ms-compositor">
+        <button class="ms-comp-btn" aria-label="Joindre"><svg><use href="#lc-plus"/></svg></button>
+        <div class="ms-comp-input">Message à Hélène…</div>
+        <button class="ms-comp-btn" aria-label="Dictée"><svg><use href="#lc-mic"/></svg></button>
+        <button class="ms-comp-btn send" aria-label="Envoyer"><svg><use href="#lc-arrow-up"/></svg></button>
+      </div>
+
+    </section>
+
+  </div>
+</main>
+
+<a class="index-button" href="index.html">↩ Index mockups</a>
+
+<script>
+  (function() {
+    const header = document.getElementById('pageHeader');
+    if (!header) return;
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 60);
+    }, { passive: true });
+  })();
+</script>
+
+</body>
+</html>
