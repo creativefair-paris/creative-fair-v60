@@ -181,14 +181,16 @@ export async function runReviewCheck(
     payload = fallbackPayload(postText, visualRef)
   }
 
-  // Persistance.
+  // Persistance — Sprint 41-secu-compte (A) : filtre tenant_id obligatoire.
   const admin = createAdmin()
   const adminReviews = admin as unknown as {
     from: (t: 'reviews') => {
       update: (row: Record<string, unknown>) => {
-        eq: (col: string, val: string) => Promise<{
-          error: { message: string } | null
-        }>
+        eq: (col: string, val: string) => {
+          eq: (col: string, val: string) => Promise<{
+            error: { message: string } | null
+          }>
+        }
       }
     }
   }
@@ -201,6 +203,7 @@ export async function runReviewCheck(
       state: 'COMPLETED',
     })
     .eq('id', review.id)
+    .eq('tenant_id', tenantId)
   if (updErr) {
     return { ok: false, reason: `Persist failed: ${updErr.message}` }
   }

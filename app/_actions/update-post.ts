@@ -1,9 +1,10 @@
 // Sprint 37.E (F58) — Server action : update d'un post éditable.
+// Sprint 41-secu-compte (A) — Patch P0 : ajout filtre tenant_id sur UPDATE.
 
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { createAdmin } from '@/lib/supabase/admin'
+import { requireTenantContext } from '@/lib/supabase/tenant-guard'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type UpdatePostInput = {
@@ -18,11 +19,14 @@ export type UpdatePostInput = {
 export type UpdatePostResult = { ok: true } | { ok: false; reason: string }
 
 export async function updatePostFields(input: UpdatePostInput): Promise<UpdatePostResult> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, reason: 'Non authentifié' }
+  // Sprint 41-secu-compte (A) : tenant guard obligatoire.
+  let tenantId: string
+  try {
+    const ctx = await requireTenantContext()
+    tenantId = ctx.tenantId
+  } catch {
+    return { ok: false, reason: 'Non authentifié' }
+  }
 
   const updates: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
@@ -43,7 +47,11 @@ export async function updatePostFields(input: UpdatePostInput): Promise<UpdatePo
   }
 
   const admin = createAdmin() as unknown as SupabaseClient
-  const { error } = await admin.from('posts').update(updates).eq('id', input.postId)
+  const { error } = await admin
+    .from('posts')
+    .update(updates)
+    .eq('id', input.postId)
+    .eq('tenant_id', tenantId)
   if (error) return { ok: false, reason: error.message }
   return { ok: true }
 }

@@ -66,7 +66,9 @@ export async function catchUpOverduePosts(): Promise<Result> {
         }
       }
       update: (row: Record<string, unknown>) => {
-        eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
+        eq: (col: string, val: string) => {
+          eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
+        }
       }
     }
   }
@@ -102,6 +104,7 @@ export async function catchUpOverduePosts(): Promise<Result> {
     current.setDate(current.getDate() + daysToAdd)
     const newDatePrevue = current.toISOString().slice(0, 10)
 
+    // Sprint 41-secu-compte (A) : filtre tenant_id obligatoire sur UPDATE.
     const { error } = await adminTyped
       .from('posts')
       .update({
@@ -110,6 +113,7 @@ export async function catchUpOverduePosts(): Promise<Result> {
         updated_at: now.toISOString(),
       })
       .eq('id', post.id)
+      .eq('tenant_id', tenantId)
 
     if (!error) reportedIds.push(post.id)
 

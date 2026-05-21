@@ -96,19 +96,29 @@ export async function generateStrategieEventsIntention(
   programmeId: string,
 ): Promise<StrategieEventsResult> {
   const t0 = Date.now()
+  // Sprint 41-secu-compte (A) : tenant context obligatoire.
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, reason: 'Non authentifié' }
 
+  const { data: rawProfile } = await supabase
+    .from('profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .maybeSingle()
+  const userTenantId = (rawProfile as { tenant_id?: string | null } | null)?.tenant_id ?? null
+  if (!userTenantId) return { ok: false, reason: 'Tenant non provisionné' }
+
   const admin = createAdmin() as unknown as SupabaseClient
 
-  // Charge le programme + brand + business_calendar.
+  // Charge le programme + brand + business_calendar (filtre tenant_id).
   const { data: rawProg } = await admin
     .from('programmes')
     .select('id, tenant_id, brand_id, date_debut, date_fin, context_generation')
     .eq('id', programmeId)
+    .eq('tenant_id', userTenantId)
     .maybeSingle()
   const programme = rawProg as {
     id: string
@@ -124,6 +134,7 @@ export async function generateStrategieEventsIntention(
     .from('brands')
     .select('name, piliers_narratifs, business_calendar')
     .eq('id', programme.brand_id)
+    .eq('tenant_id', userTenantId)
     .maybeSingle()
   const brand = rawBrand as {
     name: string | null

@@ -149,6 +149,7 @@ export async function generatePlanFromForm(
   })
 
   // 4. Marque la session COMPLETED (idempotent)
+  // Sprint 41-secu-compte (A) : filtre tenant_id obligatoire.
   await admin
     .from('programme_creation_sessions')
     .update({
@@ -156,6 +157,7 @@ export async function generatePlanFromForm(
       completed_at: new Date().toISOString(),
     })
     .eq('id', sessionId)
+    .eq('tenant_id', tenantId)
 
   return result
 }

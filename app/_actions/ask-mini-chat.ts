@@ -80,11 +80,20 @@ export async function askMiniChat(
 ): Promise<AskMiniChatResult> {
   if (!question.trim()) return { ok: false, reason: 'Question vide' }
 
+  // Sprint 41-secu-compte (A) : tenant context obligatoire.
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, reason: 'Non authentifié' }
+
+  const { data: rawProfile } = await supabase
+    .from('profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .maybeSingle()
+  const userTenantId = (rawProfile as { tenant_id?: string | null } | null)?.tenant_id ?? null
+  if (!userTenantId) return { ok: false, reason: 'Tenant non provisionné' }
 
   const admin = createAdmin() as unknown as SupabaseClient
 
@@ -92,6 +101,7 @@ export async function askMiniChat(
     .from('posts')
     .select('format, structure_type, pilier_nom, objectif_editorial, angle, date_prevue, tenant_id, brand_id')
     .eq('id', postId)
+    .eq('tenant_id', userTenantId)
     .maybeSingle()
   const post = rawPost as {
     format: string | null

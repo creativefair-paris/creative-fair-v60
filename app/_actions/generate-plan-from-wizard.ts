@@ -38,23 +38,33 @@ export type GeneratePlanResult =
 export async function generatePlanFromWizardSession(
   sessionId: string,
 ): Promise<GeneratePlanResult> {
+  // Sprint 41-secu-compte (A) : tenant context obligatoire.
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, reason: 'Non authentifié' }
 
+  const { data: rawProfile } = await supabase
+    .from('profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .maybeSingle()
+  const userTenantId = (rawProfile as { tenant_id?: string | null } | null)?.tenant_id ?? null
+  if (!userTenantId) return { ok: false, reason: 'Tenant non provisionné' }
+
   const admin = createAdmin() as unknown as SupabaseClient
 
-  // 1. Charge la session
+  // 1. Charge la session (filtres tenant_id + user_id obligatoires)
   const { data: rawSession } = await admin
     .from('programme_creation_sessions')
     .select('id, tenant_id, user_id, responses, state')
     .eq('id', sessionId)
+    .eq('tenant_id', userTenantId)
+    .eq('user_id', user.id)
     .maybeSingle()
   const session = rawSession as SessionRow | null
   if (!session) return { ok: false, reason: 'Session introuvable' }
-  if (session.user_id !== user.id) return { ok: false, reason: 'Session non autorisée' }
   if (session.state === 'EXPIRED' || session.state === 'ABANDONED') {
     return { ok: false, reason: `Session ${session.state}` }
   }
@@ -89,12 +99,12 @@ export async function generatePlanFromWizardSession(
     : []
 
   // 3. Profile.publication_frequency
-  const { data: rawProfile } = await admin
+  const { data: rawProfileFreq } = await admin
     .from('profiles')
     .select('publication_frequency')
     .eq('id', user.id)
     .maybeSingle()
-  const publicationFrequency = (rawProfile as ProfileRow | null)?.publication_frequency ?? null
+  const publicationFrequency = (rawProfileFreq as ProfileRow | null)?.publication_frequency ?? null
 
   // 4. Appel pipeline
   return generateFromWizardSession({

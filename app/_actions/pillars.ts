@@ -1,18 +1,22 @@
 // Sprint 37.K (F89) — Server actions CRUD piliers persistés.
+// Sprint 41-secu-compte (A) — Patch P0 multi-tenant : ajout filtre
+// .eq('tenant_id', tenantId) sur tous les createAdmin (UPDATE + ARCHIVE).
 //
 // Pipeline :
 //   listPillars(brandId) → PillarRow[]
 //   createPillar(input) → PillarRow inséré (position auto-calculée)
-//   updatePillar(id, updates) → PillarRow modifié
-//   archivePillar(id) → soft delete (archived_at = now())
+//   updatePillar(id, updates) → PillarRow modifié (filtré tenant_id)
+//   archivePillar(id) → soft delete (filtré tenant_id)
 //
 // RLS appliqué côté DB via public.user_tenant_id() (migration 025).
+// Pattern canonique : requireTenantContext() + admin.eq('tenant_id', tenantId).
 
 'use server'
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdmin } from '@/lib/supabase/admin'
+import { requireTenantContext } from '@/lib/supabase/tenant-guard'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PillarRow } from '@/lib/pillars/types'
 import { PILLARS_HARD_CAP } from '@/lib/pillars/types'
@@ -139,11 +143,14 @@ export async function updatePillar(
   id: string,
   updates: Partial<Pick<PillarRow, 'title' | 'description' | 'color_hex' | 'position'>>,
 ): Promise<UpdatePillarResult> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, reason: 'Non authentifié' }
+  // Sprint 41-secu-compte (A) : check tenant_id obligatoire avant UPDATE.
+  let tenantId: string
+  try {
+    const ctx = await requireTenantContext()
+    tenantId = ctx.tenantId
+  } catch {
+    return { ok: false, reason: 'Non authentifié' }
+  }
 
   // Validation titre si modifié.
   if (typeof updates.title === 'string') {
@@ -166,6 +173,7 @@ export async function updatePillar(
     .from('pillars')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .select(
       'id, tenant_id, brand_id, title, description, color_hex, position, questions_answers, generation_model, archived_at, created_at, updated_at',
     )
@@ -184,11 +192,14 @@ export type ArchivePillarResult =
   | { ok: false; reason: string }
 
 export async function archivePillar(id: string): Promise<ArchivePillarResult> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, reason: 'Non authentifié' }
+  // Sprint 41-secu-compte (A) : check tenant_id obligatoire avant ARCHIVE.
+  let tenantId: string
+  try {
+    const ctx = await requireTenantContext()
+    tenantId = ctx.tenantId
+  } catch {
+    return { ok: false, reason: 'Non authentifié' }
+  }
 
   const admin = createAdmin() as unknown as SupabaseClient
   const { error } = await admin
@@ -198,6 +209,7 @@ export async function archivePillar(id: string): Promise<ArchivePillarResult> {
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
+    .eq('tenant_id', tenantId)
 
   if (error) {
     console.error('[pillars] archive_failed', { id, message: error.message })
