@@ -1899,3 +1899,241 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+
+/* ============================================================
+   Sprint 43-stable — Tokens V2.0 + classes utilitaires
+   Doctrine 00-CONCEPT.md §11 + 01-ARCHITECTURE.md §3
+   Référence HTML : docs/design-mockups/00-tokens-preview.html
+   ============================================================ */
+
+:root {
+  /* Palette V2.0 — selon brief §4.2 */
+  --cream: #FBFAF7;
+  --blue-cf: #007AFF;
+  --lilac: #A78BFA;
+  --indigo: #6366F1;
+  --orange: #FB923C;
+  --rose: #F472B6;
+  --mint: #10B981;
+  --red: #FF3B30;
+  --text-primary: #1C1C1E;
+  --text-secondary: #737373;
+  --text-tertiary: rgba(60, 60, 67, 0.45);
+
+  /* Bordures */
+  --border-faint: rgba(0, 0, 0, 0.06);
+  --border-soft: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.12);
+
+  /* Radius supplémentaires */
+  --r-pill: 999px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-2xl: 24px;
+
+  /* Shadow tokens HTML mockups */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+  --shadow-glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Wallpaper neutre crème — doctrine §3.4 */
+.wallpaper-neutral {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse at top left,
+    rgba(167, 139, 250, 0.04),
+    transparent 50%
+  ), radial-gradient(
+    ellipse at bottom right,
+    rgba(0, 122, 255, 0.03),
+    transparent 50%
+  ), var(--cream);
+}
+
+/* Page shell — container max-width centré */
+.page-shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+  position: relative;
+  z-index: 1;
+}
+.page-shell--narrow {
+  max-width: 1080px;
+}
+
+/* Page header sticky doctrine §3.3 */
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 28px 32px 20px;
+  background: rgba(251, 250, 247, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--border-faint);
+  transition: padding var(--duration-medium) var(--ease-out-quart);
+}
+.page-header.is-scrolled {
+  padding: 14px 32px 12px;
+}
+.page-header .breadcrumb {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-header .breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 200ms;
+}
+.page-header .breadcrumb a:hover {
+  color: var(--text-primary);
+}
+.page-header .header-h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.page-header .header-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Liquid Glass — 3 niveaux z1/z2/z3 (10-SACRED.md design) */
+.glass-z1 {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 0.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--r-lg);
+}
+.glass-z2 {
+  background: rgba(251, 250, 247, 0.72);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 0.5px solid rgba(255, 255, 255, 0.75);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-md), var(--shadow-glass-inset);
+}
+.glass-z3 {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-lg), var(--shadow-glass-inset);
+}
+
+/* Sub-sidebar 260px — doctrine §3.2 (Bibliothèque, Calendrier, Rappels, Compte) */
+.sub-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 0.5px solid rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 14px 12px;
+}
+.sub-sidebar__group {
+  margin-bottom: 16px;
+}
+.sub-sidebar__group:last-child {
+  margin-bottom: 0;
+}
+.sub-sidebar__eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(60, 60, 67, 0.45);
+  padding: 4px 8px;
+  margin-bottom: 4px;
+}
+.sub-sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background 200ms;
+}
+.sub-sidebar__item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.sub-sidebar__item.is-active {
+  background: rgba(0, 122, 255, 0.08);
+  color: var(--blue-cf);
+  font-weight: 500;
+}
+
+/* Layout page-with-sidebar : sub-sidebar à gauche + content à droite */
+.page-with-sidebar {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .page-with-sidebar {
+    grid-template-columns: 1fr;
+  }
+  .sub-sidebar {
+    width: 100%;
+    position: static;
+  }
+}
+
+/* Empty state simple — pour templates temporaires §7.2 */
+.empty-state {
+  padding: 80px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.55;
+}
+.empty-state__title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+}
+
+/* Carte de pillar V2.0 */
+.pillar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.6);
+  border: 0.5px solid var(--border-faint);
+  color: var(--text-primary);
+}
+.pillar-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
