@@ -13,7 +13,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 // Sprint 40 Phase 2B — import WizardProgressBar retiré (Bloc 3 Conseiller V1 dégagé).
 // Progression simple "N / N" en header (ligne 188) suffit pour le brand onboarding V1.
-import { ExitConfirmDialog } from '@/components/conseiller/ExitConfirmDialog'
+// Sprint 40 Phase 2B — ExitConfirmDialog retiré (Bloc 4 Conseiller V1 dégagé).
+// Le bouton de fermeture déclenche directement onClose ; UX confirmable
+// Sprint 43+ via un dialog generique de la nouvelle architecture.
 import {
   updateBrandOnboardingStep,
   completeBrandOnboarding,
@@ -243,16 +245,9 @@ export function BrandOnboardingSheet({ session: initial, onClose }: Props) {
         </div>
       </main>
 
-      <ExitConfirmDialog
-        open={showExitDialog}
-        stepsAnswered={stepsAnswered}
-        totalSteps={BRAND_ONBOARDING_TOTAL_STEPS}
-        onResumeLater={() => {
-          setShowExitDialog(false)
-          onClose()
-        }}
-        onContinue={() => setShowExitDialog(false)}
-      />
+      {/* Sprint 40 Phase 2B — ExitConfirmDialog retire (Bloc 4). Si showExitDialog
+          true, on ferme directement la sheet (comportement temporaire). */}
+      {showExitDialog ? (() => { setShowExitDialog(false); onClose(); return null })() : null}
 
       <style>{`
         @keyframes cfs-wizard-in {
