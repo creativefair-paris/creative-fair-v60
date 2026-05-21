@@ -7,7 +7,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { RetombeesEditor } from '@/components/programme/RetombeesEditor'
+// Sprint 40 Phase 2B — import RetombeesEditor retiré (Bloc 13 :
+// Retombées V1 = vanity metrics hors V1 doctrine §8).
 
 export const dynamic = 'force-dynamic'
 
@@ -141,11 +142,8 @@ export default async function PostDetailPage({ params }: PageProps) {
             </p>
           </article>
 
-          {/* Sprint 37 Lot 7 — Retombées visibles uniquement si statut='publie'
-              (doc 09 §8). Sur les autres statuts, la section reste invisible. */}
-          {isPublished ? (
-            <RetombeesEditor postId={post.id} initialValue={post.retombees} />
-          ) : null}
+          {/* Sprint 40 Phase 2B — Section Retombées retirée (Bloc 13 :
+              vanity metrics hors V1 doctrine §8). */}
         </section>
       </div>
     </main>
