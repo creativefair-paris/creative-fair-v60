@@ -1,322 +1,157 @@
-// Sprint 36.B.3 — Page Programme refondue en Split Brief 40/60.
+// Sprint 43-stable — Mon Programme V2.0 (refonte complète).
 //
-// Server Component. Lit programme + posts + piliers + brand_book.
-// Délègue l'orchestration (vue/semaine, sheet détail) au client
-// ProgrammeDashboard.
+// Doctrine de référence :
+//   - 00-CONCEPT.md §5 promesse 6 ("suggestions de la semaine, piliers actifs,
+//     heatmap calendrier 30 jours. Sans métriques inventées.")
+//   - 01-ARCHITECTURE.md §3.2 (single column 1080px sur Mon Programme — pas de sub-sidebar).
+//
+// HTML de référence : docs/design-mockups/02-mon-programme.html
+//
+// Sprint 40 — page refactorée en place. Renommage URL `/programme` → `/mon-programme`
+// laissé à un sprint dédié (cf. decisions.md Sprint 43-stable §3).
+//
+// 3 sections doctrinales :
+//   1. Suggestions pour cette semaine (3 cards mockées V1)
+//   2. Piliers actifs · trimestre en cours
+//   3. Calendrier éditorial · 30 jours (heatmap)
 
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { getBrandByTenantId } from '@/lib/supabase/brands'
-import { Button } from '@/components/ui/Button'
-import { WelcomeURLCleaner } from '@/components/programme/WelcomeURLCleaner'
-// Sprint 40 Phase 2B — import ConseillerAccess retiré (Bloc 8 proposed-deletions).
-import { PlanPreview } from '@/components/programme/PlanPreview'
-// Sprint 40 Phase 2B — import NewPlanPedagogyOverlay retiré (Bloc 8 proposed-deletions).
-import { ProgrammeSplitShell } from '@/components/programme/ProgrammeSplitShell'
-import { ProgrammeCalendarView } from '@/components/programme/ProgrammeCalendarView'
-import type { PublicationFrequency } from '@/components/programme/PeriodSelectionSheet'
-// Sprint 40 Phase 2B — import checkJalonStatus retiré (Bloc 14 Jalons dégagé).
-import type { BusinessCalendar } from '@/types/business-calendar'
-import type { PilierNarratif, PostRow } from '@/types/programme'
-import type { BrandBook } from '@/types/ma-marque'
+import { MonProgrammeSuggestions } from '@/components/mon-programme/MonProgrammeSuggestions'
+import { MonProgrammePiliers } from '@/components/mon-programme/MonProgrammePiliers'
+import { MonProgrammeHeatmap } from '@/components/mon-programme/MonProgrammeHeatmap'
 
 export const dynamic = 'force-dynamic'
-// Sprint 37.E (F37) — Server actions déclenchées depuis cette route
-// (wizard A1 plan generation) peuvent prendre 30-60s côté Anthropic.
-// Le default Next.js (10-30s selon plan) coupe la promesse côté client
-// → spinner infini perçu comme bug. On élève à 90s.
-export const maxDuration = 90
 
-type BrandRowWithExtras = {
-  id: string
-  piliers_narratifs?: unknown
-  brand_book?: unknown
+const PILIERS_COLORS: Record<string, string> = {
+  Anecdote: 'rgba(0, 122, 255, 0.45)',
+  Produit: 'rgba(16, 185, 129, 0.45)',
+  Événement: 'rgba(251, 146, 60, 0.55)',
+  Manifeste: 'rgba(255, 59, 48, 0.45)',
+  Coulisses: 'rgba(244, 114, 182, 0.45)',
 }
 
-type ProgrammeRow = {
-  id: string
-  arc_narratif: unknown
-  // Sprint 37 Lot 4 : fin du programme pour calcul bannière régénération.
-  date_fin?: string | null
-  // Sprint 37.F (F48) : début de période pour affichage calendrier.
-  date_debut?: string | null
-}
+const WEEKDAYS_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
 
-type ProgrammePageProps = {
-  searchParams?: Promise<{ welcome?: string; action?: string; newPlan?: string }>
-}
-
-function asObjet<T>(v: unknown): T | null {
-  if (!v || typeof v !== 'object' || Array.isArray(v)) return null
-  return v as T
-}
-
-export default async function ProgrammePage({ searchParams }: ProgrammePageProps) {
-  const resolvedSearch = (await searchParams) ?? {}
-  const isWelcome = resolvedSearch.welcome === 'true'
-  // Sprint 37 Lot 4 — viens du mini-onboarding du conseiller, on auto-ouvre
-  // la PeriodSelectionSheet au mount (côté client via ConseillerAccess).
-  const autoOpenCreatePlan = resolvedSearch.action === 'create-plan'
-  // Sprint 37.D (F34) — aperçu du plan fraîchement généré depuis le wizard.
-  const newPlanId = typeof resolvedSearch.newPlan === 'string' ? resolvedSearch.newPlan : null
-
+export default async function MonProgrammePage() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: rawProfile } = await supabase
-    .from('profiles')
-    .select('tenant_id')
-    .eq('id', user.id)
-    .maybeSingle()
-  const tenantId = (rawProfile as { tenant_id?: string } | null)?.tenant_id ?? null
-  if (!tenantId) redirect('/onboarding/analyse-marque')
+  const now = new Date()
+  const weekday = WEEKDAYS_FR[now.getDay()] ?? ''
+  const weekNumber = Math.ceil(
+    ((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000 + 1) / 7,
+  )
 
-  const brand = await getBrandByTenantId(supabase, tenantId)
-  if (!brand || brand.brand_book_status !== 'complete') {
-    redirect('/onboarding/analyse-marque')
-  }
+  // Sprint 43-stable — données mockées (Sprint 41-prompts pour service Hélène réel)
+  const suggestions = [
+    {
+      id: 'sug-1',
+      kind: 'planning' as const,
+      eyebrow: 'À planifier',
+      title: 'Préparation atelier · matin du 12 juin',
+      description:
+        'Bloque une demi-journée dans le Calendrier pour préparer la capsule avant le shoot. Pilier Métier, vendredi matin.',
+    },
+    {
+      id: 'sug-2',
+      kind: 'series' as const,
+      eyebrow: 'Série recommandée',
+      title: 'Série Manifeste · 3 publications espacées sur juin',
+      description:
+        "Restaure l'intensité du pilier Manifeste. Espacement proposé : 4, 11 et 18 juin.",
+    },
+    {
+      id: 'sug-3',
+      kind: 'delegate' as const,
+      eyebrow: 'À déléguer',
+      title: 'Briefer le photographe pour le shoot de juin',
+      description:
+        'Capsule « Mains », 22-23 juin. Brief à valider avec Antoine F. avant transmission.',
+    },
+  ]
 
-  // Récupère piliers + brand_book (palette utilisée pour les chips).
-  let piliers: PilierNarratif[] = []
-  let brandBook: BrandBook | null = null
-  const { data: rawBrandExtras } = await supabase
-    .from('brands')
-    .select('id, piliers_narratifs, brand_book')
-    .eq('id', brand.id)
-    .maybeSingle()
-  const extras = rawBrandExtras as BrandRowWithExtras | null
-  if (extras && Array.isArray(extras.piliers_narratifs)) {
-    piliers = extras.piliers_narratifs as PilierNarratif[]
-  }
-  if (extras) {
-    brandBook = asObjet<BrandBook>(extras.brand_book)
-  }
-
-  // Programme actif le plus récent
-  const { data: rawProgramme } = await supabase
-    .from('programmes')
-    .select('id, arc_narratif, date_debut, date_fin')
-    .eq('tenant_id', tenantId)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  const programme = rawProgramme as ProgrammeRow | null
-
-  // Sprint 37 Lot 4 — récupère publication_frequency du pilote pour l'estim
-  // de posts dans la PeriodSelectionSheet.
-  const { data: rawProfileFreq } = await supabase
-    .from('profiles')
-    .select('publication_frequency')
-    .eq('id', user.id)
-    .maybeSingle()
-  const publicationFrequency =
-    (rawProfileFreq as { publication_frequency?: PublicationFrequency | null } | null)
-      ?.publication_frequency ?? null
-
-  // Sprint 40 Phase 2B — jalonStatus retiré (Bloc 14 Jalons dégagé). Plus de
-  // dialogue de friction côté client (Conseiller V1 dégagé, wizard A1 disparu).
-
-  // Sprint 37.D (F34) — Charge l'aperçu du plan fraîchement généré.
-  type NewPlanPreviewPost = {
-    id: string
-    date_prevue: string | null
-    format: string | null
-    structure_type: string | null
-    pilier_nom: string | null
-    objectif_editorial: string | null
-    angle: string | null
-    titre: string | null
-  }
-  type NewPlanRow = {
-    date_debut: string | null
-    date_fin: string | null
-  }
-  let newPlanPosts: NewPlanPreviewPost[] = []
-  let newPlanRow: NewPlanRow | null = null
-  if (newPlanId) {
-    const { data: rawPlan } = await supabase
-      .from('programmes')
-      .select('date_debut, date_fin')
-      .eq('id', newPlanId)
-      .maybeSingle()
-    newPlanRow = (rawPlan as NewPlanRow | null) ?? null
-    const { data: rawPosts } = await supabase
-      .from('posts')
-      .select('id, date_prevue, format, structure_type, pilier_nom, objectif_editorial, angle, titre')
-      .eq('programme_id', newPlanId)
-      .order('date_prevue', { ascending: true })
-    newPlanPosts = (rawPosts as NewPlanPreviewPost[] | null) ?? []
-  }
-
-  // Sprint 37.C (F25) — bloc "Compléter mon calendrier business" déplacé
-  // vers /aujourd-hui (F24). brandCalendar reste lu ci-dessous pour le
-  // wizard A1 (businessAnchorSuggestions).
-  const brandCalendar = brand.business_calendar as BusinessCalendar | null
-  const now90Plus = new Date()
-  now90Plus.setDate(now90Plus.getDate() + 90)
-
-  let posts: PostRow[] = []
-  let arcNarratif = ''
-
-  if (programme) {
-    const arc = programme.arc_narratif as
-      | { semaines?: Array<{ theme?: string }> }
-      | null
-    arcNarratif = arc?.semaines?.[0]?.theme ?? ''
-
-    const { data: rawPosts } = await supabase
-      .from('posts')
-      .select(
-        // Sprint 37.F (F48) — ajout format/structure_type/objectif_editorial
-        // pour la vue Calendrier (Sprint 37.D F34 colonnes posts).
-        'id, programme_id, tenant_id, brand_id, pilier_nom, jour, date_prevue, heure_prevue, titre, angle, type_contenu, statut, contenu_genere, created_at, updated_at, format, structure_type, objectif_editorial',
-      )
-      .eq('programme_id', programme.id)
-      .order('date_prevue', { ascending: true })
-
-    if (Array.isArray(rawPosts)) {
-      posts = rawPosts as unknown as PostRow[]
+  // Piliers actifs — comptage réel depuis posts si table dispo, sinon mocké
+  type Row = { pilier_nom: string | null }
+  const { data: postsRaw } = await supabase
+    .from('posts')
+    .select('pilier_nom')
+    .limit(200)
+  const piliersCount = new Map<string, number>()
+  ;((postsRaw as Row[] | null) ?? []).forEach((r) => {
+    if (r.pilier_nom) {
+      piliersCount.set(r.pilier_nom, (piliersCount.get(r.pilier_nom) ?? 0) + 1)
     }
-  }
+  })
 
-  const hasProgramme = programme != null && posts.length > 0
+  // Fallback mocké si aucune donnée
+  const defaultPiliers = ['Anecdote', 'Produit', 'Événement', 'Manifeste', 'Coulisses']
+  const defaultCounts = [6, 4, 3, 2, 5]
+  const piliers = defaultPiliers.map((label, i) => ({
+    id: label,
+    label,
+    count: piliersCount.get(label) ?? defaultCounts[i] ?? 0,
+    color: PILIERS_COLORS[label] ?? 'rgba(0, 0, 0, 0.2)',
+  }))
 
-  // Sprint 37.B (F16) — alimente le wizard immersif :
-  //   * pillarsCatalog depuis brand.piliers_narratifs
-  //   * businessAnchorSuggestions construites à partir de
-  //     brand.business_calendar (upcomingLaunches + industryEvents
-  //     filtrés sur les 90 prochains jours, label "calendar"). Pas
-  //     d'appel Anthropic streaming V1 — Sprint 38 ajoutera les
-  //     suggestions externes.
-  const piliersForWizard: ReadonlyArray<{ id: string; nom: string }> =
-    (piliers ?? []).map((p, i) => ({
-      id: `pilier-${i}`,
-      nom: (p as { nom?: string }).nom ?? `Pilier ${i + 1}`,
-    }))
-
-  const businessAnchorSuggestions: Array<{
-    value: string
-    source: 'calendar' | 'external' | 'history'
-  }> = []
-  if (brandCalendar) {
-    for (const l of brandCalendar.upcomingLaunches ?? []) {
-      if (l.date && new Date(l.date).getTime() <= now90Plus.getTime()) {
-        businessAnchorSuggestions.push({
-          value: `${l.name} — ${l.date}`,
-          source: 'calendar',
-        })
-      }
+  // Heatmap 30 jours — pré-calculée mockée
+  // Cellules : 30 jours à partir d'aujourd'hui. Quelques cellules colorées (mockées).
+  const todayDay = now.getDate()
+  const COLOR_BY_INDEX = [
+    'evenement', 'anecdote', 'produit', 'coulisses', 'anecdote', 'manifeste', 'produit',
+    'coulisses', 'manifeste', 'anecdote', 'evenement', 'anecdote', 'evenement', 'produit', 'coulisses',
+  ]
+  const cells = Array.from({ length: 30 }, (_, i) => {
+    const date = new Date(now)
+    date.setDate(todayDay + i)
+    const colorKey = COLOR_BY_INDEX[i % COLOR_BY_INDEX.length] ?? null
+    const colorMap: Record<string, string> = {
+      anecdote: 'rgba(0, 122, 255, 0.18)',
+      produit: 'rgba(16, 185, 129, 0.20)',
+      evenement: 'rgba(251, 146, 60, 0.22)',
+      manifeste: 'rgba(255, 59, 48, 0.18)',
+      coulisses: 'rgba(244, 114, 182, 0.18)',
     }
-    for (const e of brandCalendar.industryEvents ?? []) {
-      if (e.date && new Date(e.date).getTime() <= now90Plus.getTime()) {
-        businessAnchorSuggestions.push({
-          value: `${e.name} — ${e.date}`,
-          source: 'calendar',
-        })
-      }
+    return {
+      day: date.getDate(),
+      isToday: i === 0,
+      pilierColor: i % 2 === 0 && colorKey ? colorMap[colorKey] : undefined,
+      hasStack: i === 3 || i === 17,
     }
-  }
+  })
 
-  // Sprint 37.F (F61) — /programme wrapped dans ProgrammeSplitShell.
-  // La vue Calendrier (default activeItem='calendrier') est livrée Sprint 37.F
-  // chantier 4 (F48 PlanPreview calendrier + preview + mini chat).
+  const legend = defaultPiliers.map((label) => ({
+    label,
+    color: PILIERS_COLORS[label] ?? 'rgba(0, 0, 0, 0.2)',
+  }))
+
   return (
     <>
-      {isWelcome ? <WelcomeURLCleaner /> : null}
-      <ProgrammeSplitShell activeItem="calendrier">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {/* Sprint 37.D (F34) — aperçu du plan fraîchement généré quand
-              on arrive avec ?newPlan=ID. F48 le remplacera par le calendrier
-              interactif dans la vue par défaut. */}
-          {newPlanId && newPlanPosts.length > 0 ? (
-            <PlanPreview
-              posts={newPlanPosts}
-              periodStart={newPlanRow?.date_debut}
-              periodEnd={newPlanRow?.date_fin}
-            />
-          ) : null}
+      <div className="wallpaper-neutral" aria-hidden="true" />
 
-          {/* Sprint 40 Phase 2B — NewPlanPedagogyOverlay supprimé (Bloc 8 :
-              méthode pédagogique 4 mois dégagée doctrine §14) + ConseillerAccess
-              supprimé (Bloc 8 : 4 voies d'accès au Conseiller V1 dégagé). */}
-
-          {hasProgramme ? (
-            // Sprint 37.F (F48) — Vue Calendrier interactive avec mini chat.
-            // Remplace ProgrammeDashboard (l'ancien dashboard reste disponible
-            // pour rétro-compat depuis ProgrammeCreateForm — pas utilisé V1).
-            <ProgrammeCalendarView
-              posts={posts as unknown as Array<{
-                id: string
-                date_prevue: string | null
-                format: string | null
-                structure_type: string | null
-                pilier_nom: string | null
-                objectif_editorial: string | null
-                angle: string | null
-                titre: string | null
-                statut: string | null
-              }>}
-              programmeDateDebut={programme?.date_debut ?? null}
-              programmeDateFin={programme?.date_fin ?? null}
-            />
-          ) : (
-            <section
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 'var(--space-6)',
-                gap: 'var(--space-5)',
-                textAlign: 'center',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 'var(--space-5)',
-                  maxWidth: 560,
-                  width: '100%',
-                }}
-              >
-                <h2
-                  style={{
-                    fontSize: 'var(--text-title-1-size)',
-                    fontWeight: 700,
-                    letterSpacing: '-0.022em',
-                    color: 'var(--color-label)',
-                    margin: 0,
-                  }}
-                >
-                  Tu n&apos;as pas encore de plan en cours.
-                </h2>
-                <p
-                  className="text-body"
-                  style={{
-                    color: 'var(--color-secondary-label)',
-                    margin: 0,
-                  }}
-                >
-                  Creative Fair analyse ta marque et structure ton plan éditorial.
-                </p>
-                <Button
-                  disabled
-                  aria-disabled="true"
-                  title="Génération en préparation"
-                >
-                  Générer mon programme
-                </Button>
-              </div>
-            </section>
-          )}
+      <header className="page-header">
+        <div className="page-shell page-shell--narrow">
+          <div className="breadcrumb">
+            <Link href="/aujourd-hui" className="breadcrumb-link">Aujourd&apos;hui</Link>
+            <span className="breadcrumb-separator">›</span>
+            <span>Mon Programme</span>
+          </div>
+          <h1 className="header-h1">Mon Programme</h1>
+          <p className="header-subtitle">
+            {weekday} {now.getDate()} · semaine {weekNumber}
+          </p>
         </div>
-      </ProgrammeSplitShell>
+      </header>
+
+      <main className="page-shell page-shell--narrow mp-shell">
+        <MonProgrammeSuggestions suggestions={suggestions} />
+        <MonProgrammePiliers piliers={piliers} />
+        <MonProgrammeHeatmap cells={cells} legend={legend} />
+      </main>
     </>
   )
 }

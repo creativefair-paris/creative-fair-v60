@@ -2513,3 +2513,195 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: line-through;
   color: var(--text-secondary);
 }
+
+/* ============================================================
+   Sprint 43-stable — Mon Programme v2.0
+   ============================================================ */
+
+.mp-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-top: 32px;
+}
+
+.mp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mp-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.mp-suggestions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 900px) {
+  .mp-suggestions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mp-sugg {
+  padding: 22px;
+  border-left: 3px solid var(--blue-cf);
+}
+.mp-sugg.is-planning {
+  border-left-color: var(--blue-cf);
+}
+.mp-sugg.is-series {
+  border-left-color: var(--lilac);
+}
+.mp-sugg.is-delegate {
+  border-left-color: var(--orange);
+}
+.mp-sugg-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.mp-sugg-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  line-height: 1.35;
+}
+.mp-sugg-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.mp-piliers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.mp-pilier {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 0.5px solid var(--border-faint);
+  border-radius: var(--r-pill);
+}
+.mp-pilier-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.mp-pilier-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.mp-pilier-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.mp-cal {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.mp-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 6px;
+}
+@media (max-width: 900px) {
+  .mp-cal-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+.mp-cal-cell {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+  position: relative;
+}
+.mp-cal-cell.is-today {
+  outline: 1.5px solid var(--blue-cf);
+  outline-offset: -1px;
+  font-weight: 700;
+}
+.mp-cal-cell.has-stack::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+}
+.mp-cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--border-faint);
+}
+.mp-cal-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.mp-cal-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.mp-cal-cta {
+  align-self: flex-start;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--blue-cf);
+  text-decoration: none;
+}
+.mp-cal-cta:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.breadcrumb-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+.breadcrumb-link:hover {
+  color: var(--text-primary);
+}
+.breadcrumb-separator {
+  opacity: 0.5;
+}
